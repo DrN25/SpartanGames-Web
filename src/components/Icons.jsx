@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 export {
   Search,
   ShoppingCart,
@@ -43,7 +43,14 @@ export {
   Maximize2,
   Bot,
   Send,
-  MessageCircle
+  MessageCircle,
+  Laptop,
+  Tv,
+  Headphones,
+  Gamepad2,
+  Database,
+  Wrench,
+  Flame
 } from "lucide-react";
 
 export function WhatsAppIcon({ className = "w-4 h-4", colored = false }) {
@@ -92,7 +99,7 @@ export function TikTokIcon({ className = "w-4 h-4" }) {
 
 export function YapeIcon({ className = "w-auto h-5" }) {
   return (
-    <span className={`inline-flex items-center justify-center font-black rounded bg-[#742284] text-[#00D9C0] text-[10px] px-1.5 py-0.5 tracking-tight shadow-sm ${className}`}>
+    <span className={`inline-flex items-center justify-center font-black rounded bg-[#742284] text-[#00D9C0] text-[10px] px-1.5 py-0.5 tracking-tight shadow-xs ${className}`}>
       YAPE
     </span>
   );
@@ -100,7 +107,7 @@ export function YapeIcon({ className = "w-auto h-5" }) {
 
 export function PlinIcon({ className = "w-auto h-5" }) {
   return (
-    <span className={`inline-flex items-center justify-center font-black rounded bg-[#00B5E2] text-white text-[10px] px-1.5 py-0.5 tracking-tight shadow-sm ${className}`}>
+    <span className={`inline-flex items-center justify-center font-black rounded bg-[#00B5E2] text-white text-[10px] px-1.5 py-0.5 tracking-tight shadow-xs ${className}`}>
       PLIN
     </span>
   );

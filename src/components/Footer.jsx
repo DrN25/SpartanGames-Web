@@ -8,13 +8,11 @@ import {
   PlinIcon,
   MapPin,
   Phone,
-  Truck,
-  ShieldCheck,
   BookOpen
 } from "./Icons";
 import { storeInfo } from "../data/storeData";
 
-export default function Footer({ isDarkMode, onNavigate }) {
+export default function Footer({ onNavigate }) {
   const canvasRef = useRef(null);
 
   // Subtle interactive particle lights
@@ -31,11 +29,11 @@ export default function Footer({ isDarkMode, onNavigate }) {
     resize();
     window.addEventListener("resize", resize);
 
-    const particles = Array.from({ length: 30 }, () => ({
+    const particles = Array.from({ length: 28 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
       radius: Math.random() * 1.5 + 0.5,
       color: Math.random() > 0.5 ? "#FFDE17" : "#FF334B"
     }));
@@ -55,7 +53,7 @@ export default function Footer({ isDarkMode, onNavigate }) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = 0.4;
+        ctx.globalAlpha = 0.35;
         ctx.fill();
       });
 
@@ -71,23 +69,19 @@ export default function Footer({ isDarkMode, onNavigate }) {
   }, []);
 
   return (
-    <footer
-      className={`relative border-t overflow-hidden transition-colors ${
-        isDarkMode ? "bg-[#040609] border-gray-800/80 text-gray-400" : "bg-gray-100 border-gray-300 text-gray-600"
-      }`}
-    >
+    <footer className="relative border-t overflow-hidden bg-slate-950 border-slate-800 text-slate-300">
       {/* Background Canvas Particles */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none opacity-40"
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div className="relative z-10 max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-12 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#FFDE17] p-0.5">
+              <div className="w-10 h-10 rounded-xl bg-[#FFDE17] p-0.5 shadow-md">
                 <img
                   src="/assets/images/spartan_games_logo_base.png"
                   alt="Spartan Games Logo"
@@ -95,16 +89,18 @@ export default function Footer({ isDarkMode, onNavigate }) {
                 />
               </div>
               <div>
-                <div className="font-black text-lg text-[#FFDE17] leading-none">SPARTAN GAMES</div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
+                <div className="font-black text-lg text-[#FFDE17] leading-none tracking-wider">
+                  SPARTAN GAMES
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
                   Arequipa • Perú
                 </div>
               </div>
             </div>
 
-            <p className="text-xs leading-relaxed">
-              {storeInfo.tagline}. Tienda física especializada en hardware de alto nivel para eSports,
-              creación de contenido y gaming profesional.
+            <p className="text-xs leading-relaxed text-slate-400">
+              {storeInfo.tagline}. Tienda física especializada en hardware de alto nivel para gaming,
+              creación de contenido y ensamble profesional.
             </p>
 
             <div className="flex items-center gap-3 pt-2">
@@ -112,7 +108,7 @@ export default function Footer({ isDarkMode, onNavigate }) {
                 href="https://facebook.com/spartangamesaqp"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-center hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
+                className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
                 aria-label="Facebook Spartan Games"
               >
                 <FacebookIcon className="w-4 h-4" />
@@ -121,7 +117,7 @@ export default function Footer({ isDarkMode, onNavigate }) {
                 href="https://instagram.com/spartangamesaqp"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-center hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
+                className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
                 aria-label="Instagram Spartan Games"
               >
                 <InstagramIcon className="w-4 h-4" />
@@ -130,7 +126,7 @@ export default function Footer({ isDarkMode, onNavigate }) {
                 href="https://tiktok.com/@spartangamesaqp"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-center hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
+                className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
                 aria-label="TikTok Spartan Games"
               >
                 <TikTokIcon className="w-4 h-4" />
@@ -139,7 +135,7 @@ export default function Footer({ isDarkMode, onNavigate }) {
                 href={`https://wa.me/${storeInfo.whatsappMain}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-center hover:text-[#25D366] hover:border-[#25D366] transition-all"
+                className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-[#25D366] hover:border-[#25D366] transition-all"
                 aria-label="WhatsApp Spartan Games"
               >
                 <WhatsAppIcon className="w-4 h-4" />
@@ -149,33 +145,40 @@ export default function Footer({ isDarkMode, onNavigate }) {
 
           {/* Col 2: Tienda & Navegación */}
           <div>
-            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 pb-1 border-b border-gray-800">
+            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 pb-1 border-b border-slate-800">
               Navegación Rápida
             </h4>
-            <ul className="space-y-2 text-xs">
+            <ul className="space-y-2.5 text-xs">
               <li>
-                <button onClick={() => onNavigate("home")} className="hover:text-[#FFDE17] transition-colors">
+                <button
+                  onClick={() => onNavigate("home")}
+                  className="text-slate-300 hover:text-[#FFDE17] transition-colors text-left"
+                >
                   Inicio / Portada
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate("catalog")} className="hover:text-[#FFDE17] transition-colors">
+                <button
+                  onClick={() => onNavigate("catalog")}
+                  className="text-slate-300 hover:text-[#FFDE17] transition-colors text-left"
+                >
                   Catálogo de Hardware
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate("catalog")} className="hover:text-[#FFDE17] transition-colors">
+                <button
+                  onClick={() => onNavigate("catalog")}
+                  className="text-slate-300 hover:text-[#FFDE17] transition-colors text-left"
+                >
                   Laptops Gamer con Windows
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate("catalog")} className="hover:text-[#FFDE17] transition-colors">
+                <button
+                  onClick={() => onNavigate("catalog")}
+                  className="text-slate-300 hover:text-[#FFDE17] transition-colors text-left"
+                >
                   Tarjetas de Video RTX
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate("home")} className="hover:text-[#FFDE17] transition-colors">
-                  Arma tu PC Personalizada
                 </button>
               </li>
             </ul>
@@ -183,19 +186,19 @@ export default function Footer({ isDarkMode, onNavigate }) {
 
           {/* Col 3: Ubicación y Horarios */}
           <div>
-            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 pb-1 border-b border-gray-800">
+            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 pb-1 border-b border-slate-800">
               Tienda Física Arequipa
             </h4>
-            <ul className="space-y-3 text-xs">
+            <ul className="space-y-3 text-xs text-slate-300">
               <li className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-[#FFDE17] flex-shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                 <span>{storeInfo.address}</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-[#FFDE17] flex-shrink-0" />
-                <span>{storeInfo.phones.join(" / ")}</span>
+                <Phone className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <span className="font-mono">{storeInfo.phones.join(" / ")}</span>
               </li>
-              <li className="text-[11px] text-gray-500 pl-6.5">
+              <li className="text-[11px] text-slate-400 pl-6.5">
                 {storeInfo.schedule}
               </li>
             </ul>
@@ -203,32 +206,28 @@ export default function Footer({ isDarkMode, onNavigate }) {
 
           {/* Col 4: Libro de Reclamaciones y Medios de Pago */}
           <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 pb-1 border-b border-gray-800">
+            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 pb-1 border-b border-slate-800">
               Seguridad & Legal
             </h4>
 
-            {/* Libro de Reclamaciones INDECOPI */}
-            <div
-              className={`p-3.5 rounded-2xl border flex items-center gap-3 ${
-                isDarkMode ? "bg-black/40 border-gray-800" : "bg-white border-gray-200 shadow-sm"
-              }`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-[#FFDE17] flex items-center justify-center flex-shrink-0">
+            {/* Libro de Reclamaciones */}
+            <div className="p-3.5 rounded-2xl border flex items-center gap-3 bg-slate-900 border-slate-800">
+              <div className="w-10 h-10 rounded-xl bg-amber-400/10 text-amber-400 flex items-center justify-center flex-shrink-0">
                 <BookOpen className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-xs font-bold text-gray-200">Libro de Reclamaciones</div>
-                <div className="text-[10px] text-gray-500">Conforme a Ley INDECOPI</div>
+                <div className="text-xs font-bold text-white">Libro de Reclamaciones</div>
+                <div className="text-[10px] text-slate-400">Conforme a Ley INDECOPI</div>
               </div>
             </div>
 
             {/* Pagos */}
             <div className="pt-2">
-              <div className="text-[11px] font-bold text-gray-400 mb-2">Medios de Pago:</div>
+              <div className="text-[11px] font-bold text-slate-400 mb-2">Medios de Pago:</div>
               <div className="flex items-center gap-2 flex-wrap">
                 <YapeIcon />
                 <PlinIcon />
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/40 border border-gray-800">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
                   Culqi / Visa
                 </span>
               </div>
@@ -237,12 +236,12 @@ export default function Footer({ isDarkMode, onNavigate }) {
         </div>
 
         {/* Bottom Rights */}
-        <div className="pt-8 border-t border-gray-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+        <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
             © {new Date().getFullYear()} Spartan Games Arequipa. Todos los derechos reservados.
           </div>
-          <div className="text-[11px] text-gray-500">
-            Desarrollado con alto estándar de ingeniería frontend y arquitectura de componentes accesibles.
+          <div className="text-[11px]">
+            C.C. Compuplaza Tienda 204 • Arequipa, Perú
           </div>
         </div>
       </div>

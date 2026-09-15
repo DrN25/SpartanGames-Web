@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { X, Check, ArrowRight, RotateCcw, Sparkles } from "./Icons";
+import { X, Check, RotateCcw, Sparkles } from "./Icons";
 import { WhatsAppIcon } from "./Icons";
 import { pcBuilderSteps, storeInfo } from "../data/storeData";
 
-// Hardware options for builder steps
 const HARDWARE_CATALOG = {
   1: [
     { id: "cpu-1", name: "AMD Ryzen 7 7800X3D (8C/16T, 96MB Cache AM5)", price: 1899.0, brand: "AMD" },
@@ -44,8 +43,8 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
 
   const currentStep = pcBuilderSteps[currentStepIndex];
   const stepItems = HARDWARE_CATALOG[currentStep.id] || [
-    { id: `demo-${currentStep.id}-1`, name: `${currentStep.name} Spartan Standard Edition`, price: 290.0, brand: "Spartan" },
-    { id: `demo-${currentStep.id}-2`, name: `${currentStep.name} High Performance OC`, price: 480.0, brand: "Gamer Pro" }
+    { id: `demo-${currentStep.id}-1`, name: `${currentStep.name} Spartan Standard`, price: 290.0, brand: "Spartan" },
+    { id: `demo-${currentStep.id}-2`, name: `${currentStep.name} High Performance`, price: 480.0, brand: "Gamer Pro" }
   ];
 
   const handleSelectComponent = (item) => {
@@ -86,24 +85,24 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
       <div
         className={`relative w-full max-w-5xl border rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden ${
-          isDarkMode ? "bg-[#0B0E14] border-gray-800 text-white" : "bg-white border-gray-200 text-gray-900"
+          isDarkMode ? "bg-[#0B0E14] border-gray-800 text-white" : "bg-white border-slate-200 text-slate-900"
         }`}
       >
         {/* Header */}
         <div
           className={`px-6 py-4 border-b flex items-center justify-between ${
-            isDarkMode ? "border-gray-800 bg-[#111620]" : "border-gray-200 bg-gray-50"
+            isDarkMode ? "border-gray-800 bg-[#111620]" : "border-slate-200 bg-slate-50"
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#FFDE17] text-black flex items-center justify-center font-black">
+            <div className="w-10 h-10 rounded-xl bg-[#FFDE17] text-slate-950 flex items-center justify-center font-black shadow-sm">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-black uppercase tracking-wider">
+              <h2 className="text-base font-black uppercase tracking-wider text-slate-950 dark:text-white">
                 Configurador de PC Gamer Spartan
               </h2>
-              <span className="text-[11px] text-gray-400">
+              <span className="text-[11px] text-slate-500 dark:text-gray-400">
                 Paso {currentStepIndex + 1} de {pcBuilderSteps.length}: {currentStep.name}
               </span>
             </div>
@@ -112,7 +111,7 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
           <div className="flex items-center gap-3">
             <button
               onClick={handleReset}
-              className="text-xs text-gray-400 hover:text-white flex items-center gap-1 font-bold"
+              className="text-xs text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white flex items-center gap-1 font-bold transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reiniciar</span>
@@ -120,8 +119,11 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
             <button
               onClick={onClose}
               className={`p-2 rounded-xl transition-colors ${
-                isDarkMode ? "hover:bg-gray-800 text-gray-400 hover:text-white" : "hover:bg-gray-200 text-gray-600 hover:text-black"
+                isDarkMode
+                  ? "hover:bg-gray-800 text-gray-400 hover:text-white"
+                  : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
               }`}
+              aria-label="Cerrar configurador"
             >
               <X className="w-5 h-5" />
             </button>
@@ -131,7 +133,7 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
         {/* Steps Progress Bar */}
         <div
           className={`px-6 py-3 border-b flex items-center gap-1.5 overflow-x-auto ${
-            isDarkMode ? "border-gray-800 bg-[#0E121A]" : "border-gray-200 bg-gray-100/70"
+            isDarkMode ? "border-gray-800 bg-[#0E121A]" : "border-slate-200 bg-slate-100/70"
           }`}
         >
           {pcBuilderSteps.map((step, idx) => {
@@ -144,12 +146,12 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
                 onClick={() => setCurrentStepIndex(idx)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
                   isCurrent
-                    ? "bg-[#FFDE17] text-black shadow-md font-black"
+                    ? "bg-[#FFDE17] text-slate-950 shadow-sm font-black"
                     : isSelected
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/40"
                     : isDarkMode
                     ? "text-gray-500 hover:text-gray-300"
-                    : "text-gray-600 hover:text-black"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 <span>{step.id}.</span>
@@ -166,16 +168,16 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
           <div className="flex-1 p-6 overflow-y-auto space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-black uppercase text-[#FFDE17]">
+                <h3 className="text-lg font-black uppercase text-slate-950 dark:text-[#FFDE17]">
                   Selecciona: {currentStep.name}
                 </h3>
-                <p className="text-xs text-gray-400">{currentStep.hint}</p>
+                <p className="text-xs text-slate-500 dark:text-gray-400">{currentStep.hint}</p>
               </div>
 
               {!currentStep.required && (
                 <button
                   onClick={handleSkipStep}
-                  className="text-xs text-amber-400 hover:underline font-bold"
+                  className="text-xs text-amber-700 hover:text-amber-900 dark:text-amber-400 dark:hover:underline font-bold"
                 >
                   Omitir este componente →
                 </button>
@@ -191,24 +193,24 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
                     onClick={() => handleSelectComponent(item)}
                     className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between gap-4 ${
                       isItemChosen
-                        ? "border-[#FFDE17] bg-[#FFDE17]/10 ring-1 ring-[#FFDE17]"
+                        ? "border-amber-500 bg-amber-50/60 ring-1 ring-amber-500 dark:border-[#FFDE17] dark:bg-[#FFDE17]/10 dark:ring-[#FFDE17]"
                         : isDarkMode
                         ? "bg-[#111620] border-gray-800 hover:border-gray-700"
-                        : "bg-gray-50 border-gray-200 hover:border-amber-300"
+                        : "bg-white border-slate-200 hover:border-amber-300 shadow-sm"
                     }`}
                   >
                     <div>
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-black text-[#FFDE17]">
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-slate-950 text-[#FFDE17]">
                         {item.brand}
                       </span>
-                      <h4 className="font-bold text-sm mt-1">{item.name}</h4>
+                      <h4 className="font-bold text-sm mt-1 text-slate-950 dark:text-white">{item.name}</h4>
                     </div>
 
                     <div className="text-right flex-shrink-0">
                       <div className="text-base font-black text-[#FF334B]">
                         S/. {item.price.toFixed(2)}
                       </div>
-                      <button className="mt-1 px-3 py-1 rounded-lg bg-[#FFDE17] text-black text-[11px] font-black uppercase">
+                      <button className="mt-1 px-3 py-1 rounded-lg bg-[#FFDE17] text-slate-950 text-[11px] font-black uppercase shadow-sm">
                         {isItemChosen ? "Seleccionado" : "Elegir"}
                       </button>
                     </div>
@@ -221,17 +223,17 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
           {/* Sticky Summary Sidebar */}
           <div
             className={`w-full md:w-80 p-6 border-t md:border-t-0 md:border-l flex flex-col justify-between overflow-y-auto ${
-              isDarkMode ? "border-gray-800 bg-[#0E121A]" : "border-gray-200 bg-gray-50"
+              isDarkMode ? "border-gray-800 bg-[#0E121A]" : "border-slate-200 bg-slate-50"
             }`}
           >
             <div>
-              <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-4 pb-2 border-b border-gray-700/40">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-4 pb-2 border-b border-slate-200 dark:border-gray-700/40">
                 Tu Ensamble Spartan ({Object.keys(selections).length} piezas)
               </h3>
 
               <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
                 {Object.keys(selections).length === 0 ? (
-                  <p className="text-xs text-gray-500 italic">
+                  <p className="text-xs text-slate-500 italic">
                     Aún no has seleccionado ningún componente.
                   </p>
                 ) : (
@@ -241,14 +243,14 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
                       <div
                         key={stepId}
                         className={`p-2.5 rounded-xl border text-xs ${
-                          isDarkMode ? "bg-black/30 border-gray-800" : "bg-white border-gray-200"
+                          isDarkMode ? "bg-black/30 border-gray-800" : "bg-white border-slate-200 shadow-sm"
                         }`}
                       >
-                        <div className="text-[10px] font-bold text-gray-400 uppercase">
+                        <div className="text-[10px] font-bold text-slate-500 dark:text-gray-400 uppercase">
                           {step?.name}
                         </div>
-                        <div className="font-bold truncate text-gray-200">{item.name}</div>
-                        <div className="text-[11px] font-black text-[#FFDE17] mt-0.5">
+                        <div className="font-bold truncate text-slate-900 dark:text-gray-200">{item.name}</div>
+                        <div className="text-[11px] font-black text-amber-800 dark:text-[#FFDE17] mt-0.5">
                           S/. {item.price.toFixed(2)}
                         </div>
                       </div>
@@ -258,9 +260,9 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-700/40 mt-4 space-y-3">
+            <div className="pt-4 border-t border-slate-200 dark:border-gray-700/40 mt-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase text-gray-400">Total Estimado</span>
+                <span className="text-xs font-bold uppercase text-slate-600 dark:text-gray-400">Total Estimado</span>
                 <span className="text-2xl font-black text-[#FF334B]">
                   S/. {totalPrice.toFixed(2)}
                 </span>
@@ -270,18 +272,14 @@ export default function PCBuilderModal({ isOpen, onClose, isDarkMode }) {
                 href={whatsappQuoteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`w-full py-3 px-4 rounded-xl font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 ${
-                  totalPrice > 0
-                    ? "bg-[#25D366] text-black hover:bg-emerald-400 shadow-lg"
-                    : "bg-gray-800 text-gray-500 pointer-events-none"
-                }`}
+                className="w-full py-3 rounded-xl font-black uppercase text-xs tracking-wider bg-[#25D366] text-slate-950 hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-md shadow-emerald-500/10"
               >
-                <WhatsAppIcon className="w-4 h-4" />
-                <span>Exportar Cotización a WhatsApp</span>
+                <WhatsAppIcon className="w-4 h-4" colored={false} />
+                <span>Pedir Cotización por WhatsApp</span>
               </a>
 
-              <p className="text-[10px] text-center text-gray-400">
-                Incluye ensamble profesional, cable management y test de estabilidad gratis.
+              <p className="text-[10px] text-center text-slate-500 dark:text-gray-400">
+                Incluye ensamble profesional gratuito y pruebas térmicas en Compuplaza Tienda 204.
               </p>
             </div>
           </div>
