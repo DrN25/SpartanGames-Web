@@ -37,7 +37,13 @@ export {
   Eye,
   ExternalLink,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  Home,
+  BookOpen,
+  Maximize2,
+  Bot,
+  Send,
+  MessageCircle
 } from "lucide-react";
 
 export function WhatsAppIcon({ className = "w-4 h-4", colored = false }) {

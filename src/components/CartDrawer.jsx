@@ -1,152 +1,218 @@
-﻿import React from 'react';
-import { X, Trash2, ShoppingBag, ArrowRight, ShieldCheck, QrCode } from 'lucide-react';
-import { STORE_INFO } from '../data/storeData';
+import React from "react";
+import { X, ShoppingCart, ArrowRight, ShieldCheck, Plus, Minus } from "./Icons";
+import { WhatsAppIcon, YapeIcon, PlinIcon } from "./Icons";
+import { storeInfo } from "../data/storeData";
 
-export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
+export default function CartDrawer({
+  isOpen,
+  onClose,
+  cartItems,
+  onUpdateQuantity,
+  onRemoveItem,
+  isDarkMode
+}) {
   if (!isOpen) return null;
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const reservaMonto = subtotal * 0.10;
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const reservaMonto = (subtotal * 0.1).toFixed(2);
+
+  // Generate WhatsApp Order Deep-link
+  const itemsText = cartItems
+    .map((item) => `• ${item.quantity}x ${item.name} - S/. ${(item.price * item.quantity).toFixed(2)}`)
+    .join("\n");
+
+  const whatsappMessage = `Hola Spartan Games Arequipa, deseo procesar el siguiente pedido desde su tienda virtual:\n\n${itemsText}\n\n*TOTAL:* S/. ${subtotal.toFixed(2)}\n*Opción Reserva 10%:* S/. ${reservaMonto}\n\nPor favor confirmar disponibilidad en Compuplaza Tienda 204 y datos para Yape/Transferencia.`;
+  const whatsappUrl = `https://wa.me/${storeInfo.whatsappMain}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className="fixed inset-0 z-50 flex justify-end animate-fadeIn">
       {/* Backdrop */}
-      <div 
+      <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-fade-in"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+        aria-hidden="true"
       />
 
-      {/* Cart Panel */}
-      <div className="relative w-full max-w-md bg-[#0d0d14] text-white shadow-2xl flex flex-col z-10 border-l border-white/10">
-        
+      {/* Cart Slide-Over */}
+      <div
+        className={`relative z-10 w-full max-w-md h-full shadow-2xl flex flex-col border-l ${
+          isDarkMode
+            ? "bg-[#0B0E14] border-gray-800 text-white"
+            : "bg-white border-gray-200 text-gray-900"
+        }`}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-[#08080c]">
-          <div className="flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-spartan-gold" />
-            <h2 className="text-sm font-bold tracking-wider uppercase text-white">
-              Tu Carrito ({cartItems.length})
-            </h2>
+        <div
+          className={`p-4 sm:p-5 border-b flex items-center justify-between ${
+            isDarkMode ? "border-gray-800 bg-[#111620]" : "border-gray-200 bg-gray-50"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#FFDE17] text-black flex items-center justify-center font-black">
+              <ShoppingCart className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-black uppercase tracking-wider">
+                Mi Carrito de Compras
+              </h2>
+              <span className="text-[11px] text-gray-400">
+                {cartItems.length} {cartItems.length === 1 ? "artículo" : "artículos"} seleccionados
+              </span>
+            </div>
           </div>
-          <button 
+
+          <button
             onClick={onClose}
-            className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className={`p-2 rounded-xl transition-colors ${
+              isDarkMode ? "hover:bg-gray-800 text-gray-400 hover:text-white" : "hover:bg-gray-200 text-gray-600 hover:text-black"
+            }`}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Items List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {/* Item List */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
           {cartItems.length === 0 ? (
-            <div className="text-center py-16 text-slate-500">
-              <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-30 text-spartan-gold" />
-              <p className="text-sm font-semibold">Tu carrito está vacío</p>
-              <p className="text-xs mt-1">Explora nuestro catálogo gamer y añade componentes.</p>
+            <div className="text-center py-20">
+              <div className="w-16 h-16 rounded-full bg-amber-500/10 text-[#FFDE17] flex items-center justify-center mx-auto mb-4">
+                <ShoppingCart className="w-8 h-8 opacity-40" />
+              </div>
+              <h3 className="font-bold text-base mb-1">Tu carrito está vacío</h3>
+              <p className="text-xs text-gray-400 max-w-xs mx-auto">
+                Explora el catálogo de Spartan Games y añade componentes o laptops gamer a tu carrito.
+              </p>
             </div>
           ) : (
             cartItems.map((item) => (
-              <div 
+              <div
                 key={item.id}
-                className="flex items-center gap-3 p-3 rounded-xl bg-spartan-card border border-white/5"
+                className={`p-3.5 rounded-2xl border flex items-center gap-3 transition-colors ${
+                  isDarkMode ? "bg-[#111620] border-gray-800" : "bg-gray-50 border-gray-200"
+                }`}
               >
-                <img 
-                  src={item.images ? item.images[0] : item.image} 
-                  alt={item.name} 
-                  className="w-14 h-14 object-contain bg-black/50 rounded-lg p-1"
-                />
-                
+                {/* Image */}
+                <div
+                  className={`w-16 h-16 rounded-xl p-1.5 flex items-center justify-center flex-shrink-0 ${
+                    isDarkMode ? "bg-black/40" : "bg-white border border-gray-200"
+                  }`}
+                >
+                  <img src={item.image} alt={item.name} className="max-h-full object-contain" />
+                </div>
+
+                {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-bold text-white truncate">{item.name}</h4>
-                  <div className="text-xs text-spartan-red font-black mt-0.5">
+                  <h4 className="text-xs font-bold truncate">{item.name}</h4>
+                  <div className="text-xs font-black text-[#FF334B] mt-0.5">
                     S/. {item.price.toFixed(2)}
                   </div>
-                  
-                  {/* Quantity control */}
+
+                  {/* Quantity Controls */}
                   <div className="flex items-center gap-2 mt-2">
-                    <button
-                      onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                      className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 text-xs flex items-center justify-center font-bold"
+                    <div
+                      className={`flex items-center border rounded-lg p-0.5 ${
+                        isDarkMode ? "border-gray-700 bg-black/40" : "border-gray-300 bg-white"
+                      }`}
                     >
-                      -
-                    </button>
-                    <span className="text-xs font-mono font-bold text-white">{item.quantity}</span>
+                      <button
+                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                        className="p-1 text-gray-400 hover:text-white"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="w-6 text-center text-xs font-mono font-bold">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                        disabled={item.quantity >= item.stock}
+                        className="p-1 text-gray-400 hover:text-white disabled:opacity-30"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+
                     <button
-                      onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                      className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 text-xs flex items-center justify-center font-bold"
+                      onClick={() => onRemoveItem(item.id)}
+                      className="text-[11px] text-red-400 hover:underline font-semibold"
                     >
-                      +
+                      Eliminar
                     </button>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => onRemoveItem(item.id)}
-                  className="p-2 text-slate-500 hover:text-spartan-red transition-colors cursor-pointer"
-                  title="Eliminar"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                {/* Total Line */}
+                <div className="text-right flex-shrink-0">
+                  <div className="text-xs font-black">
+                    S/. {(item.price * item.quantity).toFixed(2)}
+                  </div>
+                </div>
               </div>
             ))
           )}
         </div>
 
-        {/* Footer Checkout Summary */}
+        {/* Footer with Totals & WhatsApp Checkout */}
         {cartItems.length > 0 && (
-          <div className="p-5 border-t border-white/10 bg-[#09090f] space-y-4">
-            
-            {/* Subtotal */}
-            <div className="space-y-1.5 text-xs">
-              <div className="flex justify-between text-slate-400">
-                <span>Subtotal</span>
-                <span className="text-white font-mono font-bold">S/. {subtotal.toFixed(2)}</span>
+          <div
+            className={`p-4 sm:p-5 border-t space-y-4 ${
+              isDarkMode ? "border-gray-800 bg-[#111620]" : "border-gray-200 bg-gray-50"
+            }`}
+          >
+            {/* 10% Reservation Highlight Box */}
+            <div
+              className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
+                isDarkMode
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                  : "bg-amber-50 border-amber-200 text-amber-900"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#FFDE17]" />
+                <div>
+                  <div className="font-black uppercase text-[10px]">Opción Pago por Reserva (10%)</div>
+                  <div className="text-[11px] opacity-80">Asegura tu stock y paga el saldo en tienda</div>
+                </div>
               </div>
-              <div className="flex justify-between text-slate-400">
-                <span>Delivery (Arequipa)</span>
-                <span className="text-emerald-400 font-medium">A coordinar</span>
-              </div>
-              <div className="flex justify-between text-base font-black pt-2 border-t border-white/10">
-                <span className="text-white">Total a Pagar</span>
-                <span className="text-spartan-gold font-mono">S/. {subtotal.toFixed(2)}</span>
+              <div className="text-right font-mono font-black text-sm text-[#FFDE17]">
+                S/. {reservaMonto}
               </div>
             </div>
 
-            {/* Pago por Reserva (10%) Box */}
-            <div className="p-3 rounded-xl bg-spartan-card border border-spartan-gold/30 text-xs">
-              <div className="flex items-center gap-2 font-bold text-spartan-gold mb-1">
-                <QrCode className="w-4 h-4" />
-                <span>Modalidad: Pago por Reserva (10%)</span>
-              </div>
-              <p className="text-[11px] text-slate-300">
-                Separa tu pedido ahora con solo <strong className="text-white">S/. {reservaMonto.toFixed(2)}</strong> vía Yape o Plin y paga el saldo restante al recibir tu equipo.
-              </p>
+            {/* Total */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                Total General (I.G.V. Incl.)
+              </span>
+              <span className="text-2xl font-black text-[#FF334B]">
+                S/. {subtotal.toFixed(2)}
+              </span>
             </div>
 
-            {/* Buttons */}
-            <div className="space-y-2">
-              <a
-                href={`https://api.whatsapp.com/send?phone=51${STORE_INFO.phones[0]}&text=${encodeURIComponent(
-                  `Hola Spartan Games, deseo procesar el pedido de mi carrito por S/. ${subtotal.toFixed(2)}:\n` +
-                  cartItems.map(i => `• ${i.quantity}x ${i.name} (S/. ${i.price.toFixed(2)})`).join('\n') +
-                  `\n¿Podemos coordinar la entrega o reserva del 10%?`
-                )}`}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-3 px-4 rounded-xl bg-spartan-green hover:bg-emerald-600 text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all text-center"
-              >
-                FINALIZAR PEDIDO POR WHATSAPP
-                <ArrowRight className="w-4 h-4" />
-              </a>
-
-              <p className="text-[10px] text-slate-500 text-center flex items-center justify-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Compra 100% segura con tienda física en Arequipa
-              </p>
+            {/* Payment Icons */}
+            <div className="flex items-center justify-center gap-2 pt-1 text-[10px] text-gray-400">
+              <span>Aceptamos:</span>
+              <YapeIcon />
+              <PlinIcon />
+              <span className="font-bold text-gray-300">Visa / Mastercard (Culqi)</span>
             </div>
 
+            {/* WhatsApp Checkout Button */}
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3.5 px-4 rounded-xl font-black uppercase text-xs tracking-wider bg-[#25D366] text-black hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10"
+            >
+              <WhatsAppIcon className="w-5 h-5" colored={false} />
+              <span>Finalizar Pedido por WhatsApp</span>
+            </a>
+
+            <p className="text-[10px] text-center text-gray-400">
+              Coordinación directa con asesores en Compuplaza Arequipa. Boleta/Factura física o electrónica.
+            </p>
           </div>
         )}
-
       </div>
     </div>
   );

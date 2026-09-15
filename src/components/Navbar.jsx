@@ -1,123 +1,173 @@
-﻿import React, { useState } from 'react';
-import { Menu, Search, ShoppingCart, X, ChevronDown, Sparkles } from 'lucide-react';
-import { CATEGORIES } from '../data/storeData';
+import React, { useState } from "react";
+import { Search, ShoppingCart, Layers, Sun, Moon, Sparkles, X } from "./Icons";
 
-export default function Navbar({ onToggleDrawer, isDrawerOpen, onOpenCart, cartCount, cartTotal, onSearch }) {
-  const [searchQuery, setSearchQuery] = useState('');
+export default function Navbar({
+  cartCount,
+  onOpenCart,
+  onOpenMegaMenu,
+  onOpenPCBuilder,
+  onNavigate,
+  currentView,
+  searchQuery,
+  onSearchChange,
+  isDarkMode,
+  onToggleTheme
+}) {
+  const [localSearch, setLocalSearch] = useState(searchQuery || "");
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (onSearch) onSearch(searchQuery);
+    onSearchChange(localSearch);
+    onNavigate("catalog");
+  };
+
+  const handleClearSearch = () => {
+    setLocalSearch("");
+    onSearchChange("");
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0a0a0f]/90 backdrop-blur-md border-b border-white/10 transition-all">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        
-        {/* Brand Logo & Categories Button */}
-        <div className="flex items-center gap-4 sm:gap-6">
-          <a href="#" className="flex items-center gap-2.5 group">
-            <img 
-              src="/assets/images/spartan_games_logo_base.png" 
-              alt="Spartan Games Logo" 
-              className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-full bg-black p-0.5 border border-spartan-gold/40 group-hover:border-spartan-gold transition-all"
-            />
-            <div className="flex flex-col">
-              <span className="font-display font-black tracking-wider text-base sm:text-lg text-white leading-tight flex items-center gap-1">
-                SPART<span className="text-spartan-gold">Λ</span>N <span className="text-spartan-gold font-bold">GΛMES</span>
-              </span>
-              <span className="text-[10px] text-slate-400 tracking-widest uppercase">Arequipa Hardware</span>
-            </div>
-          </a>
-
-          {/* Megamenu Trigger Button (Falabella style) */}
+    <header
+      className={`sticky top-0 z-40 backdrop-blur-md border-b transition-colors ${
+        isDarkMode
+          ? "bg-[#0B0E14]/95 border-gray-800/80 text-white"
+          : "bg-white/95 border-gray-200 text-gray-900 shadow-sm"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        {/* Left: Brand + MegaMenu Trigger */}
+        <div className="flex items-center gap-4 lg:gap-6">
+          {/* Logo */}
           <button
-            onClick={onToggleDrawer}
-            className={`hidden md:flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              isDrawerOpen 
-                ? 'bg-spartan-gold text-black shadow-lg shadow-spartan-gold/20' 
-                : 'bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-spartan-gold/50'
-            }`}
+            onClick={() => onNavigate("home")}
+            className="flex items-center gap-3 group text-left"
           >
-            <Menu className="w-4 h-4" />
-            <span>CATEGORÍAS</span>
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isDrawerOpen ? 'rotate-180' : ''}`} />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FFDE17] via-amber-400 to-amber-600 p-0.5 shadow-lg shadow-yellow-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
+              <img
+                src="/assets/images/spartan_games_logo_base.png"
+                alt="Spartan Games Logo"
+                className="w-full h-full object-cover rounded-[14px] bg-black"
+              />
+            </div>
+            <div>
+              <div className="font-black text-xl tracking-wider uppercase leading-none text-[#FFDE17] group-hover:text-yellow-400 transition-colors">
+                SPARTAN
+              </div>
+              <div className={`text-[11px] font-black uppercase tracking-widest leading-none mt-0.5 ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}>
+                GAMES AQP
+              </div>
+            </div>
+          </button>
+
+          {/* MegaMenu Drawer Trigger */}
+          <button
+            onClick={onOpenMegaMenu}
+            className="hidden sm:flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-[#FFDE17] text-black hover:bg-yellow-400 active:scale-95 transition-all shadow-md shadow-yellow-500/10"
+          >
+            <Layers className="w-4 h-4 stroke-[2.5]" />
+            <span>Categorías</span>
           </button>
         </div>
 
-        {/* Search Bar with Gaming Aesthetic */}
-        <div className="flex-1 max-w-xl hidden sm:block">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <input
-              type="text"
-              placeholder="Buscar laptops gamer, DDR5, monitores 255Hz, RTX 4070..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#12121a] border border-white/10 rounded-lg py-2 pl-9 pr-24 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-spartan-gold/80 focus:ring-1 focus:ring-spartan-gold/50 transition-all"
-            />
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+        {/* Center: Live Search Bar */}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="flex-1 max-w-lg hidden md:flex items-center relative"
+        >
+          <input
+            type="text"
+            placeholder="Buscar componentes, laptops, tarjetas de video..."
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            className={`w-full py-2.5 pl-11 pr-10 rounded-xl text-xs font-medium border transition-colors outline-none focus:border-[#FFDE17] ${
+              isDarkMode
+                ? "bg-[#111620] border-gray-800 text-white placeholder-gray-500"
+                : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400"
+            }`}
+          />
+          <Search className="absolute left-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
+
+          {localSearch ? (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="absolute right-3 text-gray-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          ) : (
             <button
               type="submit"
-              className="absolute right-1.5 top-1.5 bg-spartan-gold hover:bg-spartan-goldHover text-black text-xs font-bold px-3 py-1 rounded transition-colors"
+              className="absolute right-2 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-[#FFDE17] text-black hover:bg-yellow-400 transition-colors"
             >
               Buscar
             </button>
-          </form>
-        </div>
+          )}
+        </form>
 
-        {/* Mobile Menu & Cart Actions */}
-        <div className="flex items-center gap-3">
-          {/* Mobile Categories Toggle */}
+        {/* Right: Nav Links + Theme Toggle + Cart */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <nav className="hidden lg:flex items-center gap-5 text-xs font-bold uppercase tracking-wider">
+            <button
+              onClick={() => onNavigate("home")}
+              className={`transition-colors hover:text-[#FFDE17] ${
+                currentView === "home" ? "text-[#FFDE17] font-black" : isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Inicio
+            </button>
+            <button
+              onClick={() => onNavigate("catalog")}
+              className={`transition-colors hover:text-[#FFDE17] ${
+                currentView === "catalog" ? "text-[#FFDE17] font-black" : isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Tienda
+            </button>
+            <button
+              onClick={onOpenPCBuilder}
+              className="text-[#FFDE17] hover:text-yellow-400 transition-colors flex items-center gap-1 font-black"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Arma tu PC</span>
+            </button>
+          </nav>
+
+          {/* Theme Toggle Icon in Header */}
           <button
-            onClick={onToggleDrawer}
-            className="md:hidden p-2 rounded-lg bg-white/5 border border-white/10 text-white"
-            aria-label="Abrir categorías"
+            onClick={onToggleTheme}
+            className={`p-2.5 rounded-xl border transition-colors ${
+              isDarkMode
+                ? "border-gray-800 bg-[#111620] text-amber-300 hover:border-amber-400/50"
+                : "border-gray-300 bg-gray-50 text-gray-800 hover:bg-gray-100 shadow-sm"
+            }`}
+            title={isDarkMode ? "Cambiar a Tema Claro" : "Cambiar a Tema Oscuro"}
+            aria-label="Cambiar tema claro u oscuro"
           >
-            <Menu className="w-5 h-5 text-spartan-gold" />
+            {isDarkMode ? <Sun className="w-4 h-4 text-[#FFDE17]" /> : <Moon className="w-4 h-4 text-indigo-600" />}
           </button>
 
-          {/* Cart Button with Counter Badge */}
+          {/* Cart Button */}
           <button
             onClick={onOpenCart}
-            className="flex items-center gap-2.5 bg-spartan-card hover:bg-spartan-cardHover border border-white/10 hover:border-spartan-gold/40 px-3.5 py-2 rounded-lg transition-all text-white group cursor-pointer"
+            className={`relative p-2.5 sm:px-4 sm:py-2.5 rounded-xl border flex items-center gap-2 font-bold text-xs uppercase tracking-wider transition-all ${
+              isDarkMode
+                ? "bg-[#111620] border-gray-800 hover:border-[#FFDE17] text-white"
+                : "bg-gray-50 border-gray-300 hover:border-black text-gray-900 shadow-sm"
+            }`}
+            aria-label="Abrir carrito de compras"
           >
-            <div className="relative">
-              <ShoppingCart className="w-4 h-4 text-spartan-gold group-hover:scale-110 transition-transform" />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-spartan-red text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
-                  {cartCount}
-                </span>
-              )}
-            </div>
-            <div className="hidden lg:flex flex-col text-left">
-              <span className="text-[10px] text-slate-400 leading-none">Mi Carrito</span>
-              <span className="text-xs font-bold text-spartan-gold">
-                S/. {cartTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+            <ShoppingCart className="w-5 h-5 text-[#FFDE17]" />
+            <span className="hidden sm:inline">Carrito</span>
+            {cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-[#FF334B] text-white text-[11px] font-black flex items-center justify-center shadow-lg animate-pulse">
+                {cartCount}
               </span>
-            </div>
+            )}
           </button>
         </div>
-
-      </div>
-
-      {/* Mobile Search Bar Row */}
-      <div className="sm:hidden px-4 pb-3">
-        <form onSubmit={handleSearchSubmit} className="relative">
-          <input
-            type="text"
-            placeholder="Buscar productos..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#12121a] border border-white/10 rounded-lg py-1.5 pl-8 pr-16 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-spartan-gold"
-          />
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-          <button
-            type="submit"
-            className="absolute right-1 top-1 bg-spartan-gold text-black text-[11px] font-bold px-2 py-0.5 rounded"
-          >
-            Ir
-          </button>
-        </form>
       </div>
     </header>
   );

@@ -1,165 +1,181 @@
-﻿import React, { useState } from 'react';
-import { X, ChevronRight, ArrowLeft, Laptop, Cpu, Monitor, Headphones, Shield, Check } from 'lucide-react';
-import { CATEGORIES } from '../data/storeData';
+import React, { useState } from "react";
+import { X, ChevronRight, Sparkles, Layers, ShieldCheck, Truck } from "./Icons";
 
-const iconMap = {
-  Laptop: Laptop,
-  Cpu: Cpu,
-  Monitor: Monitor,
-  Headphones: Headphones,
-};
-
-export default function MegaMenuDrawer({ isOpen, onClose, onSelectCategory }) {
-  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0]);
-  const [mobileSubcategoryView, setMobileSubcategoryView] = useState(false);
+export default function MegaMenuDrawer({
+  isOpen,
+  onClose,
+  categories,
+  isDarkMode,
+  onSelectCategory,
+  onNavigate
+}) {
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
   if (!isOpen) return null;
 
+  const currentCategory = categories[activeCategoryIndex] || categories[0];
+
+  const handleCategoryClick = (catId) => {
+    onSelectCategory(catId);
+    onNavigate("catalog");
+    onClose();
+  };
+
+  const handleSubCategoryClick = (catId, subCat) => {
+    onSelectCategory(catId);
+    onNavigate("catalog");
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex">
+    <div className="fixed inset-0 z-50 flex animate-fadeIn">
       {/* Backdrop */}
-      <div 
+      <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-fade-in"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+        aria-hidden="true"
       />
 
-      {/* Drawer Container (Falabella Multi-Panel Style in Dark Mode) */}
-      <div className="relative w-full max-w-2xl sm:max-w-3xl bg-[#0d0d14] text-white shadow-2xl flex flex-col z-10 border-r border-white/10">
-        
-        {/* Drawer Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-[#08080c]">
-          <div className="flex items-center gap-2">
-            <span className="text-spartan-gold font-display font-black text-sm sm:text-base tracking-wider flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-spartan-gold animate-ping" />
-              CATEGORÍAS DE HARDWARE
-            </span>
+      {/* Drawer Container (Falabella style 2-panel) */}
+      <div
+        className={`relative z-10 w-full max-w-4xl h-full shadow-2xl flex flex-col transition-all duration-300 transform border-r ${
+          isDarkMode
+            ? "bg-[#0B0E14] border-gray-800 text-white"
+            : "bg-white border-gray-200 text-gray-900"
+        }`}
+      >
+        {/* Header */}
+        <div
+          className={`p-4 sm:p-5 border-b flex items-center justify-between ${
+            isDarkMode ? "border-gray-800 bg-[#111620]" : "border-gray-200 bg-gray-50"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#FFDE17] text-black flex items-center justify-center font-black">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-black uppercase tracking-wider">
+                Departamentos y Hardware
+              </h2>
+              <p className="text-[11px] text-gray-400">
+                Selecciona una categoría para explorar el catálogo en Compuplaza Arequipa
+              </p>
+            </div>
           </div>
-          <button 
+
+          <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className={`p-2 rounded-xl transition-colors ${
+              isDarkMode ? "hover:bg-gray-800 text-gray-400 hover:text-white" : "hover:bg-gray-200 text-gray-600 hover:text-black"
+            }`}
+            aria-label="Cerrar menú"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Drawer Body: 2 Columns for Desktop, Slide for Mobile */}
+        {/* 2-Panel Content */}
         <div className="flex-1 flex overflow-hidden">
-          
-          {/* Column 1: Parent Categories */}
-          <div className={`w-full md:w-5/12 border-r border-white/10 overflow-y-auto bg-[#0a0a0f] ${mobileSubcategoryView ? 'hidden md:block' : 'block'}`}>
-            <ul className="py-2">
-              {CATEGORIES.map((cat) => {
-                const IconComponent = iconMap[cat.icon] || Cpu;
-                const isSelected = activeCategory?.id === cat.id;
-
+          {/* Panel Izquierdo: Categorías Principales */}
+          <div
+            className={`w-2/5 sm:w-1/3 border-r overflow-y-auto ${
+              isDarkMode ? "border-gray-800 bg-[#0E121A]" : "border-gray-200 bg-gray-50"
+            }`}
+          >
+            <div className="p-2 space-y-1">
+              {categories.map((cat, idx) => {
+                const isActive = activeCategoryIndex === idx;
                 return (
-                  <li key={cat.id}>
-                    <button
-                      onMouseEnter={() => setActiveCategory(cat)}
-                      onClick={() => {
-                        setActiveCategory(cat);
-                        setMobileSubcategoryView(true);
-                      }}
-                      className={`w-full flex items-center justify-between px-5 py-3.5 text-xs sm:text-sm font-semibold transition-all text-left cursor-pointer ${
-                        isSelected 
-                          ? 'bg-spartan-gold text-black font-bold' 
-                          : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                  <button
+                    key={cat.id}
+                    onMouseEnter={() => setActiveCategoryIndex(idx)}
+                    onClick={() => handleCategoryClick(cat.id)}
+                    className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-left text-xs font-bold transition-all ${
+                      isActive
+                        ? "bg-[#FFDE17] text-black shadow-md font-black"
+                        : isDarkMode
+                        ? "text-gray-300 hover:bg-gray-800/60"
+                        : "text-gray-700 hover:bg-gray-200/70"
+                    }`}
+                  >
+                    <span className="truncate">{cat.name}</span>
+                    <ChevronRight
+                      className={`w-4 h-4 flex-shrink-0 transition-transform ${
+                        isActive ? "translate-x-1 text-black" : "opacity-40"
                       }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <IconComponent className={`w-4 h-4 ${isSelected ? 'text-black' : 'text-spartan-gold'}`} />
-                        <span>{cat.name}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${isSelected ? 'bg-black/20 text-black' : 'bg-white/5 text-slate-400'}`}>
-                          {cat.count}
-                        </span>
-                        <ChevronRight className={`w-4 h-4 ${isSelected ? 'text-black' : 'text-slate-500'}`} />
-                      </div>
-                    </button>
-                  </li>
+                    />
+                  </button>
                 );
               })}
-            </ul>
-
-            {/* View All Store Button */}
-            <div className="p-4 border-t border-white/10">
-              <button 
-                onClick={() => {
-                  onSelectCategory('all');
-                  onClose();
-                }}
-                className="w-full py-2.5 px-4 rounded-lg bg-spartan-card hover:bg-spartan-cardHover border border-spartan-gold/30 text-spartan-gold text-xs font-bold text-center transition-all cursor-pointer"
-              >
-                Ver Todo el Catálogo (Tienda Completa)
-              </button>
             </div>
           </div>
 
-          {/* Column 2: Subcategories List */}
-          <div className={`w-full md:w-7/12 overflow-y-auto p-5 bg-[#0e0e16] ${mobileSubcategoryView ? 'block' : 'hidden md:block'}`}>
-            {/* Mobile Back Button */}
-            <div className="md:hidden pb-3 mb-3 border-b border-white/10">
-              <button
-                onClick={() => setMobileSubcategoryView(false)}
-                className="flex items-center gap-2 text-spartan-gold text-xs font-bold cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Volver a Categorías
-              </button>
-            </div>
-
-            {/* Active Category Header */}
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <span className="text-spartan-gold">{activeCategory?.name}</span>
-              </h3>
-              <button 
-                onClick={() => {
-                  onSelectCategory(activeCategory?.id);
-                  onClose();
-                }}
-                className="text-xs text-spartan-gold hover:underline cursor-pointer"
-              >
-                Ver todos &rsaquo;
-              </button>
-            </div>
-
-            {/* Subcategories Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {activeCategory?.subcategories.map((sub) => (
+          {/* Panel Derecho: Subcategorías y Promociones */}
+          <div className="w-3/5 sm:w-2/3 p-6 overflow-y-auto flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b mb-6 border-gray-700/40">
+                <h3 className="text-lg font-black uppercase text-[#FFDE17] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  {currentCategory.name}
+                </h3>
                 <button
-                  key={sub.id}
-                  onClick={() => {
-                    onSelectCategory(sub.id);
-                    onClose();
-                  }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-spartan-gold/10 border border-white/5 hover:border-spartan-gold/30 text-left transition-all group cursor-pointer"
+                  onClick={() => handleCategoryClick(currentCategory.id)}
+                  className="text-xs font-bold hover:underline text-gray-400 hover:text-white"
                 >
-                  <span className="text-xs text-slate-300 group-hover:text-white font-medium">
-                    {sub.name}
-                  </span>
-                  <span className="text-[10px] text-slate-500 group-hover:text-spartan-gold font-mono">
-                    ({sub.count})
-                  </span>
+                  Ver todos ({currentCategory.count}) →
                 </button>
-              ))}
-            </div>
-
-            {/* Promotional Card inside Drawer */}
-            <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-spartan-card to-black border border-white/10 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-bold text-spartan-red tracking-wider uppercase">Promoción Spartan</span>
-                <h4 className="text-xs font-bold text-white mt-0.5">Envíos Gratis en Arequipa</h4>
-                <p className="text-[11px] text-slate-400 mt-1">Por compras mayores a S/. 500 en componentes seleccionados.</p>
               </div>
-              <Shield className="w-8 h-8 text-spartan-gold shrink-0 opacity-80" />
+
+              {/* Grid de Subcategorías */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                {currentCategory.subCategories.map((sub, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSubCategoryClick(currentCategory.id, sub)}
+                    className={`p-3.5 rounded-xl border text-left text-xs font-bold transition-all group ${
+                      isDarkMode
+                        ? "bg-[#111620] border-gray-800 hover:border-[#FFDE17] hover:bg-gray-800/40"
+                        : "bg-gray-50 border-gray-200 hover:border-amber-400 hover:bg-amber-50/50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="group-hover:text-[#FFDE17] transition-colors">{sub}</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
 
+            {/* Bottom Promo Card */}
+            <div
+              className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${
+                isDarkMode
+                  ? "bg-gradient-to-r from-amber-500/10 to-red-500/10 border-amber-500/30"
+                  : "bg-amber-50 border-amber-200"
+              }`}
+            >
+              <div>
+                <div className="text-[11px] font-black uppercase text-[#FFDE17] tracking-wider">
+                  Beneficio Spartan
+                </div>
+                <div className="text-xs font-bold mt-0.5">
+                  Envíos express en Arequipa y garantía directa de tienda
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  onNavigate("catalog");
+                  onClose();
+                }}
+                className="py-2 px-3.5 rounded-xl bg-[#FFDE17] text-black font-black uppercase text-[10px] tracking-wider hover:bg-yellow-400 transition-colors whitespace-nowrap"
+              >
+                Ir a la Tienda
+              </button>
+            </div>
           </div>
-
         </div>
-
       </div>
     </div>
   );
