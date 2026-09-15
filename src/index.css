@@ -1,0 +1,52 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-canvas: #060608;
+    --bg-surface: #0e0e13;
+    --bg-card: #14141c;
+    --spartan-gold: #FFDE17;
+    --spartan-red: #FF334B;
+  }
+  
+  body {
+    background-color: #060608;
+    color: #f1f5f9;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Custom dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #09090d;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #232332;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #FFDE17;
+  }
+}
+
+/* Glassmorphism utility */
+.glass-dark {
+  background: rgba(14, 14, 19, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gold-glow {
+  box-shadow: 0 0 20px rgba(255, 222, 23, 0.18);
+}
+
+.red-glow {
+  box-shadow: 0 0 15px rgba(255, 51, 75, 0.25);
+}
