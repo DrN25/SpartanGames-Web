@@ -28,17 +28,17 @@ export default function MegaMenuDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex">
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-spartan-fade-in"
         aria-hidden="true"
       />
 
       {/* Drawer Container */}
       <div
-        className={`relative z-10 w-full max-w-4xl h-full shadow-2xl flex flex-col transition-all duration-300 transform border-r ${
+        className={`relative z-10 w-full max-w-4xl h-full shadow-2xl flex flex-col animate-spartan-drawer-left border-r ${
           isDarkMode
             ? "bg-[#0B0E14] border-gray-800 text-white"
             : "bg-white border-slate-200 text-slate-900"

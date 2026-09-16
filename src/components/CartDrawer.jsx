@@ -27,17 +27,17 @@ export default function CartDrawer({
   const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-spartan-fade-in"
         aria-hidden="true"
       />
 
       {/* Drawer Container */}
       <div
-        className={`relative w-full max-w-md h-full shadow-2xl flex flex-col z-10 transition-transform duration-300 border-l ${
+        className={`relative w-full max-w-md h-full shadow-2xl flex flex-col z-10 animate-spartan-drawer-right border-l ${
           isDarkMode
             ? "bg-[#0E121A] border-gray-800 text-white"
             : "bg-white border-slate-200 text-slate-900"

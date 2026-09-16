@@ -32,23 +32,145 @@
 
   /* Custom scrollbar matching active theme */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
   }
   ::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: transparent;
   }
   .dark ::-webkit-scrollbar-track {
-    background: #09090d;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
-    border-radius: 4px;
+    border-radius: 9999px;
   }
   .dark ::-webkit-scrollbar-thumb {
-    background: #232332;
+    background: #283040;
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #FFDE17;
   }
+}
+
+/* ==========================================================================
+   SPARTAN GAMES - ULTRA SMOOTH ANIMATION SUITE (60fps / 120Hz GPU-Accelerated)
+   ========================================================================== */
+
+/* 1. Backdrop Fade */
+@keyframes spartanFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 2. Modals Scale & Float In (macOS spring-like fluid cubic-bezier) */
+@keyframes spartanModalEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.93) translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 3. Drawers Slide In From Right (CartDrawer) */
+@keyframes spartanDrawerSlideRight {
+  0% {
+    opacity: 0.6;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 4. Drawers Slide In From Left (MegaMenuDrawer) */
+@keyframes spartanDrawerSlideLeft {
+  0% {
+    opacity: 0.6;
+    transform: translateX(-100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 5. Chat Window Pop Up (from bottom-right trigger) */
+@keyframes spartanChatPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.84) translateY(28px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 6. Message Bubble Slide Up */
+@keyframes spartanMessageSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 7. Subtle Pulse & Shimmer for Highlights */
+@keyframes spartanGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(255, 222, 23, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 222, 23, 0.45);
+  }
+}
+
+/* ==========================================================================
+   UTILITY CLASSES
+   ========================================================================== */
+.animate-spartan-fade-in {
+  animation: spartanFadeIn 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity;
+}
+
+.animate-spartan-modal {
+  animation: spartanModalEnter 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-spartan-drawer-right {
+  animation: spartanDrawerSlideRight 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+.animate-spartan-drawer-left {
+  animation: spartanDrawerSlideLeft 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+.animate-spartan-chat {
+  animation: spartanChatPop 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom right;
+  will-change: transform, opacity;
+}
+
+.animate-spartan-message {
+  animation: spartanMessageSlideUp 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-spartan-glow {
+  animation: spartanGlowPulse 2.5s infinite ease-in-out;
 }

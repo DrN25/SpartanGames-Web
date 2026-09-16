@@ -617,9 +617,9 @@ export default function ProductDetail({
 
       {/* Modal de Stock */}
       {showStockModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-spartan-fade-in">
           <div
-            className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl relative ${
+            className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl relative animate-spartan-modal ${
               isDarkMode
                 ? "bg-[#111620] border-gray-800 text-white"
                 : "bg-white border-slate-200 text-slate-900"

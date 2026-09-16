@@ -134,9 +134,9 @@ export default function PCBuilderModal({
   const whatsappQuoteUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappQuoteMsg)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-spartan-fade-in">
       <div
-        className={`relative w-full max-w-5xl border rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden ${
+        className={`relative w-full max-w-5xl border rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-spartan-modal ${
           isDarkMode
             ? "bg-[#0B0E14] border-gray-800 text-white"
             : "bg-white border-slate-200 text-slate-900"

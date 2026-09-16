@@ -755,7 +755,7 @@ export default function ChatIABubble({
             minWidth: "320px",
             minHeight: "380px"
           }}
-          className={`fixed bottom-22 sm:bottom-24 right-6 z-50 rounded-3xl border shadow-2xl flex flex-col overflow-hidden transition-shadow select-text ${
+          className={`fixed bottom-22 sm:bottom-24 right-6 z-50 rounded-3xl border shadow-2xl flex flex-col overflow-hidden transition-all duration-300 select-text animate-spartan-chat origin-bottom-right ${
             isDarkMode
               ? "bg-[#0B0E14] border-gray-800 text-white"
               : "bg-white border-slate-300 text-slate-900"
@@ -846,7 +846,7 @@ export default function ChatIABubble({
             }`}
           >
             {messages.map((m) => (
-              <div key={m.id} className="space-y-2">
+              <div key={m.id} className="space-y-2 animate-spartan-message">
                 <div
                   className={`flex items-start gap-2.5 ${
                     m.sender === "user" ? "justify-end" : "justify-start"
@@ -956,7 +956,7 @@ export default function ChatIABubble({
                         {m.productCards.length > 1 && (
                           <button
                             onClick={() => handleBatchAddToCart(m.productCards, m.id)}
-                            className={`mt-2 w-full py-2.5 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
+                            className={`mt-2 w-full py-2.5 px-3 rounded-xl font-black text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
                               addedBatchMap[m.id]
                                 ? "bg-emerald-600 text-white"
                                 : isDarkMode

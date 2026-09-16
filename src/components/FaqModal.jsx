@@ -8,9 +8,9 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-spartan-fade-in">
       <div
-        className={`relative w-full max-w-2xl border rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden ${
+        className={`relative w-full max-w-2xl border rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-spartan-modal ${
           isDarkMode
             ? "bg-[#0E121A] border-gray-800 text-white"
             : "bg-white border-slate-200 text-slate-900"
