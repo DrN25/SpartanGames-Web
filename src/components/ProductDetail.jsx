@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import {
   CheckCircle2,
@@ -11,6 +11,9 @@ import {
   AlertTriangle,
   Sparkles,
   ChevronRight,
+  ChevronLeft,
+  Maximize2,
+  X,
   Star
 } from "./Icons";
 import { WhatsAppIcon } from "./Icons";
@@ -31,13 +34,38 @@ export default function ProductDetail({
   const { shouldRender: shouldRenderStockModal, isClosing: isClosingStockModal } = useModalTransition(showStockModal, 220);
   const [addedAnimation, setAddedAnimation] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-
-  if (!product) return null;
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const images =
-    product.images && product.images.length > 0
+    product?.images && product.images.length > 0
       ? product.images
-      : [product.image].filter(Boolean);
+      : [product?.image].filter(Boolean);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [product?.id]);
+
+  useEffect(() => {
+    if (isLightboxOpen) {
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") setIsLightboxOpen(false);
+        if (e.key === "ArrowLeft" && images.length > 1) {
+          setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+        }
+        if (e.key === "ArrowRight" && images.length > 1) {
+          setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [isLightboxOpen, images.length]);
+
+  if (!product) return null;
 
   const handleDecrease = () => {
     if (quantity > 1) setQuantity(quantity - 1);
@@ -107,9 +135,11 @@ export default function ProductDetail({
           <div className="lg:col-span-6 2xl:col-span-5 flex flex-col items-center">
             {/* Stage */}
             <div
-              className={`relative w-full aspect-square rounded-2xl p-6 sm:p-8 flex items-center justify-center border overflow-hidden ${
+              onClick={() => setIsLightboxOpen(true)}
+              className={`group relative w-full aspect-square rounded-2xl p-6 sm:p-8 flex items-center justify-center border overflow-hidden cursor-zoom-in transition-all ${
                 isDarkMode ? "bg-black/50 border-gray-800" : "bg-slate-50/70 border-slate-200"
               }`}
+              title="Haz clic para ver en pantalla completa"
             >
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                 <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-950 text-[#FFDE17] shadow-xs">
@@ -122,14 +152,25 @@ export default function ProductDetail({
                 )}
               </div>
 
-              <div className="absolute top-4 right-4 z-10 text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-900 text-white dark:bg-black/60 dark:text-gray-300">
-                ID #{product.id}
-              </div>
+              {/* Botón Ampliar / Pantalla Completa (reemplaza ID técnico) */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLightboxOpen(true);
+                }}
+                className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-900 text-white dark:bg-black/70 dark:hover:bg-black text-xs font-bold flex items-center gap-1.5 border border-white/15 backdrop-blur-md transition-all shadow-md hover:scale-105 active:scale-95"
+                aria-label="Ver en pantalla completa"
+                title="Ver en pantalla completa"
+              >
+                <Maximize2 className="w-3.5 h-3.5 text-[#FFDE17]" />
+                <span className="hidden sm:inline">Ampliar</span>
+              </button>
 
               <img
                 src={images[activeImageIndex] || product.image}
                 alt={product.name}
-                className="max-h-full max-w-full object-contain transform hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                className="max-h-full max-w-full object-contain transform group-hover:scale-105 transition-transform duration-300"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
@@ -691,6 +732,120 @@ export default function ProductDetail({
           </div>
         </div>
       )}
-    </div>
+    
+      {/* Lightbox / Modal Pantalla Completa */}
+      {isLightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-black/95 backdrop-blur-md p-4 sm:p-6 select-none animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsLightboxOpen(false);
+          }}
+        >
+          {/* Barra Superior */}
+          <div className="w-full max-w-6xl flex items-center justify-between text-white/90 py-2 px-3 border-b border-white/10">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="px-2.5 py-1 rounded-md text-xs font-black uppercase bg-[#FFDE17] text-slate-950 shrink-0">
+                {product.brand}
+              </span>
+              <h2 className="text-xs sm:text-sm font-bold text-gray-200 truncate">
+                {product.name}
+              </h2>
+            </div>
+            <div className="flex items-center gap-3 shrink-0 ml-4">
+              {images.length > 1 && (
+                <span className="text-xs font-mono font-bold text-gray-300 bg-white/10 px-2.5 py-1 rounded-full">
+                  {activeImageIndex + 1} / {images.length}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(false)}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold"
+                aria-label="Cerrar pantalla completa (Esc)"
+              >
+                <X className="w-5 h-5" />
+                <span className="hidden sm:inline">Cerrar (Esc)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Viewport Principal de la Imagen */}
+          <div
+            className="relative w-full max-w-6xl flex-1 flex items-center justify-center p-2 sm:p-6 overflow-hidden"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsLightboxOpen(false);
+            }}
+          >
+            {images.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+                }}
+                className="absolute left-2 sm:left-6 z-20 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-sm transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                aria-label="Imagen anterior"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+            )}
+
+            <img
+              src={images[activeImageIndex] || product.image}
+              alt={`${product.name} - Vista ampliada ${activeImageIndex + 1}`}
+              className="max-h-[76vh] max-w-full object-contain rounded-2xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] transition-all duration-300 select-none"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+              }}
+            />
+
+            {images.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+                }}
+                className="absolute right-2 sm:right-6 z-20 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-sm transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                aria-label="Siguiente imagen"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            )}
+          </div>
+
+          {/* Carrusel de Miniaturas Inferior */}
+          {images.length > 1 && (
+            <div className="w-full max-w-2xl flex items-center justify-center gap-2.5 overflow-x-auto py-2 px-4">
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImageIndex(idx);
+                  }}
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-1.5 border-2 transition-all flex items-center justify-center shrink-0 bg-black/40 overflow-hidden cursor-pointer ${
+                    activeImageIndex === idx
+                      ? "border-[#FFDE17] ring-2 ring-[#FFDE17]/60 scale-105"
+                      : "border-white/20 opacity-60 hover:opacity-100 hover:border-white/50"
+                  }`}
+                  aria-label={`Ver imagen ${idx + 1}`}
+                >
+                  <img
+                    src={img}
+                    alt=""
+                    className="max-h-full max-w-full object-contain"
+                    referrerPolicy="no-referrer"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+</div>
   );
 }

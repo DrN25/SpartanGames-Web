@@ -9,6 +9,7 @@ export {
   Filter,
   X,
   ChevronRight,
+  ChevronLeft,
   ChevronDown,
   Check,
   ShieldCheck,

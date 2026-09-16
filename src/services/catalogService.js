@@ -7,7 +7,7 @@ import {
 export const GOOGLE_SHEET_ID = "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno";
 export const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit?usp=sharing`;
 
-const CACHE_KEY = "spartan_catalog_cache";
+const CACHE_KEY = "spartan_catalog_cache_v4";
 const CACHE_CAT_KEY = "spartan_categories_cache";
 const CACHE_CONFIG_KEY = "spartan_config_cache";
 const CACHE_TIME_KEY = "spartan_catalog_timestamp";
@@ -29,7 +29,8 @@ const HEADER_ALIASES = {
   isPromo: ["en_oferta", "ispromo", "oferta", "promocion"],
   promoTag: ["etiqueta_oferta", "promotag", "badge", "tag"],
   featured: ["destacado", "featured", "portada", "popular"],
-  image: ["imagen", "image", "foto", "url_imagen", "portada_url"],
+  image: ["imagen", "image", "foto", "url_imagen", "portada_url", "imagen_principal"],
+  images: ["imagenes", "images", "galeria", "fotos", "fotos_adicionales", "galeria_urls", "url_imagenes", "otras_imagenes"],
   specs: ["caracteristicas_rapidas", "specs", "caracteristicas", "especificaciones_rapidas"],
   summary: ["resumen", "summary", "extracto", "bajada"],
   description: ["descripcion", "description", "detalle"],
@@ -166,6 +167,46 @@ export function parseProductRow(headers, row) {
   const rawCategory = getColVal(HEADER_ALIASES.category) || "Hardware";
   const rawCategoryId = getColVal(HEADER_ALIASES.categoryId) || normalizeHeader(rawCategory);
 
+  // Extracción robusta de imágenes múltiples (soporta lista separada por comas, saltos de línea, columnas adicionales)
+  const extractImages = () => {
+    const rawMain = getColVal(HEADER_ALIASES.image);
+    const rawGallery = getColVal(HEADER_ALIASES.images);
+
+    const numberedImages = [];
+    normalizedHeaders.forEach((header, idx) => {
+      if (
+        /^(imagen|image|foto)[_\s-]?\d+$/i.test(header) &&
+        row[idx] !== undefined &&
+        row[idx] !== null &&
+        row[idx].trim() !== ""
+      ) {
+        numberedImages.push(row[idx].trim());
+      }
+    });
+
+    const combinedRaw = [rawMain, rawGallery, ...numberedImages].filter(Boolean);
+    const urls = [];
+
+    combinedRaw.forEach((entry) => {
+      const splitEntries = String(entry).split(/[\r\n,;|]+/);
+      splitEntries.forEach((item) => {
+        const trimmed = item.trim();
+        if (trimmed) {
+          urls.push(normalizeImageUrl(trimmed));
+        }
+      });
+    });
+
+    let uniqueUrls = Array.from(new Set(urls));
+    if (uniqueUrls.length === 0) {
+      uniqueUrls.push("/assets/images/spartan_games_banner.jpg");
+    }
+
+    return uniqueUrls;
+  };
+
+  const parsedImages = extractImages();
+
   return {
     id: isNaN(Number(rawId)) ? rawId : Number(rawId),
     name: getColVal(HEADER_ALIASES.name) || "Componente Hardware",
@@ -181,7 +222,8 @@ export function parseProductRow(headers, row) {
     isPromo: parseBoolean(getColVal(HEADER_ALIASES.isPromo)),
     promoTag: getColVal(HEADER_ALIASES.promoTag) || (parseBoolean(getColVal(HEADER_ALIASES.isPromo)) ? "OFERTA" : ""),
     featured: parseBoolean(getColVal(HEADER_ALIASES.featured)),
-    image: normalizeImageUrl(getColVal(HEADER_ALIASES.image)),
+    image: parsedImages[0],
+    images: parsedImages,
     specs: parseSpecs(getColVal(HEADER_ALIASES.specs)),
     summary: getColVal(HEADER_ALIASES.summary) || "",
     description: getColVal(HEADER_ALIASES.description) || "",
