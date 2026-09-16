@@ -191,7 +191,7 @@ export default function CatalogView({
             {/* Categorías */}
             <div className="mb-6">
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-3">
-                Departamentos
+                Categorias
               </h3>
               <div className="space-y-1">
                 <button

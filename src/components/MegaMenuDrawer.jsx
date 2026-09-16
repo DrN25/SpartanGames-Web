@@ -62,7 +62,7 @@ export default function MegaMenuDrawer({
             </div>
             <div>
               <h2 className="text-base font-black uppercase tracking-wider text-slate-950 dark:text-white">
-                Departamentos y Hardware
+                Categorias y Hardware
               </h2>
               <p className="text-[11px] text-slate-500 dark:text-gray-400">
                 Selecciona una categoría para explorar el catálogo en Compuplaza Arequipa

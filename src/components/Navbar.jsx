@@ -77,7 +77,7 @@ export default function Navbar({
             aria-label="Abrir catálogo por categorías"
           >
             <Layers className="w-4 h-4 text-[#FFDE17] stroke-[2.5]" />
-            <span className="hidden sm:inline tracking-wide font-semibold">Departamentos</span>
+            <span className="hidden sm:inline tracking-wide font-semibold">Categorias</span>
             <ChevronDown className="w-3.5 h-3.5 opacity-60 ml-0.5 hidden sm:inline" />
           </button>
         </div>
