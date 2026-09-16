@@ -32,11 +32,10 @@ export default function ProductDetail({
 
   if (!product) return null;
 
-  const images = [
-    product.image,
-    "/assets/images/spartan_games_anuncio_2.jpg",
-    "/assets/images/spartan_games_banner.jpg"
-  ];
+  const images =
+    product.images && product.images.length > 0
+      ? product.images
+      : [product.image].filter(Boolean);
 
   const handleDecrease = () => {
     if (quantity > 1) setQuantity(quantity - 1);
@@ -67,7 +66,9 @@ export default function ProductDetail({
   const whatsappUrl = `https://wa.me/51912930004?text=${encodeURIComponent(whatsappMsg)}`;
 
   const relatedProducts = allProducts
-    ? allProducts.filter((p) => p.id !== product.id && p.categoryId === product.categoryId).slice(0, 4)
+    ? allProducts
+        .filter((p) => p.id !== product.id && p.categoryId === product.categoryId)
+        .slice(0, 4)
     : [];
 
   const breadcrumbsList = [
@@ -83,27 +84,31 @@ export default function ProductDetail({
   ];
 
   return (
-    <div className={`min-h-screen py-6 px-4 sm:px-6 lg:px-8 xl:px-12 max-w-[1720px] mx-auto transition-colors ${
-      isDarkMode ? "text-gray-100" : "text-slate-900"
-    }`}>
+    <div
+      className={`min-h-screen py-6 px-4 sm:px-6 lg:px-8 xl:px-12 max-w-[1720px] mx-auto transition-colors ${
+        isDarkMode ? "text-gray-100" : "text-slate-900"
+      }`}
+    >
       {/* Breadcrumbs */}
       <div className="mb-4">
         <Breadcrumbs items={breadcrumbsList} isDarkMode={isDarkMode} onNavigate={onNavigate} />
       </div>
 
-      {/* Main Product Hero Layout: Scaled gracefully on ultrawide monitors */}
-      <div className={`rounded-3xl border p-6 sm:p-8 lg:p-10 mb-12 shadow-xs ${
-        isDarkMode
-          ? "bg-[#111620] border-gray-800"
-          : "bg-white border-slate-200"
-      }`}>
+      {/* Main Product Hero Layout */}
+      <div
+        className={`rounded-3xl border p-6 sm:p-8 lg:p-10 mb-12 shadow-xs ${
+          isDarkMode ? "bg-[#111620] border-gray-800" : "bg-white border-slate-200"
+        }`}
+      >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 2xl:gap-16">
           {/* Columna Izquierda: Galería */}
           <div className="lg:col-span-6 2xl:col-span-5 flex flex-col items-center">
             {/* Stage */}
-            <div className={`relative w-full aspect-square rounded-2xl p-6 sm:p-8 flex items-center justify-center border overflow-hidden ${
-              isDarkMode ? "bg-black/50 border-gray-800" : "bg-slate-50/70 border-slate-200"
-            }`}>
+            <div
+              className={`relative w-full aspect-square rounded-2xl p-6 sm:p-8 flex items-center justify-center border overflow-hidden ${
+                isDarkMode ? "bg-black/50 border-gray-800" : "bg-slate-50/70 border-slate-200"
+              }`}
+            >
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                 <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-950 text-[#FFDE17] shadow-xs">
                   {product.brand}
@@ -123,27 +128,38 @@ export default function ProductDetail({
                 src={images[activeImageIndex] || product.image}
                 alt={product.name}
                 className="max-h-full max-w-full object-contain transform hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                }}
               />
 
               {/* Scarcity Bar */}
               <div className="absolute bottom-4 left-4 right-4">
-                <div className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold ${
-                  product.stock <= 4
-                    ? isDarkMode
-                      ? "bg-red-500/10 border-red-500/30 text-red-400"
-                      : "bg-rose-50 border-rose-200 text-rose-800"
-                    : isDarkMode
-                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                    : "bg-emerald-50 border-emerald-200 text-emerald-800"
-                }`}>
+                <div
+                  className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold ${
+                    product.stock <= 4
+                      ? isDarkMode
+                        ? "bg-red-500/10 border-red-500/30 text-red-400"
+                        : "bg-rose-50 border-rose-200 text-rose-800"
+                      : isDarkMode
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                      : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                  }`}
+                >
                   <span className="flex items-center gap-1.5">
                     <span className="relative flex h-2 w-2">
-                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                        product.stock <= 4 ? "bg-red-400" : "bg-emerald-400"
-                      }`}></span>
-                      <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                        product.stock <= 4 ? "bg-red-500" : "bg-emerald-500"
-                      }`}></span>
+                      <span
+                        className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                          product.stock <= 4 ? "bg-red-400" : "bg-emerald-400"
+                        }`}
+                      ></span>
+                      <span
+                        className={`relative inline-flex rounded-full h-2 w-2 ${
+                          product.stock <= 4 ? "bg-red-500" : "bg-emerald-500"
+                        }`}
+                      ></span>
                     </span>
                     ¡Solo quedan {product.stock} unidades en Compuplaza Arequipa!
                   </span>
@@ -152,25 +168,36 @@ export default function ProductDetail({
               </div>
             </div>
 
-            {/* Miniaturas */}
-            <div className="flex items-center gap-3 mt-4 w-full overflow-x-auto pb-2">
-              {images.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveImageIndex(idx)}
-                  className={`w-20 h-20 rounded-xl p-2 border flex items-center justify-center flex-shrink-0 transition-all ${
-                    activeImageIndex === idx
-                      ? "border-amber-500 ring-2 ring-amber-400/40 bg-amber-50/20"
-                      : isDarkMode
-                      ? "border-gray-800 bg-black/20 hover:border-gray-600"
-                      : "border-slate-200 bg-slate-50 hover:border-slate-400"
-                  }`}
-                  aria-label={`Vista miniatura ${idx + 1}`}
-                >
-                  <img src={img} alt={`Vista ${idx + 1}`} className="max-h-full object-contain" />
-                </button>
-              ))}
-            </div>
+            {/* Miniaturas dinámicas (solo si hay más de 1 imagen) */}
+            {images.length > 1 && (
+              <div className="flex items-center gap-3 mt-4 w-full overflow-x-auto pb-2">
+                {images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`w-20 h-20 rounded-xl p-2 border flex items-center justify-center flex-shrink-0 transition-all ${
+                      activeImageIndex === idx
+                        ? "border-amber-500 ring-2 ring-amber-400/40 bg-amber-50/20"
+                        : isDarkMode
+                        ? "border-gray-800 bg-black/20 hover:border-gray-600"
+                        : "border-slate-200 bg-slate-50 hover:border-slate-400"
+                    }`}
+                    aria-label={`Vista miniatura ${idx + 1}`}
+                  >
+                    <img
+                      src={img}
+                      alt={`Vista ${idx + 1}`}
+                      className="max-h-full object-contain"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Columna Derecha: Comercial */}
@@ -186,52 +213,75 @@ export default function ProductDetail({
                 >
                   {product.category}
                 </button>
-                <div className="flex items-center gap-1 text-amber-600 dark:text-[#FFDE17] text-xs font-bold">
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <span>{product.rating}</span>
-                  <span className="text-slate-500 dark:text-gray-500 font-normal">({product.reviewsCount} valoraciones)</span>
+                <div className="flex items-center gap-1 text-xs">
+                  <div className="flex items-center text-amber-500">
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <span className="font-bold ml-1 text-slate-900 dark:text-white">
+                      {product.rating}
+                    </span>
+                  </div>
+                  <span className="text-slate-400">({product.reviewsCount} opiniones)</span>
                 </div>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight leading-tight mb-3 text-slate-950 dark:text-white">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-tight text-slate-950 dark:text-white mb-3 leading-tight">
                 {product.name}
               </h1>
 
-              <p className={`text-sm mb-4 leading-relaxed ${isDarkMode ? "text-gray-300" : "text-slate-600"}`}>
-                {product.summary}
-              </p>
+              <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-gray-400 font-mono mb-4">
+                <span>
+                  SKU: <strong className="text-slate-800 dark:text-gray-200">{product.sku}</strong>
+                </span>
+                <span>•</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold">
+                  {product.stock > 0 ? "Stock Inmediato en Arequipa" : "A Pedido"}
+                </span>
+              </div>
 
               {/* Specs Pills */}
               <div className="flex flex-wrap gap-2 mb-6">
-                {product.specs.map((spec, i) => (
+                {product.specs?.map((spec, i) => (
                   <span
                     key={i}
-                    className={`text-xs px-3 py-1 rounded-lg font-mono font-semibold border ${
+                    className={`text-xs px-2.5 py-1 rounded-lg font-mono font-medium ${
                       isDarkMode
-                        ? "bg-[#18202F] border-gray-700 text-gray-200"
-                        : "bg-slate-100 border-slate-200 text-slate-800"
+                        ? "bg-[#18202F] text-gray-200 border border-gray-700"
+                        : "bg-slate-100 text-slate-800 border border-slate-200"
                     }`}
                   >
-                    [ {spec} ]
+                    {spec}
                   </span>
                 ))}
               </div>
 
-              {/* Price Box */}
-              <div className={`p-5 rounded-2xl border mb-6 ${
-                isDarkMode ? "bg-black/40 border-gray-800" : "bg-slate-50 border-slate-200"
-              }`}>
+              {/* Summary */}
+              <p
+                className={`text-sm leading-relaxed mb-6 ${
+                  isDarkMode ? "text-gray-300" : "text-slate-600"
+                }`}
+              >
+                {product.summary}
+              </p>
+
+              {/* Price Tag Box */}
+              <div
+                className={`p-4 rounded-2xl border mb-6 ${
+                  isDarkMode
+                    ? "bg-black/40 border-gray-800"
+                    : "bg-gradient-to-r from-amber-50/70 to-slate-50 border-amber-200"
+                }`}
+              >
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl sm:text-4xl font-black text-[#FF334B] tracking-tight">
+                  <span className="text-3xl sm:text-4xl font-black text-[#FF334B]">
                     S/. {product.price.toFixed(2)}
                   </span>
                   {product.oldPrice && (
-                    <span className="text-base line-through text-slate-400 font-medium">
+                    <span className="text-sm sm:text-base line-through text-slate-400 dark:text-gray-500">
                       S/. {product.oldPrice.toFixed(2)}
                     </span>
                   )}
-                  {discount > 0 && (
-                    <span className="px-2.5 py-0.5 rounded text-xs font-black uppercase bg-[#FF334B] text-white shadow-xs">
+                  {savings > 0 && (
+                    <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
                       Ahorras S/. {savings}
                     </span>
                   )}
@@ -241,16 +291,20 @@ export default function ProductDetail({
                   <span>•</span>
                   <span>Boleta o Factura Electrónica</span>
                   <span>•</span>
-                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">10% Pago por Reserva Disponible</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">
+                    10% Pago por Reserva Disponible
+                  </span>
                 </div>
               </div>
 
               {/* Quantity Selector & Retail Action Buttons */}
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-4">
-                  <div className={`flex items-center border rounded-xl p-1 ${
-                    isDarkMode ? "bg-black/50 border-gray-700" : "bg-white border-slate-300"
-                  }`}>
+                  <div
+                    className={`flex items-center border rounded-xl p-1 ${
+                      isDarkMode ? "bg-black/50 border-gray-700" : "bg-white border-slate-300"
+                    }`}
+                  >
                     <button
                       onClick={handleDecrease}
                       disabled={quantity <= 1}
@@ -324,12 +378,16 @@ export default function ProductDetail({
       </div>
 
       {/* Tabs Section */}
-      <div className={`rounded-3xl border overflow-hidden mb-16 shadow-xs ${
-        isDarkMode ? "bg-[#111620] border-gray-800" : "bg-white border-slate-200"
-      }`}>
-        <div className={`flex border-b overflow-x-auto ${
-          isDarkMode ? "border-gray-800 bg-black/40" : "border-slate-200 bg-slate-50"
-        }`}>
+      <div
+        className={`rounded-3xl border overflow-hidden mb-16 shadow-xs ${
+          isDarkMode ? "bg-[#111620] border-gray-800" : "bg-white border-slate-200"
+        }`}
+      >
+        <div
+          className={`flex border-b overflow-x-auto ${
+            isDarkMode ? "border-gray-800 bg-black/40" : "border-slate-200 bg-slate-50"
+          }`}
+        >
           <button
             onClick={() => setActiveTab("description")}
             className={`py-4 px-6 font-bold uppercase text-xs tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
@@ -382,14 +440,18 @@ export default function ProductDetail({
               <p className={isDarkMode ? "text-gray-300" : "text-slate-700"}>
                 {product.description}
               </p>
-              <div className={`p-4 rounded-xl border mt-4 ${
-                isDarkMode ? "bg-black/30 border-gray-800" : "bg-amber-50/50 border-amber-200"
-              }`}>
+              <div
+                className={`p-4 rounded-xl border mt-4 ${
+                  isDarkMode ? "bg-black/30 border-gray-800" : "bg-amber-50/50 border-amber-200"
+                }`}
+              >
                 <h4 className="font-bold text-xs uppercase text-amber-800 dark:text-amber-400 mb-1">
                   Nota del Equipo Técnico Spartan Games:
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-gray-400">
-                  Si deseas ensamblar este componente en tu equipo actual o armar una PC desde cero, nuestro equipo en Compuplaza realiza el testeo de compatibilidad y actualización de BIOS sin costo adicional.
+                  Si deseas ensamblar este componente en tu equipo actual o armar una PC desde cero,
+                  nuestro equipo en Compuplaza realiza el testeo de compatibilidad y actualización de
+                  BIOS sin costo adicional.
                 </p>
               </div>
             </div>
@@ -408,14 +470,22 @@ export default function ProductDetail({
                         key={i}
                         className={`border-b border-slate-200 dark:border-gray-800/60 ${
                           i % 2 === 0
-                            ? isDarkMode ? "bg-black/20" : "bg-slate-50/60"
-                            : isDarkMode ? "bg-transparent" : "bg-white"
+                            ? isDarkMode
+                              ? "bg-black/20"
+                              : "bg-slate-50/60"
+                            : isDarkMode
+                            ? "bg-transparent"
+                            : "bg-white"
                         }`}
                       >
                         <td className="py-3 px-4 font-bold text-slate-600 dark:text-gray-400 w-1/3 border-r border-slate-200 dark:border-gray-800/40">
                           {spec.label}
                         </td>
-                        <td className={`py-3 px-4 font-semibold ${isDarkMode ? "text-gray-200" : "text-slate-900"}`}>
+                        <td
+                          className={`py-3 px-4 font-semibold ${
+                            isDarkMode ? "text-gray-200" : "text-slate-900"
+                          }`}
+                        >
                           {spec.value}
                         </td>
                       </tr>
@@ -432,31 +502,45 @@ export default function ProductDetail({
                 Políticas de Entrega y Garantía Local
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className={`p-5 rounded-2xl border ${
-                  isDarkMode ? "bg-black/30 border-gray-800" : "bg-slate-50 border-slate-200"
-                }`}>
+                <div
+                  className={`p-5 rounded-2xl border ${
+                    isDarkMode ? "bg-black/30 border-gray-800" : "bg-slate-50 border-slate-200"
+                  }`}
+                >
                   <h4 className="font-bold text-xs uppercase mb-2 flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
                     <Truck className="w-4 h-4" />
                     Delivery en Arequipa y Despacho a Provincias
                   </h4>
                   <ul className="text-xs text-slate-600 dark:text-gray-400 space-y-1.5 list-disc pl-4">
                     <li>Entrega inmediata en Cercado, Yanahuara, Cayma, JLByR y Cerro Colorado.</li>
-                    <li>Equipos completos se entregan con Windows 11 y programas esenciales activados.</li>
-                    <li>Envíos a Cusco, Puno, Tacna, Moquegua y Lima por Shalom y Olva Courier.</li>
+                    <li>
+                      Equipos completos se entregan con Windows 11 y programas esenciales activados.
+                    </li>
+                    <li>
+                      Envíos a Cusco, Puno, Tacna, Moquegua y Lima por Shalom y Olva Courier.
+                    </li>
                   </ul>
                 </div>
 
-                <div className={`p-5 rounded-2xl border ${
-                  isDarkMode ? "bg-black/30 border-gray-800" : "bg-slate-50 border-slate-200"
-                }`}>
+                <div
+                  className={`p-5 rounded-2xl border ${
+                    isDarkMode ? "bg-black/30 border-gray-800" : "bg-slate-50 border-slate-200"
+                  }`}
+                >
                   <h4 className="font-bold text-xs uppercase mb-2 flex items-center gap-2 text-amber-800 dark:text-[#FFDE17]">
                     <ShieldCheck className="w-4 h-4" />
                     Garantía y Soporte Postventa
                   </h4>
                   <ul className="text-xs text-slate-600 dark:text-gray-400 space-y-1.5 list-disc pl-4">
-                    <li>Garantía física directa de 12 a 36 meses con boleta o factura con RUC.</li>
-                    <li>Soporte técnico y diagnóstico en tienda física C.C. Compuplaza Tienda 204.</li>
-                    <li>Cambio inmediato ante fallas de fábrica durante los primeros 7 días.</li>
+                    <li>
+                      Garantía física directa de 12 a 36 meses con boleta o factura con RUC.
+                    </li>
+                    <li>
+                      Soporte técnico y diagnóstico en tienda física C.C. Compuplaza Tienda 204.
+                    </li>
+                    <li>
+                      Cambio inmediato ante fallas de fábrica durante los primeros 7 días.
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -500,12 +584,25 @@ export default function ProductDetail({
                     : "bg-white border-slate-200 hover:border-amber-400 shadow-xs"
                 }`}
               >
-                <div className={`aspect-square rounded-xl p-3 mb-3 flex items-center justify-center ${
-                  isDarkMode ? "bg-black/40" : "bg-slate-50"
-                }`}>
-                  <img src={rel.image} alt={rel.name} className="max-h-full object-contain" />
+                <div
+                  className={`aspect-square rounded-xl p-3 mb-3 flex items-center justify-center ${
+                    isDarkMode ? "bg-black/40" : "bg-slate-50"
+                  }`}
+                >
+                  <img
+                    src={rel.image}
+                    alt={rel.name}
+                    className="max-h-full object-contain"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                    }}
+                  />
                 </div>
-                <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-gray-400">{rel.brand}</div>
+                <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-gray-400">
+                  {rel.brand}
+                </div>
                 <h3 className="font-bold text-xs line-clamp-2 text-slate-900 dark:text-white hover:text-amber-800 dark:hover:text-[#FFDE17] transition-colors mt-0.5">
                   {rel.name}
                 </h3>
@@ -521,9 +618,13 @@ export default function ProductDetail({
       {/* Modal de Stock */}
       {showStockModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl relative ${
-            isDarkMode ? "bg-[#111620] border-gray-800 text-white" : "bg-white border-slate-200 text-slate-900"
-          }`}>
+          <div
+            className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl relative ${
+              isDarkMode
+                ? "bg-[#111620] border-gray-800 text-white"
+                : "bg-white border-slate-200 text-slate-900"
+            }`}
+          >
             <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-600 dark:text-[#FFDE17] flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-6 h-6" />
             </div>
@@ -532,17 +633,31 @@ export default function ProductDetail({
               Confirmación de Stock en Tienda
             </h3>
             <p className="text-xs text-slate-600 dark:text-gray-400 text-center leading-relaxed mb-6">
-              Debido a la alta rotación de hardware en Compuplaza Arequipa, te sugerimos confirmar disponibilidad con nuestros asesores por WhatsApp o agregarlo al carrito para reservar tu unidad.
+              Debido a la alta rotación de hardware en Compuplaza Arequipa, te sugerimos confirmar
+              disponibilidad con nuestros asesores por WhatsApp o agregarlo al carrito para reservar
+              tu unidad.
             </p>
 
-            <div className={`p-3 rounded-xl border mb-6 flex items-center gap-3 ${
-              isDarkMode ? "bg-black/50 border-gray-800" : "bg-slate-50 border-slate-200"
-            }`}>
-              <img src={product.image} alt={product.name} className="w-12 h-12 object-contain" />
+            <div
+              className={`p-3 rounded-xl border mb-6 flex items-center gap-3 ${
+                isDarkMode ? "bg-black/50 border-gray-800" : "bg-slate-50 border-slate-200"
+              }`}
+            >
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-12 h-12 object-contain"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                }}
+              />
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-bold truncate">{product.name}</div>
                 <div className="text-xs text-[#FF334B] font-black">
-                  S/. {(product.price * quantity).toFixed(2)} ({quantity} {quantity === 1 ? "unidad" : "unidades"})
+                  S/. {(product.price * quantity).toFixed(2)} ({quantity}{" "}
+                  {quantity === 1 ? "unidad" : "unidades"})
                 </div>
               </div>
             </div>

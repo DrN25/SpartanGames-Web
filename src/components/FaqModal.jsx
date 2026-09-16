@@ -1,9 +1,10 @@
 import React from "react";
 import { X, HelpCircle } from "./Icons";
 import { WhatsAppIcon } from "./Icons";
-import { faqData, storeInfo } from "../data/storeData";
+import { faqData, storeInfo as defaultStoreInfo } from "../data/storeData";
 
-export default function FaqModal({ isOpen, onClose, isDarkMode }) {
+export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propStoreInfo }) {
+  const storeInfo = propStoreInfo || defaultStoreInfo;
   if (!isOpen) return null;
 
   return (
@@ -39,40 +40,33 @@ export default function FaqModal({ isOpen, onClose, isDarkMode }) {
             onClick={onClose}
             className={`p-2 rounded-xl transition-colors ${
               isDarkMode
-                ? "hover:bg-gray-800 text-gray-400 hover:text-white"
-                : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                ? "text-gray-400 hover:text-white hover:bg-gray-800"
+                : "text-slate-500 hover:text-slate-900 hover:bg-slate-200"
             }`}
-            aria-label="Cerrar preguntas frecuentes"
+            aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto space-y-6 text-xs leading-relaxed">
-          {faqData.map((section, idx) => (
-            <div key={idx} className="space-y-3">
-              <h3 className="text-sm font-black uppercase tracking-wider text-slate-950 dark:text-[#FFDE17] pb-1 border-b border-slate-200 dark:border-gray-800/60">
-                {section.category}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {faqData.map((faq, idx) => (
+            <div
+              key={idx}
+              className={`p-4 rounded-2xl border transition-colors ${
+                isDarkMode
+                  ? "bg-[#111620] border-gray-800"
+                  : "bg-slate-50 border-slate-200"
+              }`}
+            >
+              <h3 className="font-black text-xs uppercase tracking-wide mb-1.5 text-slate-950 dark:text-white flex items-center gap-2">
+                <span className="text-amber-800 dark:text-[#FFDE17] font-mono">0{idx + 1}.</span>
+                <span>{faq.q}</span>
               </h3>
-              <div className="space-y-3">
-                {section.items.map((item, i) => (
-                  <div
-                    key={i}
-                    className={`p-4 rounded-2xl border ${
-                      isDarkMode ? "bg-black/30 border-gray-800/80" : "bg-slate-50 border-slate-200"
-                    }`}
-                  >
-                    <div className="font-bold text-xs mb-1.5 flex items-center gap-2 text-slate-900 dark:text-white">
-                      <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-[#FFDE17] flex-shrink-0" />
-                      <span>{item.q}</span>
-                    </div>
-                    <p className={`pl-4 ${isDarkMode ? "text-gray-300" : "text-slate-600"}`}>
-                      {item.a}
-                    </p>
-                  </div>
-                ))}
-              </div>
+              <p className="text-xs leading-relaxed text-slate-600 dark:text-gray-400 pl-6">
+                {faq.a}
+              </p>
             </div>
           ))}
 

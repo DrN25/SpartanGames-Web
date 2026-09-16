@@ -10,9 +10,10 @@ import {
   Phone,
   BookOpen
 } from "./Icons";
-import { storeInfo } from "../data/storeData";
+import { storeInfo as defaultStoreInfo } from "../data/storeData";
 
-export default function Footer({ onNavigate }) {
+export default function Footer({ onNavigate, onOpenLocation, storeInfo: propStoreInfo }) {
+  const storeInfo = propStoreInfo || defaultStoreInfo;
   const canvasRef = useRef(null);
 
   // Subtle interactive particle lights
@@ -40,7 +41,6 @@ export default function Footer({ onNavigate }) {
 
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
@@ -53,13 +53,13 @@ export default function Footer({ onNavigate }) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = 0.35;
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = p.color;
         ctx.fill();
       });
 
       animationFrameId = requestAnimationFrame(render);
     };
-
     render();
 
     return () => {
@@ -190,16 +190,33 @@ export default function Footer({ onNavigate }) {
               Tienda Física Arequipa
             </h4>
             <ul className="space-y-3 text-xs text-slate-300">
-              <li className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                <span>{storeInfo.address}</span>
+              <li>
+                <button
+                  onClick={onOpenLocation}
+                  className="flex items-start gap-2.5 text-left group hover:text-amber-400 transition-colors cursor-pointer w-full"
+                  title="Ver ubicación en Google Maps"
+                >
+                  <MapPin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                  <span className="underline decoration-dotted decoration-slate-600 group-hover:decoration-amber-400">
+                    {storeInfo.address}
+                  </span>
+                </button>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                <span className="font-mono">{storeInfo.phones.join(" / ")}</span>
+                <span className="font-mono">{(storeInfo.phones || []).join(" / ")}</span>
               </li>
               <li className="text-[11px] text-slate-400 pl-6.5">
                 {storeInfo.schedule}
+              </li>
+              <li className="pt-1 pl-6.5">
+                <button
+                  onClick={onOpenLocation}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-slate-900 border border-slate-700 hover:border-amber-400 text-slate-200 hover:text-amber-400 transition-all cursor-pointer"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Ver Ubicación en Google Maps</span>
+                </button>
               </li>
             </ul>
           </div>

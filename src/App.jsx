@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Topbar from "./components/Topbar";
 import Navbar from "./components/Navbar";
 import MarqueeTicker from "./components/MarqueeTicker";
@@ -8,9 +8,16 @@ import MegaMenuDrawer from "./components/MegaMenuDrawer";
 import CartDrawer from "./components/CartDrawer";
 import PCBuilderModal from "./components/PCBuilderModal";
 import FaqModal from "./components/FaqModal";
+import LocationModal from "./components/LocationModal";
 import ChatIABubble from "./components/ChatIABubble";
 import Footer from "./components/Footer";
-import { productsCatalog, categoriesTree } from "./data/storeData";
+import {
+  fetchLiveCatalog,
+  getCachedCatalog,
+  getCachedCategories,
+  getCachedConfig,
+  countCategories
+} from "./services/catalogService";
 import {
   Sparkles,
   ArrowRight,
@@ -27,15 +34,65 @@ import {
   Database,
   HardDrive,
   Wrench,
-  Flame
+  Flame,
+  MapPin
 } from "./components/Icons";
 
 export default function App() {
+  // Live Products, Categories, and Store Settings synced with Google Sheets tabs
+  const [products, setProducts] = useState(() => getCachedCatalog());
+  const [categories, setCategories] = useState(() => countCategories(getCachedCategories(), getCachedCatalog()));
+  const [storeInfo, setStoreInfo] = useState(() => getCachedConfig());
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState("");
+
   // Navigation View State: 'home' | 'catalog' | 'product'
   const [view, setView] = useState("home");
-  const [selectedProduct, setSelectedProduct] = useState(productsCatalog[0]);
+  const [selectedProduct, setSelectedProduct] = useState(() => {
+    const cached = getCachedCatalog();
+    return cached && cached.length > 0 ? cached[0] : null;
+  });
+
+  useEffect(() => {
+    if (!selectedProduct && products && products.length > 0) {
+      setSelectedProduct(products[0]);
+    }
+  }, [products, selectedProduct]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSyncCatalog = async (force = false) => {
+    setIsSyncing(true);
+    try {
+      const data = await fetchLiveCatalog(force);
+      if (data) {
+        if (data.products && data.products.length > 0) {
+          setProducts(data.products);
+          setSelectedProduct((prev) => {
+            if (!prev) return data.products[0];
+            const match = data.products.find((p) => p.id === prev.id);
+            return match || data.products[0];
+          });
+        }
+        if (data.categories && data.categories.length > 0) {
+          setCategories(data.categories);
+        }
+        if (data.storeInfo) {
+          setStoreInfo(data.storeInfo);
+        }
+        setLastSyncTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+      }
+    } catch (e) {
+      console.warn("Live sync error:", e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    // Initial fetch on mount
+    handleSyncCatalog(false);
+  }, []);
 
   // Theme State: Light Mode is PRIMARY by default
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -58,6 +115,7 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isPCBuilderOpen, setIsPCBuilderOpen] = useState(false);
   const [isFaqOpen, setIsFaqOpen] = useState(false);
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
 
   // Sync theme with HTML root class
   useEffect(() => {
@@ -92,6 +150,26 @@ export default function App() {
         );
       }
       return [...prev, { ...product, quantity: qty }];
+    });
+    setIsCartOpen(true);
+  };
+
+  const handleAddBatchToCart = (productsToAdd = []) => {
+    if (!productsToAdd || productsToAdd.length === 0) return;
+    setCart((prev) => {
+      let updated = [...prev];
+      productsToAdd.forEach((product) => {
+        const existingIndex = updated.findIndex((item) => item.id === product.id);
+        if (existingIndex > -1) {
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            quantity: updated[existingIndex].quantity + 1
+          };
+        } else {
+          updated.push({ ...product, quantity: 1 });
+        }
+      });
+      return updated;
     });
     setIsCartOpen(true);
   };
@@ -161,7 +239,14 @@ export default function App() {
       }`}
     >
       {/* 1. Topbar */}
-      <Topbar onOpenFaq={() => setIsFaqOpen(true)} isDarkMode={isDarkMode} />
+      <Topbar
+        onOpenFaq={() => setIsFaqOpen(true)}
+        onOpenLocation={() => setIsLocationOpen(true)}
+        isDarkMode={isDarkMode}
+        isSyncing={isSyncing}
+        onSync={() => handleSyncCatalog(true)}
+        lastSyncTime={lastSyncTime}
+      />
 
       {/* 2. Navbar */}
       <Navbar
@@ -322,12 +407,21 @@ export default function App() {
                       </p>
                     </div>
 
-                    <button
-                      onClick={() => setIsFaqOpen(true)}
-                      className="mt-4 w-full py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider border border-slate-300 dark:border-gray-700 hover:border-slate-900 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 transition-all text-center"
-                    >
-                      Ver Políticas & Horarios
-                    </button>
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setIsLocationOpen(true)}
+                        className="py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all text-center flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                      >
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span>Ver Ubicación</span>
+                      </button>
+                      <button
+                        onClick={() => setIsFaqOpen(true)}
+                        className="py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider border border-slate-300 dark:border-gray-700 hover:border-slate-900 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 transition-all text-center cursor-pointer"
+                      >
+                        Horarios & FAQ
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -353,7 +447,7 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 2xl:grid-cols-8 gap-3 sm:gap-4">
-                {categoriesTree.map((cat) => (
+                {categories.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => handleSelectCategory(cat.id)}
@@ -404,7 +498,12 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-5">
-                {productsCatalog.slice(0, 10).map((product) => {
+                {(products.filter((p) => p.featured).length > 0
+                  ? products.filter((p) => p.featured)
+                  : products
+                )
+                  .slice(0, 12)
+                  .map((product) => {
                   const discount = product.oldPrice
                     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
                     : 0;
@@ -441,6 +540,11 @@ export default function App() {
                             alt={product.name}
                             className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-300"
                             loading="lazy"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                            }}
                           />
 
                           <div className="absolute bottom-2 left-3 right-3 text-[10px] font-bold">
@@ -572,8 +676,8 @@ export default function App() {
         {/* VIEW: CATALOG (Independent view with filters) */}
         {view === "catalog" && (
           <CatalogView
-            products={productsCatalog}
-            categories={categoriesTree}
+            products={products}
+            categories={categories}
             isDarkMode={isDarkMode}
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
@@ -590,7 +694,7 @@ export default function App() {
           <div className="py-6">
             <ProductDetail
               product={selectedProduct}
-              allProducts={productsCatalog}
+              allProducts={products}
               isDarkMode={isDarkMode}
               onAddToCart={handleAddToCart}
               onSelectProduct={handleSelectProduct}
@@ -605,7 +709,7 @@ export default function App() {
       <MegaMenuDrawer
         isOpen={isMegaMenuOpen}
         onClose={() => setIsMegaMenuOpen(false)}
-        categories={categoriesTree}
+        categories={categories}
         isDarkMode={isDarkMode}
         onSelectCategory={handleSelectCategory}
         onNavigate={handleNavigate}
@@ -618,25 +722,53 @@ export default function App() {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
         isDarkMode={isDarkMode}
+        storeInfo={storeInfo}
       />
 
       <PCBuilderModal
         isOpen={isPCBuilderOpen}
         onClose={() => setIsPCBuilderOpen(false)}
         isDarkMode={isDarkMode}
+        products={products}
+        storeInfo={storeInfo}
       />
 
       <FaqModal
         isOpen={isFaqOpen}
         onClose={() => setIsFaqOpen(false)}
         isDarkMode={isDarkMode}
+        storeInfo={storeInfo}
       />
 
-      {/* Floating AI Assistant Chat */}
-      <ChatIABubble isDarkMode={isDarkMode} onOpenPCBuilder={() => setIsPCBuilderOpen(true)} />
+      <LocationModal
+        isOpen={isLocationOpen}
+        onClose={() => setIsLocationOpen(false)}
+        isDarkMode={isDarkMode}
+        storeInfo={storeInfo}
+      />
+
+      {/* Floating AI Assistant Chat powered by OpenRouter GPT-5.6 Luna with live catalog */}
+      <ChatIABubble
+        isDarkMode={isDarkMode}
+        products={products}
+        categories={categories}
+        storeInfo={storeInfo}
+        onOpenPCBuilder={() => setIsPCBuilderOpen(true)}
+        onOpenLocation={() => setIsLocationOpen(true)}
+        onSelectProduct={handleSelectProduct}
+        onAddToCart={handleAddToCart}
+        onAddBatchToCart={handleAddBatchToCart}
+        onNavigate={handleNavigate}
+      />
 
       {/* 5. Footer */}
-      <Footer isDarkMode={isDarkMode} onNavigate={handleNavigate} />
+      <Footer
+        isDarkMode={isDarkMode}
+        onNavigate={handleNavigate}
+        onOpenLocation={() => setIsLocationOpen(true)}
+        storeInfo={storeInfo}
+      />
     </div>
   );
 }
+

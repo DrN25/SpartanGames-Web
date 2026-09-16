@@ -552,6 +552,11 @@ export default function CatalogView({
                           alt={product.name}
                           className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                          }}
                         />
 
                         <div className="absolute bottom-2.5 left-3 right-3">
@@ -655,7 +660,16 @@ export default function CatalogView({
                     <div className={`w-32 h-32 rounded-xl p-3 flex items-center justify-center flex-shrink-0 ${
                       isDarkMode ? "bg-black/40" : "bg-slate-50"
                     }`}>
-                      <img src={product.image} alt={product.name} className="max-h-full object-contain" />
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="max-h-full object-contain"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                        }}
+                      />
                     </div>
 
                     <div className="flex-1 min-w-0">

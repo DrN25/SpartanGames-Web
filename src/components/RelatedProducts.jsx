@@ -1,9 +1,16 @@
 import React from "react";
 import { ShoppingCart, Eye, ChevronRight } from "./Icons";
-import { productsCatalog } from "../data/storeData";
 
-export default function RelatedProducts({ onAddToCart, onSelectProduct, isDarkMode, onNavigate }) {
-  const items = productsCatalog.slice(0, 4);
+export default function RelatedProducts({
+  products = [],
+  onAddToCart,
+  onSelectProduct,
+  isDarkMode,
+  onNavigate
+}) {
+  const items = products.slice(0, 4);
+
+  if (items.length === 0) return null;
 
   return (
     <section
@@ -54,6 +61,11 @@ export default function RelatedProducts({ onAddToCart, onSelectProduct, isDarkMo
                     src={item.image}
                     alt={item.name}
                     className="max-h-[120px] object-contain group-hover:scale-105 transition-transform"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                    }}
                   />
                   <div className="absolute top-2 left-2 flex flex-col gap-1">
                     <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-slate-950 text-[#FFDE17]">
@@ -81,11 +93,11 @@ export default function RelatedProducts({ onAddToCart, onSelectProduct, isDarkMo
               <div className="pt-3 mt-3 border-t border-slate-200 dark:border-gray-700/30 flex items-center justify-between">
                 <div>
                   <div className="text-sm font-black text-[#FF334B]">
-                    S/. {item.price.toFixed(2)}
+                    S/. {Number(item.price).toFixed(2)}
                   </div>
                   {item.oldPrice && (
                     <div className="text-[11px] line-through text-slate-400 dark:text-gray-500">
-                      S/. {item.oldPrice.toFixed(2)}
+                      S/. {Number(item.oldPrice).toFixed(2)}
                     </div>
                   )}
                 </div>

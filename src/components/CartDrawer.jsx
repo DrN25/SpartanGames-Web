@@ -1,7 +1,7 @@
 import React from "react";
 import { X, ShoppingCart, ArrowRight, ShieldCheck, Plus, Minus } from "./Icons";
 import { WhatsAppIcon, YapeIcon, PlinIcon } from "./Icons";
-import { storeInfo } from "../data/storeData";
+import { storeInfo as defaultStoreInfo } from "../data/storeData";
 
 export default function CartDrawer({
   isOpen,
@@ -9,7 +9,8 @@ export default function CartDrawer({
   cartItems,
   onUpdateQuantity,
   onRemoveItem,
-  isDarkMode
+  isDarkMode,
+  storeInfo = defaultStoreInfo
 }) {
   if (!isOpen) return null;
 
@@ -21,8 +22,9 @@ export default function CartDrawer({
     .map((item) => `• ${item.quantity}x ${item.name} - S/. ${(item.price * item.quantity).toFixed(2)}`)
     .join("\n");
 
+  const whatsappPhone = storeInfo?.whatsappMain || "51912930004";
   const whatsappMessage = `Hola Spartan Games Arequipa, deseo procesar el siguiente pedido desde su tienda virtual:\n\n${itemsText}\n\n*TOTAL:* S/. ${subtotal.toFixed(2)}\n*Opción Reserva 10%:* S/. ${reservaMonto}\n\nPor favor confirmar disponibilidad en Compuplaza Tienda 204 y datos para Yape/Transferencia.`;
-  const whatsappUrl = `https://wa.me/${storeInfo.whatsappMain}?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end animate-fadeIn">
@@ -33,30 +35,30 @@ export default function CartDrawer({
         aria-hidden="true"
       />
 
-      {/* Cart Slide-Over */}
+      {/* Drawer Container */}
       <div
-        className={`relative z-10 w-full max-w-md h-full shadow-2xl flex flex-col border-l ${
+        className={`relative w-full max-w-md h-full shadow-2xl flex flex-col z-10 transition-transform duration-300 border-l ${
           isDarkMode
-            ? "bg-[#0B0E14] border-gray-800 text-white"
+            ? "bg-[#0E121A] border-gray-800 text-white"
             : "bg-white border-slate-200 text-slate-900"
         }`}
       >
         {/* Header */}
         <div
-          className={`p-4 sm:p-5 border-b flex items-center justify-between ${
+          className={`p-5 border-b flex items-center justify-between ${
             isDarkMode ? "border-gray-800 bg-[#111620]" : "border-slate-200 bg-slate-50"
           }`}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#FFDE17] text-slate-950 flex items-center justify-center font-black shadow-sm">
-              <ShoppingCart className="w-4 h-4" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-[#FFDE17] text-slate-950 font-black">
+              <ShoppingCart className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-black uppercase tracking-wider text-slate-950 dark:text-white">
-                Mi Carrito de Compras
+              <h2 className="font-black text-sm uppercase tracking-wide">
+                Tu Carrito Gamer
               </h2>
               <span className="text-[11px] text-slate-500 dark:text-gray-400">
-                {cartItems.length} {cartItems.length === 1 ? "artículo" : "artículos"} seleccionados
+                {cartItems.length} {cartItems.length === 1 ? "componente" : "componentes"}
               </span>
             </div>
           </div>
@@ -65,8 +67,8 @@ export default function CartDrawer({
             onClick={onClose}
             className={`p-2 rounded-xl transition-colors ${
               isDarkMode
-                ? "hover:bg-gray-800 text-gray-400 hover:text-white"
-                : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                ? "text-gray-400 hover:text-white hover:bg-gray-800"
+                : "text-slate-500 hover:text-slate-900 hover:bg-slate-200"
             }`}
             aria-label="Cerrar carrito"
           >
@@ -74,44 +76,74 @@ export default function CartDrawer({
           </button>
         </div>
 
-        {/* Item List */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {cartItems.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-[#FFDE17] flex items-center justify-center mx-auto mb-4">
-                <ShoppingCart className="w-8 h-8 opacity-60" />
+            <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
+              <div className="w-16 h-16 rounded-full bg-amber-500/10 text-amber-600 dark:text-[#FFDE17] flex items-center justify-center">
+                <ShoppingCart className="w-8 h-8 opacity-40" />
               </div>
-              <h3 className="font-bold text-base mb-1 text-slate-900 dark:text-white">Tu carrito está vacío</h3>
-              <p className="text-xs text-slate-600 dark:text-gray-400 max-w-xs mx-auto">
-                Explora el catálogo de Spartan Games y añade componentes o laptops gamer a tu carrito.
+              <h3 className="text-base font-bold uppercase tracking-wide">Tu carrito está vacío</h3>
+              <p className="text-xs text-slate-500 dark:text-gray-400 max-w-xs">
+                Explora el catálogo de procesadores, tarjetas gráficas o laptops y ármate con el mejor hardware en Arequipa.
               </p>
+              <button
+                onClick={onClose}
+                className="mt-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 transition-colors shadow-sm"
+              >
+                Ver Catálogo
+              </button>
             </div>
           ) : (
             cartItems.map((item) => (
               <div
                 key={item.id}
-                className={`p-3.5 rounded-2xl border flex items-center gap-3 transition-colors ${
-                  isDarkMode ? "bg-[#111620] border-gray-800" : "bg-white border-slate-200 shadow-sm"
+                className={`p-3.5 rounded-2xl border flex gap-3 transition-colors ${
+                  isDarkMode
+                    ? "bg-[#111620] border-gray-800"
+                    : "bg-white border-slate-200 shadow-xs"
                 }`}
               >
-                {/* Image */}
                 <div
-                  className={`w-16 h-16 rounded-xl p-1.5 flex items-center justify-center flex-shrink-0 ${
-                    isDarkMode ? "bg-black/40" : "bg-slate-50 border border-slate-100"
+                  className={`w-18 h-18 rounded-xl p-2 flex items-center justify-center flex-shrink-0 ${
+                    isDarkMode ? "bg-black/40" : "bg-slate-50"
                   }`}
                 >
-                  <img src={item.image} alt={item.name} className="max-h-full object-contain" />
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="max-h-14 max-w-14 object-contain"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                    }}
+                  />
                 </div>
 
-                {/* Details */}
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-bold truncate text-slate-900 dark:text-white">{item.name}</h4>
-                  <div className="text-xs font-black text-[#FF334B] mt-0.5">
-                    S/. {item.price.toFixed(2)}
+                <div className="flex-1 min-w-0 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-[10px] uppercase font-bold text-amber-800 dark:text-[#FFDE17]">
+                        {item.brand}
+                      </span>
+                      <button
+                        onClick={() => onRemoveItem(item.id)}
+                        className="text-[11px] text-rose-600 hover:underline font-bold"
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                    <h4 className="text-xs font-bold line-clamp-1 text-slate-900 dark:text-white">
+                      {item.name}
+                    </h4>
                   </div>
 
-                  {/* Quantity Controls */}
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="text-xs font-black text-[#FF334B]">
+                      S/. {(item.price * item.quantity).toFixed(2)}
+                    </div>
+
                     <div
                       className={`flex items-center border rounded-lg p-0.5 ${
                         isDarkMode ? "border-gray-700 bg-black/40" : "border-slate-200 bg-slate-50"
@@ -119,45 +151,22 @@ export default function CartDrawer({
                     >
                       <button
                         onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                        className={`p-1 transition-colors ${
-                          isDarkMode
-                            ? "text-gray-400 hover:text-white"
-                            : "text-slate-600 hover:text-slate-900"
-                        }`}
-                        aria-label="Disminuir cantidad"
+                        className="p-1 hover:text-[#FFDE17] transition-colors"
+                        aria-label="Disminuir"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
-                      <span className="w-6 text-center text-xs font-mono font-bold text-slate-900 dark:text-white">
+                      <span className="w-7 text-center font-mono font-bold text-xs">
                         {item.quantity}
                       </span>
                       <button
                         onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                        disabled={item.quantity >= item.stock}
-                        className={`p-1 transition-colors disabled:opacity-30 ${
-                          isDarkMode
-                            ? "text-gray-400 hover:text-white"
-                            : "text-slate-600 hover:text-slate-900"
-                        }`}
-                        aria-label="Aumentar cantidad"
+                        className="p-1 hover:text-[#FFDE17] transition-colors"
+                        aria-label="Aumentar"
                       >
                         <Plus className="w-3 h-3" />
                       </button>
                     </div>
-
-                    <button
-                      onClick={() => onRemoveItem(item.id)}
-                      className="text-[11px] text-red-600 dark:text-red-400 hover:underline font-semibold"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-
-                {/* Total Line */}
-                <div className="text-right flex-shrink-0">
-                  <div className="text-xs font-black text-slate-900 dark:text-white">
-                    S/. {(item.price * item.quantity).toFixed(2)}
                   </div>
                 </div>
               </div>
@@ -165,69 +174,72 @@ export default function CartDrawer({
           )}
         </div>
 
-        {/* Footer with Totals & WhatsApp Checkout */}
+        {/* Footer Checkout Section */}
         {cartItems.length > 0 && (
           <div
-            className={`p-4 sm:p-5 border-t space-y-4 ${
+            className={`p-5 border-t space-y-4 ${
               isDarkMode ? "border-gray-800 bg-[#111620]" : "border-slate-200 bg-slate-50"
             }`}
           >
-            {/* 10% Reservation Highlight Box */}
+            {/* Trust badge */}
+            <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-gray-400">
+              <span className="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-400">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                Garantía física en tienda
+              </span>
+              <span>Compuplaza Tienda 204</span>
+            </div>
+
+            {/* Totales */}
+            <div className="space-y-1.5 pt-2 border-t border-slate-200 dark:border-gray-800 text-xs">
+              <div className="flex justify-between text-slate-500 dark:text-gray-400">
+                <span>Subtotal componentes</span>
+                <span className="font-mono">S/. {subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-emerald-700 dark:text-emerald-400 font-medium">
+                <span>Ensamble y Testeo</span>
+                <span className="font-bold uppercase tracking-wider text-[10px] bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded">
+                  GRATIS
+                </span>
+              </div>
+              <div className="flex justify-between text-base font-black pt-2 border-t border-slate-200 dark:border-gray-800 text-slate-900 dark:text-white">
+                <span>Total a Pagar</span>
+                <span className="text-[#FF334B] font-mono">S/. {subtotal.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Opciones de Pago Rápidas */}
             <div
-              className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
+              className={`p-3 rounded-xl border flex items-center justify-between text-[11px] ${
                 isDarkMode
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
-                  : "bg-amber-50 border-amber-200 text-amber-950"
+                  ? "bg-black/40 border-gray-800 text-gray-300"
+                  : "bg-white border-slate-200 text-slate-700"
               }`}
             >
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-amber-700 dark:text-[#FFDE17]" />
-                <div>
-                  <div className="font-black uppercase text-[10px] text-amber-950 dark:text-[#FFDE17]">
-                    Opción Pago por Reserva (10%)
-                  </div>
-                  <div className="text-[11px] text-amber-900/80 dark:text-amber-200/80">
-                    Asegura tu stock y paga el saldo en tienda
-                  </div>
-                </div>
+                <YapeIcon className="w-4 h-4" />
+                <PlinIcon className="w-4 h-4" />
+                <span className="font-bold">Reserva con 10%:</span>
               </div>
-              <div className="text-right font-mono font-black text-sm text-amber-900 dark:text-[#FFDE17]">
+              <span className="font-black text-amber-800 dark:text-[#FFDE17] font-mono">
                 S/. {reservaMonto}
-              </div>
-            </div>
-
-            {/* Total */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-gray-400">
-                Total General (I.G.V. Incl.)
-              </span>
-              <span className="text-2xl font-black text-[#FF334B]">
-                S/. {subtotal.toFixed(2)}
               </span>
             </div>
 
-            {/* Payment Icons */}
-            <div className="flex items-center justify-center gap-2 pt-1 text-[10px] text-slate-600 dark:text-gray-400">
-              <span>Aceptamos:</span>
-              <YapeIcon />
-              <PlinIcon />
-              <span className="font-bold text-slate-700 dark:text-gray-300">Visa / Mastercard (Culqi)</span>
-            </div>
-
-            {/* WhatsApp Checkout Button */}
+            {/* Primary Action Button: WhatsApp Order */}
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3.5 px-4 rounded-xl font-black uppercase text-xs tracking-wider bg-[#25D366] text-slate-950 hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-md shadow-emerald-500/10"
+              className="w-full py-3.5 px-4 rounded-xl font-bold uppercase text-xs tracking-wider bg-emerald-700 hover:bg-emerald-800 text-white transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-emerald-700/20 active:scale-[0.99]"
             >
-              <WhatsAppIcon className="w-5 h-5" colored={false} />
-              <span>Finalizar Pedido por WhatsApp</span>
+              <WhatsAppIcon className="w-4 h-4" colored={false} />
+              <span>Coordinar Pedido por WhatsApp</span>
             </a>
 
-            <p className="text-[10px] text-center text-slate-500 dark:text-gray-400">
-              Coordinación directa con asesores en Compuplaza Arequipa. Boleta/Factura física o electrónica.
-            </p>
+            <div className="text-[10px] text-center text-slate-500 dark:text-gray-400 leading-tight">
+              Al hacer clic te redirigiremos a WhatsApp oficial de Spartan Games para confirmar stock y datos de entrega en Arequipa.
+            </div>
           </div>
         )}
       </div>

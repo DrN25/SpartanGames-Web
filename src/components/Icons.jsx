@@ -41,6 +41,7 @@ export {
   Home,
   BookOpen,
   Maximize2,
+  Minimize2,
   Bot,
   Send,
   MessageCircle,
@@ -50,7 +51,12 @@ export {
   Gamepad2,
   Database,
   Wrench,
-  Flame
+  Flame,
+  FileSpreadsheet,
+  RefreshCw,
+  Copy,
+  Navigation,
+  Clock
 } from "lucide-react";
 
 export function WhatsAppIcon({ className = "w-4 h-4", colored = false }) {
