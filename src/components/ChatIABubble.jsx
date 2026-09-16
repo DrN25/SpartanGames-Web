@@ -5,7 +5,6 @@ import {
   RotateCcw,
   Wrench,
   ShoppingCart,
-  Eye,
   Maximize2,
   Minimize2,
   Sparkles,
@@ -16,6 +15,7 @@ import {
   WhatsAppIcon
 } from "./Icons";
 import { sendChatMessage } from "../services/aiService";
+import { useModalTransition } from "../hooks/useModalTransition";
 
 /**
  * Tokenizes inline Markdown: bold (**), italic (*), code (`), links ([text](url))
@@ -332,6 +332,7 @@ export default function ChatIABubble({
   onNavigate
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { shouldRender: shouldRenderChat, isClosing: isClosingChat } = useModalTransition(isOpen, 220);
   const [inputMsg, setInputMsg] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
@@ -743,7 +744,7 @@ export default function ChatIABubble({
       </div>
 
       {/* 3. The SPARTAN Window */}
-      {isOpen && (
+      {shouldRenderChat && (
         <div
           style={{
             width: isMaximized
@@ -757,7 +758,9 @@ export default function ChatIABubble({
             minWidth: "320px",
             minHeight: "380px"
           }}
-          className={`fixed bottom-22 sm:bottom-24 right-6 z-50 rounded-3xl border shadow-2xl flex flex-col overflow-hidden transition-all duration-300 select-text animate-spartan-chat origin-bottom-right ${
+          className={`fixed bottom-22 sm:bottom-24 right-6 z-50 rounded-3xl border shadow-2xl flex flex-col overflow-hidden select-text origin-bottom-right ${
+            isClosingChat ? "animate-spartan-chat-exit" : "animate-spartan-chat"
+          } ${
             isDarkMode
               ? "bg-[#0B0E14] border-gray-800 text-white"
               : "bg-white border-slate-300 text-slate-900"
@@ -900,10 +903,11 @@ export default function ChatIABubble({
                           {m.productCards.map((p) => (
                             <div
                               key={p.id}
-                              className={`flex items-center gap-2 p-2 rounded-xl border transition-all ${
+                              onClick={() => handleProductCardClick(p)}
+                              className={`flex items-center gap-2.5 p-2 rounded-xl border transition-all cursor-pointer hover:-translate-y-0.5 ${
                                 isDarkMode
-                                  ? "bg-black/60 border-gray-800 hover:border-amber-400/60"
-                                  : "bg-white border-slate-200 hover:border-amber-400 shadow-xs"
+                                  ? "bg-black/60 border-gray-800 hover:border-amber-400/60 hover:bg-[#151c28]"
+                                  : "bg-white border-slate-200 hover:border-amber-400 hover:bg-slate-50 shadow-xs"
                               }`}
                             >
                               <img
@@ -932,27 +936,18 @@ export default function ChatIABubble({
                                   </span>
                                 </div>
                               </div>
-                              <div className="flex flex-col gap-1">
-                                <button
-                                  onClick={() => handleProductCardClick(p)}
-                                  className="p-1 rounded-lg border border-slate-300 dark:border-gray-700 text-slate-700 dark:text-gray-300 hover:text-black dark:hover:text-white cursor-pointer"
-                                  title="Ver producto"
-                                  aria-label="Ver producto"
-                                >
-                                  <Eye className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (onAddToCart) onAddToCart(p);
-                                    setIsOpen(false);
-                                  }}
-                                  className="p-1 rounded-lg bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 cursor-pointer"
-                                  title="Agregar al carrito"
-                                  aria-label="Agregar al carrito"
-                                >
-                                  <ShoppingCart className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onAddToCart) onAddToCart(p);
+                                  setIsOpen(false);
+                                }}
+                                className="p-2 rounded-xl bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 cursor-pointer flex-shrink-0 active:scale-95 transition-transform"
+                                title="Agregar al carrito"
+                                aria-label={`Agregar ${p.name} al carrito`}
+                              >
+                                <ShoppingCart className="w-3.5 h-3.5" />
+                              </button>
                             </div>
                           ))}
                         </div>

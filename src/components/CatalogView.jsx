@@ -10,7 +10,6 @@ import {
   ArrowUpDown,
   Tag,
   ShieldCheck,
-  Eye,
   ShoppingCart,
   Layers,
   Sparkles,
@@ -526,10 +525,11 @@ export default function CatalogView({
                 return (
                   <div
                     key={product.id}
-                    className={`group rounded-2xl border overflow-hidden transition-all duration-200 flex flex-col justify-between ${
+                    onClick={() => onSelectProduct(product)}
+                    className={`group rounded-2xl border overflow-hidden transition-all duration-200 flex flex-col justify-between cursor-pointer hover:-translate-y-1 ${
                       isDarkMode
-                        ? "bg-[#111620] border-gray-800 hover:border-gray-700"
-                        : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs"
+                        ? "bg-[#111620] border-gray-800 hover:border-amber-400/50 hover:shadow-lg hover:shadow-black/40"
+                        : "bg-white border-slate-200 hover:border-amber-400 hover:shadow-md"
                     }`}
                   >
                     <div>
@@ -611,31 +611,21 @@ export default function CatalogView({
                         )}
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => onSelectProduct(product)}
-                          className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-colors flex items-center justify-center gap-1.5 ${
-                            isDarkMode
-                              ? "border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white"
-                              : "border-slate-200 hover:border-slate-400 text-slate-700 bg-white hover:bg-slate-50"
-                          }`}
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Ver Ficha</span>
-                        </button>
-
-                        <button
-                          onClick={() => onAddToCart(product)}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs ${
-                            isDarkMode
-                              ? "bg-[#18202F] text-slate-100 hover:bg-[#FFDE17] hover:text-slate-950 border border-gray-700"
-                              : "bg-slate-900 text-white hover:bg-amber-500 hover:text-slate-950 border border-slate-900"
-                          }`}
-                        >
-                          <ShoppingCart className="w-3.5 h-3.5" />
-                          <span>+ Carrito</span>
-                        </button>
-                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddToCart(product);
+                        }}
+                        className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-98 ${
+                          isDarkMode
+                            ? "bg-[#18202F] text-slate-100 hover:bg-[#FFDE17] hover:text-slate-950 border border-gray-700"
+                            : "bg-slate-900 text-white hover:bg-amber-500 hover:text-slate-950 border border-slate-900"
+                        }`}
+                        aria-label={`Añadir ${product.name} al carrito`}
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Añadir al Carrito</span>
+                      </button>
                     </div>
                   </div>
                 );
@@ -651,10 +641,11 @@ export default function CatalogView({
                 return (
                   <div
                     key={product.id}
-                    className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-center gap-5 transition-all ${
+                    onClick={() => onSelectProduct(product)}
+                    className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row items-center gap-5 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 ${
                       isDarkMode
-                        ? "bg-[#111620] border-gray-800 hover:border-gray-700"
-                        : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs"
+                        ? "bg-[#111620] border-gray-800 hover:border-amber-400/50 hover:shadow-lg"
+                        : "bg-white border-slate-200 hover:border-amber-400 hover:shadow-md"
                     }`}
                   >
                     <div className={`w-32 h-32 rounded-xl p-3 flex items-center justify-center flex-shrink-0 ${
@@ -715,30 +706,21 @@ export default function CatalogView({
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => onSelectProduct(product)}
-                          className={`p-2 rounded-xl border text-xs font-semibold ${
-                            isDarkMode
-                              ? "border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white"
-                              : "border-slate-200 hover:border-slate-400 text-slate-800 bg-white hover:bg-slate-50"
-                          }`}
-                          title="Ver Ficha Técnica"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => onAddToCart(product)}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs ${
-                            isDarkMode
-                              ? "bg-[#18202F] text-slate-100 hover:bg-[#FFDE17] hover:text-slate-950 border border-gray-700"
-                              : "bg-slate-900 text-white hover:bg-amber-500 hover:text-slate-950 border border-slate-900"
-                          }`}
-                        >
-                          <ShoppingCart className="w-3.5 h-3.5" />
-                          <span>Agregar</span>
-                        </button>
-                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddToCart(product);
+                        }}
+                        className={`py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-98 ${
+                          isDarkMode
+                            ? "bg-[#18202F] text-slate-100 hover:bg-[#FFDE17] hover:text-slate-950 border border-gray-700"
+                            : "bg-slate-900 text-white hover:bg-amber-500 hover:text-slate-950 border border-slate-900"
+                        }`}
+                        aria-label={`Añadir ${product.name} al carrito`}
+                      >
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        <span>Añadir al Carrito</span>
+                      </button>
                     </div>
                   </div>
                 );

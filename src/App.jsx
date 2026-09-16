@@ -25,7 +25,6 @@ import {
   Truck,
   Cpu,
   ShoppingCart,
-  Eye,
   Layers,
   Laptop,
   Tv,
@@ -511,10 +510,11 @@ export default function App() {
                   return (
                     <div
                       key={product.id}
-                      className={`group rounded-2xl border overflow-hidden transition-all duration-200 flex flex-col justify-between ${
+                      onClick={() => handleSelectProduct(product)}
+                      className={`group rounded-2xl border overflow-hidden transition-all duration-200 flex flex-col justify-between cursor-pointer hover:-translate-y-1 ${
                         isDarkMode
-                          ? "bg-[#111620] border-gray-800 hover:border-gray-700"
-                          : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm"
+                          ? "bg-[#111620] border-gray-800 hover:border-amber-400/50 hover:shadow-lg hover:shadow-black/40"
+                          : "bg-white border-slate-200 hover:border-amber-400 hover:shadow-md"
                       }`}
                     >
                       <div>
@@ -607,31 +607,21 @@ export default function App() {
                           )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            onClick={() => handleSelectProduct(product)}
-                            className={`py-2 px-2.5 rounded-xl text-xs font-semibold border transition-colors flex items-center justify-center gap-1 ${
-                              isDarkMode
-                                ? "border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white"
-                                : "border-slate-200 hover:border-slate-400 text-slate-700 bg-white hover:bg-slate-50"
-                            }`}
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>Ver Ficha</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleAddToCart(product)}
-                            className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs ${
-                              isDarkMode
-                                ? "bg-[#18202F] text-slate-100 hover:bg-[#FFDE17] hover:text-slate-950 border border-gray-700"
-                                : "bg-slate-900 text-white hover:bg-amber-500 hover:text-slate-950 border border-slate-900"
-                            }`}
-                          >
-                            <ShoppingCart className="w-3.5 h-3.5" />
-                            <span>+ Carrito</span>
-                          </button>
-                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                          }}
+                          className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-98 ${
+                            isDarkMode
+                              ? "bg-[#18202F] text-slate-100 hover:bg-[#FFDE17] hover:text-slate-950 border border-gray-700"
+                              : "bg-slate-900 text-white hover:bg-amber-500 hover:text-slate-950 border border-slate-900"
+                          }`}
+                          aria-label={`Añadir ${product.name} al carrito`}
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          <span>Añadir al Carrito</span>
+                        </button>
                       </div>
                     </div>
                   );

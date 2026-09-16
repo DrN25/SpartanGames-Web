@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { X, HelpCircle, Search } from "./Icons";
 import { WhatsAppIcon } from "./Icons";
 import { faqData, storeInfo as defaultStoreInfo } from "../data/storeData";
+import { useModalTransition } from "../hooks/useModalTransition";
 
 export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propStoreInfo }) {
   const storeInfo = propStoreInfo || defaultStoreInfo;
   const [searchTerm, setSearchTerm] = useState("");
+  const { shouldRender, isClosing } = useModalTransition(isOpen, 220);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -21,7 +23,7 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   // Safely normalize grouped structure ({ category, items: [{ q, a }] }) or flat structure ({ q, a })
   const normalizedGroups = faqData.map((group, gIdx) => {
@@ -56,14 +58,18 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md animate-spartan-fade-in"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md ${
+        isClosing ? "animate-spartan-fade-out" : "animate-spartan-fade-in"
+      }`}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="Preguntas Frecuentes y Políticas Spartan Games"
     >
       <div
-        className={`relative w-full max-w-3xl border rounded-3xl shadow-2xl flex flex-col max-h-[88vh] overflow-hidden animate-spartan-modal ${
+        className={`relative w-full max-w-3xl border rounded-3xl shadow-2xl flex flex-col max-h-[88vh] overflow-hidden ${
+          isClosing ? "animate-spartan-modal-exit" : "animate-spartan-modal"
+        } ${
           isDarkMode
             ? "bg-[#0B0E14] border-gray-800 text-white"
             : "bg-slate-50 border-slate-300 text-slate-900"

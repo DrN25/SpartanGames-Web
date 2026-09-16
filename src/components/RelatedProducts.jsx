@@ -1,5 +1,5 @@
 import React from "react";
-import { ShoppingCart, Eye, ChevronRight } from "./Icons";
+import { ShoppingCart, ChevronRight } from "./Icons";
 
 export default function RelatedProducts({
   products = [],
@@ -45,10 +45,11 @@ export default function RelatedProducts({
           return (
             <div
               key={item.id}
-              className={`rounded-2xl border p-4 transition-all duration-300 flex flex-col justify-between group ${
+              onClick={() => onSelectProduct && onSelectProduct(item)}
+              className={`rounded-2xl border p-4 transition-all duration-200 flex flex-col justify-between group cursor-pointer hover:-translate-y-1 ${
                 isDarkMode
-                  ? "bg-[#111620] border-gray-800 hover:border-[#FFDE17]/60"
-                  : "bg-white border-slate-200 hover:border-amber-400 shadow-sm"
+                  ? "bg-[#111620] border-gray-800 hover:border-[#FFDE17]/60 hover:shadow-lg"
+                  : "bg-white border-slate-200 hover:border-amber-400 hover:shadow-md"
               }`}
             >
               <div>
@@ -102,28 +103,18 @@ export default function RelatedProducts({
                   )}
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => onSelectProduct && onSelectProduct(item)}
-                    className={`p-2 rounded-xl border text-xs transition-colors ${
-                      isDarkMode
-                        ? "border-gray-700 text-gray-300 hover:text-[#FFDE17]"
-                        : "border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-950"
-                    }`}
-                    title="Ver detalle"
-                    aria-label={`Ver detalle de ${item.name}`}
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => onAddToCart && onAddToCart(item)}
-                    className="p-2 rounded-xl bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 transition-colors shadow-sm"
-                    title="Agregar al carrito"
-                    aria-label={`Agregar ${item.name} al carrito`}
-                  >
-                    <ShoppingCart className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddToCart && onAddToCart(item);
+                  }}
+                  className="py-2 px-3 rounded-xl bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 transition-colors shadow-sm text-xs font-bold flex items-center gap-1.5 cursor-pointer active:scale-98"
+                  title="Añadir al carrito"
+                  aria-label={`Añadir ${item.name} al carrito`}
+                >
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  <span>+ Carrito</span>
+                </button>
               </div>
             </div>
           );

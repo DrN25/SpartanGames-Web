@@ -14,6 +14,7 @@ import {
   Star
 } from "./Icons";
 import { WhatsAppIcon } from "./Icons";
+import { useModalTransition } from "../hooks/useModalTransition";
 
 export default function ProductDetail({
   product,
@@ -27,6 +28,7 @@ export default function ProductDetail({
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
   const [showStockModal, setShowStockModal] = useState(false);
+  const { shouldRender: shouldRenderStockModal, isClosing: isClosingStockModal } = useModalTransition(showStockModal, 220);
   const [addedAnimation, setAddedAnimation] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
@@ -616,14 +618,22 @@ export default function ProductDetail({
       )}
 
       {/* Modal de Stock */}
-      {showStockModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-spartan-fade-in">
+      {shouldRenderStockModal && (
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm ${
+            isClosingStockModal ? "animate-spartan-fade-out" : "animate-spartan-fade-in"
+          }`}
+          onClick={() => setShowStockModal(false)}
+        >
           <div
-            className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl relative animate-spartan-modal ${
+            className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl relative ${
+              isClosingStockModal ? "animate-spartan-modal-exit" : "animate-spartan-modal"
+            } ${
               isDarkMode
                 ? "bg-[#111620] border-gray-800 text-white"
                 : "bg-white border-slate-200 text-slate-900"
             }`}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-600 dark:text-[#FFDE17] flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-6 h-6" />
