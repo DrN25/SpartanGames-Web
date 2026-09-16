@@ -6,10 +6,10 @@
  */
 
 const OPENROUTER_MODEL =
-  import.meta.env.VITE_OPENROUTER_MODEL || "openai/gpt-5.6-luna";
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_OPENROUTER_MODEL) || "openai/gpt-5.6-luna";
 
 const DIRECT_API_KEY =
-  import.meta.env.VITE_OPENROUTER_API_KEY || "";
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_OPENROUTER_API_KEY) || "";
 
 /**
  * Builds compact catalog text for the LLM context
@@ -29,8 +29,60 @@ function buildCatalogContext(products = []) {
 /**
  * Builds system prompt with enterprise guardrails, store info, emojis, and subtle Spartan personality
  */
+
+export function getStoreTimeContext(storeInfo = {}) {
+  const schedule = storeInfo?.schedule || "Lunes a Sábado: 11:00 am a 8:00 pm (Domingos cerrado)";
+  const address = storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211, Arequipilla, Peru, 04001";
+  
+  const now = new Date();
+  const fullDate = now.toLocaleDateString("es-PE", {
+    timeZone: "America/Lima",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+  
+  const dayOfWeek = now.toLocaleDateString("es-PE", {
+    timeZone: "America/Lima",
+    weekday: "long"
+  }).toLowerCase();
+  
+  const time = now.toLocaleTimeString("es-PE", {
+    timeZone: "America/Lima",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+  
+  const hour24 = parseInt(
+    now.toLocaleTimeString("en-US", {
+      timeZone: "America/Lima",
+      hour: "numeric",
+      hour12: false
+    }),
+    10
+  );
+
+  const isSunday = dayOfWeek.includes("domingo");
+  
+  let storeStatus = "";
+  if (isSunday) {
+    storeStatus = "la tienda física en Compuplaza Int 211 está cerrada hoy domingo (atendemos consultas y cotizaciones online 24/7 por WhatsApp).";
+  } else if (hour24 >= 11 && hour24 < 20) {
+    storeStatus = "la tienda física en Compuplaza Int 211 ESTÁ ABIERTA en este momento (atención hasta las 8:00 pm).";
+  } else if (hour24 < 11) {
+    storeStatus = "la tienda física en Compuplaza Int 211 abre hoy a las 11:00 am (actualmente atendiendo cotizaciones online).";
+  } else {
+    storeStatus = "la tienda física en Compuplaza Int 211 cerró por hoy a las 8:00 pm (reanudamos atención presencial mañana a las 11:00 am).";
+  }
+
+  return { fullDate, dayOfWeek, time, schedule, address, storeStatus };
+}
+
 function buildSystemPrompt(products, storeInfo) {
   const catalogContext = buildCatalogContext(products);
+  const timeCtx = getStoreTimeContext(storeInfo);
 
   return `Eres SPARTAN, el asesor oficial y estratega de hardware gamer de Spartan Games en Compuplaza Arequipa, Perú.
 
@@ -70,10 +122,25 @@ GUARDRAILS Y LÍMITES ESTRICTOS (SEGURIDAD Y DOMINIO):
    - Nunca pidas números de tarjetas de crédito, contraseñas o datos bancarios privados.
    - Las compras se coordinan en tienda física (Calle Octavio Muñoz Najar 223 Int 211 Compuplaza) o por el WhatsApp oficial (+51 912 930 004).
 
+FECHA, HORA Y ESTADO EN VIVO (AREQUIPA, PERÚ):
+- Fecha exacta hoy: ${timeCtx.fullDate}
+- Hora actual en Perú: ${timeCtx.time}
+- Horario oficial de tienda (desde Google Sheets): ${timeCtx.schedule}
+- Estado de atención física en este momento: ${timeCtx.storeStatus}
+
+REGLAS CRÍTICAS DE CREDIBILIDAD TEMPORAL:
+1. SI EL USUARIO PREGUNTA QUÉ DÍA O FECHA ES HOY O TE SALUDA CASUALMENTE:
+   - Responde con la fecha EXACTA (${timeCtx.fullDate}), hora (${timeCtx.time}) y estado de tienda (${timeCtx.storeStatus}).
+   - NUNCA inventes fechas del pasado ni menciones años como 2024 o 2025.
+   - Ejemplo de respuesta con credibilidad:
+     "¡Todo firme, máquina lista! Hoy es ${timeCtx.fullDate}, son las ${timeCtx.time} y ${timeCtx.storeStatus} ¿Qué hardware gamer deseas revisar en Spartan Games?"
+2. SI EL USUARIO PREGUNTA POR EL HORARIO O SI ESTÁN ABIERTOS:
+   - Responde con el horario oficial (${timeCtx.schedule}) y el estado en vivo (${timeCtx.storeStatus}).
+
 DATOS OFICIALES DE LA TIENDA:
-- Ubicación física: ${storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211, Arequipilla, Peru, 04001"}.
+- Ubicación física: ${timeCtx.address}.
 - WhatsApp oficial: ${storeInfo?.whatsappMain || "51912930004"}. Teléfonos: ${(storeInfo?.phones || ["912930004", "973696367"]).join(" / ")}.
-- Horario: ${storeInfo?.schedule || "Lunes a Sábado: 11:00 am a 8:00 pm (Domingos cerrado)"}.
+- Horario: ${timeCtx.schedule}.
 - Redes sociales: Facebook (facebook.com/spartangamesaqp), Instagram (instagram.com/spartangamesaqp), TikTok (@spartangamesaqp).
 - Envíos: Delivery express en Arequipa Metropolitana. Despachos a provincias del Sur (Cusco, Puno, Tacna, Moquegua, Lima, etc.) vía Shalom y Olva Courier.
 - Medios de pago: Yape, Plin (sin recargo), transferencias bancarias (BCP, BBVA, Interbank) y tarjetas. Se puede apartar cualquier producto con 10% de seña.
@@ -145,13 +212,29 @@ function isGibberish(text = "") {
 /**
  * Checks for off-topic prompt injection or controversial figures client-side as a safety net
  */
-function checkClientSideGuardrails(text = "") {
+function checkClientSideGuardrails(text = "", storeInfo = {}) {
   const lower = text.toLowerCase();
 
   // 1. Gibberish check first
   if (isGibberish(text)) {
     return "🛡️ No logré entender tu mensaje. ⚡ Por favor escríbelo de nuevo con más detalle o indícame qué componente, laptop o armado de PC buscas en Spartan Games.";
   }
+
+  // 1.1 Temporal Grounding: Instant, 100% veridic date & schedule response
+  const dateTriggers = [
+    "que dia es hoy", "qué día es hoy", "que dia estamos", "qué día estamos",
+    "que fecha es hoy", "qué fecha es hoy", "que fecha es", "qué fecha es",
+    "que fecha estamos", "qué fecha estamos", "que hora es", "qué hora es",
+    "hora actual", "estan abiertos", "están abiertos", "estan atendiendo",
+    "están atendiendo", "a que hora abren", "a qué hora abren",
+    "a que hora cierran", "a qué hora cierran"
+  ];
+
+  if (dateTriggers.some((t) => lower.includes(t))) {
+    const timeCtx = getStoreTimeContext(storeInfo);
+    return `¡Todo firme y listo para la batalla! Hoy es **${timeCtx.fullDate}**, son las **${timeCtx.time}** en Arequipa y ${timeCtx.storeStatus}\n\nEl horario oficial de atención en tienda física es **${timeCtx.schedule}** en **${timeCtx.address}**.\n\n¿En qué componente, proforma o armado de PC gamer te puedo asesorar hoy?`;
+  }
+
 
   // 2. Off-topic politics and historical atrocities
   const offTopicKeywords = [
@@ -188,17 +271,21 @@ export async function sendChatMessage({
 }) {
   const lastUserMessage = messages[messages.length - 1]?.content || "";
 
-  const guardrailResponse = checkClientSideGuardrails(lastUserMessage);
+  const guardrailResponse = checkClientSideGuardrails(lastUserMessage, storeInfo);
   if (guardrailResponse) {
     return guardrailResponse;
   }
 
   const catalogContext = buildCatalogContext(products);
+  const timeCtx = getStoreTimeContext(storeInfo);
   const storeContext = {
-    address: storeInfo?.address,
+    address: timeCtx.address,
     whatsapp: storeInfo?.whatsappMain,
     phones: storeInfo?.phones,
-    schedule: storeInfo?.schedule
+    schedule: timeCtx.schedule,
+    fullDate: timeCtx.fullDate,
+    time: timeCtx.time,
+    storeStatus: timeCtx.storeStatus
   };
 
   try {
