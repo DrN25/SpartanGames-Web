@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X, ChevronRight, Sparkles, Layers } from "./Icons";
+import { useModalTransition } from "../hooks/useModalTransition";
 
 export default function MegaMenuDrawer({
   isOpen,
@@ -10,8 +11,9 @@ export default function MegaMenuDrawer({
   onNavigate
 }) {
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
+  const { shouldRender, isClosing } = useModalTransition(isOpen, 240);
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   const currentCategory = categories[activeCategoryIndex] || categories[0];
 
@@ -32,13 +34,17 @@ export default function MegaMenuDrawer({
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-spartan-fade-in"
+        className={`fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity ${
+          isClosing ? "animate-spartan-fade-out" : "animate-spartan-fade-in"
+        }`}
         aria-hidden="true"
       />
 
       {/* Drawer Container */}
       <div
-        className={`relative z-10 w-full max-w-4xl h-full shadow-2xl flex flex-col animate-spartan-drawer-left border-r ${
+        className={`relative z-10 w-full max-w-4xl h-full shadow-2xl flex flex-col border-r ${
+          isClosing ? "animate-spartan-drawer-exit-left" : "animate-spartan-drawer-left"
+        } ${
           isDarkMode
             ? "bg-[#0B0E14] border-gray-800 text-white"
             : "bg-white border-slate-200 text-slate-900"

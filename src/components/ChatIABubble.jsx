@@ -353,6 +353,8 @@ export default function ChatIABubble({
         setAddedBatchMap((prev) => ({ ...prev, [messageId]: false }));
       }, 3500);
     }
+    // Automatically hide chatbot window so it does not overlap the CartDrawer
+    setIsOpen(false);
   };
 
   const initialMessage = {
@@ -940,7 +942,10 @@ export default function ChatIABubble({
                                   <Eye className="w-3.5 h-3.5" />
                                 </button>
                                 <button
-                                  onClick={() => onAddToCart && onAddToCart(p)}
+                                  onClick={() => {
+                                    if (onAddToCart) onAddToCart(p);
+                                    setIsOpen(false);
+                                  }}
                                   className="p-1 rounded-lg bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 cursor-pointer"
                                   title="Agregar al carrito"
                                   aria-label="Agregar al carrito"
@@ -956,7 +961,7 @@ export default function ChatIABubble({
                         {m.productCards.length > 1 && (
                           <button
                             onClick={() => handleBatchAddToCart(m.productCards, m.id)}
-                            className={`mt-2 w-full py-2.5 px-3 rounded-xl font-black text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
+                            className={`mt-2 w-full py-2.5 px-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
                               addedBatchMap[m.id]
                                 ? "bg-emerald-600 text-white"
                                 : isDarkMode

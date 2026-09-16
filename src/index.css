@@ -137,8 +137,66 @@
   }
 }
 
+/* 8. Backdrop Fade Out */
+@keyframes spartanFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* 9. Modal Scale & Float Out */
+@keyframes spartanModalExit {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.94) translateY(14px);
+  }
+}
+
+/* 10. Drawer Slide Out To Right */
+@keyframes spartanDrawerExitRight {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0.5;
+    transform: translateX(100%);
+  }
+}
+
+/* 11. Drawer Slide Out To Left */
+@keyframes spartanDrawerExitLeft {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0.5;
+    transform: translateX(-100%);
+  }
+}
+
+/* 12. Chat Pop Down */
+@keyframes spartanChatExit {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85) translateY(24px);
+  }
+}
+
 /* ==========================================================================
-   UTILITY CLASSES
+   UTILITY CLASSES - ENTRANCE
    ========================================================================== */
 .animate-spartan-fade-in {
   animation: spartanFadeIn 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -151,12 +209,12 @@
 }
 
 .animate-spartan-drawer-right {
-  animation: spartanDrawerSlideRight 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: spartanDrawerSlideRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform;
 }
 
 .animate-spartan-drawer-left {
-  animation: spartanDrawerSlideLeft 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: spartanDrawerSlideLeft 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform;
 }
 
@@ -173,4 +231,33 @@
 
 .animate-spartan-glow {
   animation: spartanGlowPulse 2.5s infinite ease-in-out;
+}
+
+/* ==========================================================================
+   UTILITY CLASSES - EXIT
+   ========================================================================== */
+.animate-spartan-fade-out {
+  animation: spartanFadeOut 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity;
+}
+
+.animate-spartan-modal-exit {
+  animation: spartanModalExit 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-spartan-drawer-exit-right {
+  animation: spartanDrawerExitRight 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+.animate-spartan-drawer-exit-left {
+  animation: spartanDrawerExitLeft 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+.animate-spartan-chat-exit {
+  animation: spartanChatExit 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom right;
+  will-change: transform, opacity;
 }

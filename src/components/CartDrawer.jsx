@@ -2,6 +2,7 @@ import React from "react";
 import { X, ShoppingCart, ArrowRight, ShieldCheck, Plus, Minus } from "./Icons";
 import { WhatsAppIcon, YapeIcon, PlinIcon } from "./Icons";
 import { storeInfo as defaultStoreInfo } from "../data/storeData";
+import { useModalTransition } from "../hooks/useModalTransition";
 
 export default function CartDrawer({
   isOpen,
@@ -12,7 +13,8 @@ export default function CartDrawer({
   isDarkMode,
   storeInfo = defaultStoreInfo
 }) {
-  if (!isOpen) return null;
+  const { shouldRender, isClosing } = useModalTransition(isOpen, 240);
+  if (!shouldRender) return null;
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const reservaMonto = (subtotal * 0.1).toFixed(2);
@@ -31,13 +33,17 @@ export default function CartDrawer({
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-spartan-fade-in"
+        className={`fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity ${
+          isClosing ? "animate-spartan-fade-out" : "animate-spartan-fade-in"
+        }`}
         aria-hidden="true"
       />
 
       {/* Drawer Container */}
       <div
-        className={`relative w-full max-w-md h-full shadow-2xl flex flex-col z-10 animate-spartan-drawer-right border-l ${
+        className={`relative w-full max-w-md h-full shadow-2xl flex flex-col z-10 border-l ${
+          isClosing ? "animate-spartan-drawer-exit-right" : "animate-spartan-drawer-right"
+        } ${
           isDarkMode
             ? "bg-[#0E121A] border-gray-800 text-white"
             : "bg-white border-slate-200 text-slate-900"
