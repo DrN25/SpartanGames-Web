@@ -141,7 +141,7 @@ export default function LocationModal({
                 href={mapsShortUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs ml-auto"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-700 text-black text-xs font-bold transition-all shadow-xs ml-auto"
               >
                 <span>Ver en App de Google Maps</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -264,7 +264,7 @@ export default function LocationModal({
                   href={mapsShortUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer text-center"
+                  className="px-3.5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-500 text-black font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer text-center"
                 >
                   <MapPin className="w-4 h-4" />
                   <span>Google Maps</span>
@@ -287,7 +287,7 @@ export default function LocationModal({
                 href={`https://wa.me/${phoneMain}?text=Hola%20Spartan%20Games%20Arequipa,%20estoy%20yendo%20a%20su%20tienda%20en%20Compuplaza%20Tienda%20204.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#25D366] hover:bg-emerald-600 text-black font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
               >
                 <WhatsAppIcon className="w-4 h-4" colored={false} />
                 <span>Avisar llegada por WhatsApp Oficial</span>

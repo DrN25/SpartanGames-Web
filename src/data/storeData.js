@@ -1,4 +1,4 @@
-﻿export const storeInfo = {
+export const storeInfo = {
   name: "Spartan Games",
   tagline: "Especialistas en Hardware Gamer y Cómputo de Alto Rendimiento",
   city: "Arequipa, Perú",
@@ -427,6 +427,10 @@ export const faqData = [
       {
         q: "¿Cómo funciona el 'Pago por Reserva (10%)'?",
         a: "Para asegurar el precio de oferta y el stock físico de componentes de alta demanda, puedes abonar una seña del 10% mediante Yape o transferencia. Te enviamos la proforma firmada por WhatsApp y cancelas el 90% restante al retirar tu equipo en tienda o contraentrega coordinada en Arequipa."
+      },
+      {
+        q: "¿Emiten boleta o factura con RUC?",
+        a: "Sí, emitimos boleta de venta o factura electrónica oficial con RUC para empresas o personas naturales con negocio. Todos nuestros precios publicados ya incluyen IGV."
       }
     ]
   },
@@ -440,6 +444,10 @@ export const faqData = [
       {
         q: "¿Hacen envíos a otras ciudades del Perú?",
         a: "Realizamos envíos asegurados a todo el Perú (Cusco, Puno, Tacna, Moquegua, Lima, etc.) a través de Shalom y Olva Courier con código de rastreo en tiempo real."
+      },
+      {
+        q: "¿Puedo recoger mi pedido directamente en la tienda física?",
+        a: "¡Por supuesto! Puedes realizar tu compra o separar tu equipo con el 10% de seña y retirarlo directamente en nuestro local de C.C. Compuplaza Tienda 204, Cercado de Arequipa."
       }
     ]
   },
@@ -448,11 +456,15 @@ export const faqData = [
     items: [
       {
         q: "¿Qué tipo de garantía ofrecen?",
-        a: "Todos nuestros componentes y laptops cuentan con garantía física local de 1 a 3 años. Entregamos boleta de venta o factura electrónica con RUC."
+        a: "Todos nuestros componentes y laptops cuentan con garantía física local de 1 a 3 años según el fabricante. Entregamos boleta de venta o factura electrónica oficial."
       },
       {
         q: "¿Realizan servicio de armado y mantenimiento?",
         a: "Sí, todos los ensambles comprados con nosotros incluyen armado profesional, gestión de cables oculta (cable management) y prueba de estrés térmico completamente GRATIS."
+      },
+      {
+        q: "¿Los componentes son 100% nuevos y sellados?",
+        a: "Absolutamente todos nuestros productos son nuevos de fábrica, en caja original sellada y con número de serie registrado para validación de garantía oficial."
       }
     ]
   }
