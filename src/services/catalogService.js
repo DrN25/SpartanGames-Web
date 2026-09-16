@@ -7,10 +7,10 @@ import {
 export const GOOGLE_SHEET_ID = "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno";
 export const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit?usp=sharing`;
 
-const CACHE_KEY = "spartan_catalog_cache_v4";
+const CACHE_KEY = "spartan_catalog_cache_v5";
 const CACHE_CAT_KEY = "spartan_categories_cache";
-const CACHE_CONFIG_KEY = "spartan_config_cache";
-const CACHE_TIME_KEY = "spartan_catalog_timestamp";
+const CACHE_CONFIG_KEY = "spartan_config_cache_v5";
+const CACHE_TIME_KEY = "spartan_catalog_timestamp_v5";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos de caché
 
 // Mapeo bilingüe de cabeceras para pestaña Productos

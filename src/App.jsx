@@ -305,7 +305,7 @@ export default function App() {
                       }`}
                     >
                       Tarjetas de video RTX, procesadores AMD Ryzen/Intel, laptops gamer y ensambles
-                      a medida con Windows 11 activado. Atención directa en C.C. Compuplaza Tienda 204 y
+                      a medida con Windows 11 activado. Atención directa en Calle Octavio Muñoz Najar 223 Int 211, Compuplaza y
                       delivery express en Arequipa.
                     </p>
 
@@ -399,7 +399,7 @@ export default function App() {
                         <ShieldCheck className="w-4 h-4 text-emerald-500" />
                       </div>
                       <h3 className="text-lg font-black uppercase text-slate-950 dark:text-white leading-tight mb-1">
-                        C.C. Compuplaza Tienda 204
+                        Calle Octavio Muñoz Najar 223 Int 211 Compuplaza
                       </h3>
                       <p className="text-xs text-slate-600 dark:text-gray-400 leading-relaxed">
                         Retira tu compra, asesórate con técnicos expertos y paga con 10% de reserva o tarjeta de crédito en tienda.

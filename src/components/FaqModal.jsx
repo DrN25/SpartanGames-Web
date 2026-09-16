@@ -67,12 +67,12 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
       aria-label="Preguntas Frecuentes y Políticas Spartan Games"
     >
       <div
-        className={`relative w-full max-w-3xl border rounded-3xl shadow-2xl flex flex-col max-h-[88vh] overflow-hidden ${
+        className={`relative w-full max-w-3xl border-0 rounded-3xl shadow-2xl shadow-black/90 flex flex-col max-h-[88vh] overflow-hidden ${
           isClosing ? "animate-spartan-modal-exit" : "animate-spartan-modal"
         } ${
           isDarkMode
-            ? "bg-[#0B0E14] border-gray-800 text-white"
-            : "bg-slate-50 border-slate-300 text-slate-900"
+            ? "bg-[#0B0E14] text-white"
+            : "bg-slate-50 text-slate-900"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -96,7 +96,7 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium">
-                Atención y soporte directo en C.C. Compuplaza Tienda 204, Arequipa
+                Atención y soporte directo en Calle Octavio Muñoz Najar 223 Int 211 Compuplaza, Arequipa
               </p>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
               className={`w-full pl-9 pr-3.5 py-2 rounded-xl text-xs font-medium border transition-colors outline-none ${
                 isDarkMode
                   ? "bg-black/50 border-gray-800 text-white placeholder-slate-500 focus:border-amber-400"
-                  : "bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-amber-500"
+                  : "bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-amber-500"
               }`}
             />
           </div>

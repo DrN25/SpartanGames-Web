@@ -579,7 +579,7 @@ export default function ProductDetail({
                       Garantía física directa de 12 a 36 meses con boleta o factura con RUC.
                     </li>
                     <li>
-                      Soporte técnico y diagnóstico en tienda física C.C. Compuplaza Tienda 204.
+                      Soporte técnico y diagnóstico en tienda física Calle Octavio Muñoz Najar 223 Int 211 Compuplaza.
                     </li>
                     <li>
                       Cambio inmediato ante fallas de fábrica durante los primeros 7 días.
@@ -667,12 +667,12 @@ export default function ProductDetail({
           onClick={() => setShowStockModal(false)}
         >
           <div
-            className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl relative ${
+            className={`w-full max-w-md rounded-3xl border-0 p-6 shadow-2xl shadow-black/90 relative ${
               isClosingStockModal ? "animate-spartan-modal-exit" : "animate-spartan-modal"
             } ${
               isDarkMode
-                ? "bg-[#111620] border-gray-800 text-white"
-                : "bg-white border-slate-200 text-slate-900"
+                ? "bg-[#111620] text-white"
+                : "bg-white text-slate-900"
             }`}
             onClick={(e) => e.stopPropagation()}
           >

@@ -41,11 +41,11 @@ export default function LocationModal({
 
   const mapsShortUrl = "https://maps.app.goo.gl/gVknznGWkkmZHsgL9";
   const mapsEmbedUrl =
-    "https://maps.google.com/maps?q=Spartan+Games+Compuplaza+Arequipa&hl=es&z=19&output=embed";
+    "https://maps.google.com/maps?q=Calle+Octavio+Mu%C3%B1oz+Najar+223+Arequipa&hl=es&z=19&output=embed";
   const wazeUrl = "https://waze.com/ul?ll=-16.4013312,-71.529535&navigate=yes";
   const fullAddress =
     storeInfo?.address ||
-    "Centro Comercial Compuplaza, Tienda 204 - Cercado, Arequipa, Perú";
+    "Calle Octavio Muñoz Najar 223 Int 211, Arequipilla, Peru, 04001";
   const phoneMain = storeInfo?.whatsappMain || "51912930004";
 
   const handleCopyAddress = async () => {
@@ -69,12 +69,12 @@ export default function LocationModal({
       aria-label="Ubicación de Tienda Física Spartan Games"
     >
       <div
-        className={`w-full max-w-4xl max-h-[92vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden ${
+        className={`w-full max-w-4xl max-h-[92vh] rounded-3xl border-0 shadow-2xl shadow-black/90 flex flex-col overflow-hidden ${
           isClosing ? "animate-spartan-modal-exit" : "animate-spartan-modal"
         } ${
           isDarkMode
-            ? "bg-[#0B0E14] border-gray-800 text-white"
-            : "bg-white border-slate-300 text-slate-900"
+            ? "bg-[#0B0E14] text-white"
+            : "bg-white text-slate-900"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -99,7 +99,7 @@ export default function LocationModal({
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium">
-                C.C. Compuplaza Tienda 204 • Cercado, Arequipa
+                Calle Octavio Muñoz Najar 223 Int 211 Compuplaza • Cercado, Arequipa
               </p>
             </div>
           </div>
@@ -202,7 +202,7 @@ export default function LocationModal({
 
                 <div className="mt-2.5 pt-2.5 border-t border-slate-200/60 dark:border-gray-800/80 text-xs text-slate-600 dark:text-slate-400">
                   <span className="font-semibold text-slate-800 dark:text-slate-200">
-                    🧭 Referencia:
+                    <Navigation className="w-3.5 h-3.5 text-amber-500 inline mr-1 -mt-0.5" /> Referencia:
                   </span>{" "}
                   Al subir al segundo piso por las escaleras mecánicas, hacia el pasillo principal.
                 </div>
@@ -224,7 +224,7 @@ export default function LocationModal({
                     Horario de Atención
                   </span>
                   <p className="text-slate-600 dark:text-slate-400 font-medium">
-                    {storeInfo?.schedule || "Lunes a Sábado: 9:30 AM - 8:30 PM"}
+                    {storeInfo?.schedule || "Lunes a Sábado: 11:00 am a 8:00 pm (Domingos cerrado)"}
                   </p>
                   <span className="text-[11px] text-slate-500 dark:text-gray-400 block mt-0.5">
                     (Domingos cerrado por mantenimiento)

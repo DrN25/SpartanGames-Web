@@ -1,9 +1,9 @@
 import React from "react";
-import { Sparkles, Truck, ShieldCheck, Cpu } from "./Icons";
+import { Sparkles, Truck, ShieldCheck, Cpu, MapPin, CreditCard } from "./Icons";
 
 export default function MarqueeTicker() {
   const items = [
-    { text: "Compuplaza Arequipa Tienda 204 • Atención de Lunes a Sábado", icon: "pin" },
+    { text: "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza • Lunes a Sábado 11:00 am - 8:00 pm", icon: "pin" },
     { text: "Delivery express en Arequipa Metropolitana y envíos asegurados a provincias", icon: "truck" },
     { text: "Garantía local directa de 1 a 3 años con boleta o factura", icon: "shield" },
     { text: "Ensambles con Windows 11 activado y pruebas de estrés térmico gratis", icon: "cpu" },
@@ -12,8 +12,12 @@ export default function MarqueeTicker() {
 
   const renderIcon = (type) => {
     switch (type) {
+      case "pin":
+        return <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-amber-600 dark:text-[#FFDE17]" />;
+      case "wallet":
+        return <CreditCard className="w-3.5 h-3.5 flex-shrink-0 text-amber-600 dark:text-[#FFDE17]" />;
       case "truck":
-        return <Truck className="w-3.5 h-3.5 flex-shrink-0 text-amber-600 dark:text-[#FFDE17]" />;
+        return <Truck className="w-3.5 h-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />;
       case "shield":
         return <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />;
       case "cpu":

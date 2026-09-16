@@ -573,7 +573,7 @@ export default function ChatIABubble({
         const confirmMsg = {
           id: Date.now() + 1,
           sender: "spartan",
-          text: `⚔️ ¡Listo para la batalla! He añadido los **${lastWithProducts.productCards.length} componentes** de tu cotización directamente al carrito de compras (Total: **S/. ${totalQuote.toFixed(2)}**). 🛒\n\nEl carrito de compras se ha abierto a la derecha para que puedas verificar cada pieza, apartarlas con el 10% de seña o exportar la orden oficial hacia WhatsApp para coordinar tu armado o recojo en Compuplaza Tienda 204. 🛡️⚡`,
+          text: `⚔️ ¡Listo para la batalla! He añadido los **${lastWithProducts.productCards.length} componentes** de tu cotización directamente al carrito de compras (Total: **S/. ${totalQuote.toFixed(2)}**). 🛒\n\nEl carrito de compras se ha abierto a la derecha para que puedas verificar cada pieza, apartarlas con el 10% de seña o exportar la orden oficial hacia WhatsApp para coordinar tu armado o recojo en Calle Octavio Muñoz Najar 223 Int 211 Compuplaza. 🛡️⚡`,
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           productCards: lastWithProducts.productCards,
           actions: [
@@ -758,12 +758,12 @@ export default function ChatIABubble({
             minWidth: "320px",
             minHeight: "380px"
           }}
-          className={`fixed bottom-22 sm:bottom-24 right-6 z-50 rounded-3xl border shadow-2xl flex flex-col overflow-hidden select-text origin-bottom-right ${
+          className={`fixed bottom-22 sm:bottom-24 right-6 z-50 rounded-3xl border-0 shadow-2xl shadow-black/80 flex flex-col overflow-hidden select-text origin-bottom-right ${
             isClosingChat ? "animate-spartan-chat-exit" : "animate-spartan-chat"
           } ${
             isDarkMode
-              ? "bg-[#0B0E14] border-gray-800 text-white"
-              : "bg-white border-slate-300 text-slate-900"
+              ? "bg-[#0B0E14] text-white"
+              : "bg-white text-slate-900"
           }`}
         >
           {/* Top Edge Resize Zone */}

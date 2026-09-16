@@ -146,8 +146,8 @@ export default function PCBuilderModal({
           isClosing ? "animate-spartan-modal-exit" : "animate-spartan-modal"
         } ${
           isDarkMode
-            ? "bg-[#0B0E14] border-gray-800 text-white"
-            : "bg-white border-slate-200 text-slate-900"
+            ? "bg-[#0B0E14] text-white"
+            : "bg-white text-slate-900"
         }`}
       >
         {/* Header */}

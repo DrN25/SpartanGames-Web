@@ -23,11 +23,11 @@ export default function Topbar({ onOpenFaq, onOpenLocation, isDarkMode, isSyncin
           <button
             onClick={onOpenLocation}
             className="truncate flex items-center gap-1.5 hover:text-amber-400 transition-colors group cursor-pointer text-left"
-            title="Ver ubicación en Google Maps (C.C. Compuplaza Tienda 204)"
+            title="Ver ubicación en Google Maps (Calle Octavio Muñoz Najar 223 Int 211 Compuplaza)"
           >
             <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-amber-400/80 group-hover:text-amber-400 hidden sm:inline" />
             <span className="underline decoration-dotted decoration-slate-600 group-hover:decoration-amber-400">
-              C.C. Compuplaza Tienda 204 • Cercado, Arequipa
+              Calle Octavio Muñoz Najar 223 Int 211 Compuplaza • Arequipa
             </span>
           </button>
         </div>

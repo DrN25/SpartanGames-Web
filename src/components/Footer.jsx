@@ -6,6 +6,8 @@ import {
   WhatsAppIcon,
   YapeIcon,
   PlinIcon,
+  CulqiIcon,
+  VisaIcon,
   MapPin,
   Phone,
   BookOpen
@@ -241,12 +243,11 @@ export default function Footer({ onNavigate, onOpenLocation, storeInfo: propStor
             {/* Pagos */}
             <div className="pt-2">
               <div className="text-[11px] font-bold text-slate-400 mb-2">Medios de Pago:</div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <YapeIcon />
-                <PlinIcon />
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
-                  Culqi / Visa
-                </span>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <YapeIcon className="w-6 h-6 hover:scale-105 transition-transform" />
+                <PlinIcon className="w-6 h-6 hover:scale-105 transition-transform" />
+                <CulqiIcon className="w-6 h-6 hover:scale-105 transition-transform" />
+                <VisaIcon className="w-6 h-6 hover:scale-105 transition-transform" />
               </div>
             </div>
           </div>
@@ -258,7 +259,7 @@ export default function Footer({ onNavigate, onOpenLocation, storeInfo: propStor
             © {new Date().getFullYear()} Spartan Games Arequipa. Todos los derechos reservados.
           </div>
           <div className="text-[11px]">
-            C.C. Compuplaza Tienda 204 • Arequipa, Perú
+            Calle Octavio Muñoz Najar 223 Int 211, Compuplaza • Arequipa, Perú
           </div>
         </div>
       </div>

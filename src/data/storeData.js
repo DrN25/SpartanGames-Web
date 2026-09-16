@@ -2,10 +2,10 @@ export const storeInfo = {
   name: "Spartan Games",
   tagline: "Especialistas en Hardware Gamer y Cómputo de Alto Rendimiento",
   city: "Arequipa, Perú",
-  address: "Centro Comercial Compuplaza, Tienda 204 - Cercado, Arequipa",
+  address: "Calle Octavio Muñoz Najar 223 Int 211, Arequipilla, Peru, 04001",
   phones: ["912930004", "973696367"],
   whatsappMain: "51912930004",
-  schedule: "Lunes a Sábado: 9:30 AM - 8:30 PM",
+  schedule: "Lunes a Sábado: 11:00 am a 8:00 pm (Domingos cerrado)",
   deliveryNote: "Envíos directos en Arequipa Metropolitana y despacho a provincias del Sur del Perú por Olva Courier y Shalom.",
   warrantyPolicy: "Garantía física directa en tienda de 1 a 3 años según componente.",
   legalBookUrl: "/libro-reclamaciones"
@@ -434,7 +434,7 @@ export const faqData = [
     items: [
       {
         q: "¿Cuáles son los métodos de pago aceptados?",
-        a: "Aceptamos Yape, Plin, transferencias directas (BCP, BBVA, Interbank), efectivo en tienda (C.C. Compuplaza Tienda 204) y tarjetas de crédito/débito con Culqi (Visa, Mastercard, Amex)."
+        a: "Aceptamos Yape, Plin, transferencias directas (BCP, BBVA, Interbank), efectivo en tienda (C.C. Compuplaza Tienda 211) y tarjetas de crédito/débito con Culqi (Visa, Mastercard, Amex)."
       },
       {
         q: "¿Cómo funciona el 'Pago por Reserva (10%)'?",
@@ -459,7 +459,7 @@ export const faqData = [
       },
       {
         q: "¿Puedo recoger mi pedido directamente en la tienda física?",
-        a: "¡Por supuesto! Puedes realizar tu compra o separar tu equipo con el 10% de seña y retirarlo directamente en nuestro local de C.C. Compuplaza Tienda 204, Cercado de Arequipa."
+        a: "¡Por supuesto! Puedes realizar tu compra o separar tu equipo con el 10% de seña y retirarlo directamente en nuestro local de C.C. Compuplaza Tienda 211, Cercado de Arequipa."
       }
     ]
   },
