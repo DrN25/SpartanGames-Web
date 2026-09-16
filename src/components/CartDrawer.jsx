@@ -223,8 +223,8 @@ export default function CartDrawer({
               }`}
             >
               <div className="flex items-center gap-2">
-                <YapeIcon className="w-4 h-4" />
-                <PlinIcon className="w-4 h-4" />
+                <YapeIcon className="w-5 h-5" />
+                <PlinIcon className="w-5 h-5" />
                 <span className="font-bold">Reserva con 10%:</span>
               </div>
               <span className="font-black text-amber-800 dark:text-[#FFDE17] font-mono">
