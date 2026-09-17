@@ -27,17 +27,17 @@ export default function Topbar({
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex items-center justify-between gap-4">
         {/* Left: Location & Delivery notice */}
         <div className="flex items-center gap-3 truncate">
-          <div className="flex items-center gap-1.5 text-amber-400 font-bold">
+          <div className="flex items-center gap-1.5 text-amber-400 font-bold text-[11px] sm:text-xs">
             <Truck className="w-3.5 h-3.5 flex-shrink-0" />
             <span>Delivery Arequipa Express</span>
           </div>
           <span className="hidden md:inline text-gray-500">•</span>
           <button
             onClick={onOpenLocation}
-            className="truncate flex items-center gap-1.5 hover:text-amber-400 transition-colors group cursor-pointer text-left"
+            className="hidden md:flex truncate items-center gap-1.5 hover:text-amber-400 transition-colors group cursor-pointer text-left"
             title={`Ver ubicación en Google Maps (${displayAddress})`}
           >
-            <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-amber-400/80 group-hover:text-amber-400 hidden sm:inline" />
+            <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-amber-400/80 group-hover:text-amber-400" />
             <span className="underline decoration-dotted decoration-slate-600 group-hover:decoration-amber-400">
               {displayAddress}
             </span>

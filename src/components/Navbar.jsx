@@ -34,19 +34,19 @@ export default function Navbar({
       className="sticky top-0 z-40 backdrop-blur-xl border-b border-gray-800/80 text-white shadow-2xl shadow-black/50 transition-all"
       style={{ backgroundColor: "#0b0e14" }}
     >
-      <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-20 flex items-center justify-between gap-4 lg:gap-8">
+      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 h-16 sm:h-20 flex items-center justify-between gap-2.5 sm:gap-4 lg:gap-8">
         {/* Left: Brand Lockup + Categories Trigger */}
-        <div className="flex items-center gap-4 lg:gap-6">
+        <div className="flex items-center gap-2.5 sm:gap-4 lg:gap-6">
           <button
             onClick={() => onNavigate("home")}
-            className="flex items-center gap-3.5 group text-left flex-shrink-0 cursor-pointer"
+            className="flex items-center gap-2.5 sm:gap-3.5 group text-left flex-shrink-0 cursor-pointer"
           >
             {/* Logo Badge: Premium Squircle with Yellow Brand Field & Subtle Gold Rim */}
-            <div className="w-12 h-12 rounded-2xl overflow-hidden bg-[#FFDE17] p-1 shadow-lg shadow-amber-500/20 ring-2 ring-[#FFDE17]/70 group-hover:scale-105 group-hover:ring-[#FFDE17] group-hover:shadow-amber-500/40 transition-all flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl overflow-hidden bg-[#FFDE17] p-1 shadow-lg shadow-amber-500/20 ring-2 ring-[#FFDE17]/70 group-hover:scale-105 group-hover:ring-[#FFDE17] group-hover:shadow-amber-500/40 transition-all flex items-center justify-center flex-shrink-0">
               <img
                 src="/assets/images/spartan_games_logo_base_solo.png"
                 alt="Spartan Games Logo"
-                className="w-full h-full object-contain rounded-xl"
+                className="w-full h-full object-contain rounded-lg sm:rounded-xl"
                 onError={(e) => {
                   e.currentTarget.src = "/assets/images/spartan_games_logo_base_solo.png";
                 }}
@@ -55,19 +55,19 @@ export default function Navbar({
 
             {/* Typography */}
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5 leading-none">
-                <span className="font-black text-2xl tracking-tight text-white uppercase">
+              <div className="flex items-center gap-1 leading-none">
+                <span className="font-black text-lg sm:text-2xl tracking-tight text-white uppercase">
                   SPARTAN
                 </span>
-                <span className="font-black text-2xl tracking-tight text-[#FFDE17] uppercase">
+                <span className="font-black text-lg sm:text-2xl tracking-tight text-[#FFDE17] uppercase">
                   GAMES
                 </span>
               </div>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-400 leading-none">
+              <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.18em] sm:tracking-[0.22em] text-gray-400 leading-none">
                   HARDWARE AREQUIPA
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FFDE17] shadow-xs shadow-amber-400" />
+                <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-[#FFDE17] shadow-xs shadow-amber-400" />
               </div>
             </div>
           </button>
@@ -75,7 +75,7 @@ export default function Navbar({
           {/* Departments Button: Sleek Retail Dark Glass Style */}
           <button
             onClick={onOpenMegaMenu}
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md bg-[#151C28] hover:bg-[#1E283A] border border-gray-700/80 text-white group cursor-pointer active:scale-95"
+            className="flex items-center gap-2 p-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md bg-[#151C28] hover:bg-[#1E283A] border border-gray-700/80 text-white group cursor-pointer active:scale-95"
             aria-label="Abrir catálogo por categorías"
           >
             <Layers className="w-4 h-4 text-[#FFDE17] stroke-[2.5] group-hover:rotate-6 transition-transform" />
@@ -172,7 +172,7 @@ export default function Navbar({
           {/* Cart Trigger: Professional Retail E-Commerce Button */}
           <button
             onClick={onOpenCart}
-            className="relative px-4 py-2.5 rounded-xl border border-gray-800 bg-[#121824] hover:bg-[#1A2232] text-white flex items-center gap-2.5 text-xs font-bold transition-all shadow-md cursor-pointer group"
+            className="relative p-2 sm:px-4 sm:py-2.5 rounded-xl border border-gray-800 bg-[#121824] hover:bg-[#1A2232] text-white flex items-center gap-2 text-xs font-bold transition-all shadow-md cursor-pointer group"
             aria-label={`Ver carrito de compras con ${cartCount} artículos`}
           >
             <div className="relative flex items-center justify-center">
@@ -183,9 +183,9 @@ export default function Navbar({
                 </span>
               )}
             </div>
-            <span className="font-bold tracking-wide">Carrito</span>
+            <span className="hidden sm:inline font-bold tracking-wide">Carrito</span>
             {cartCount > 0 && (
-              <span className="text-[10px] font-mono font-bold text-amber-400">({cartCount})</span>
+              <span className="hidden sm:inline text-[10px] font-mono font-bold text-amber-400">({cartCount})</span>
             )}
           </button>
         </div>

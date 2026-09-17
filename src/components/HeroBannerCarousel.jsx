@@ -78,11 +78,32 @@ export default function HeroBannerCarousel({
     }
   };
 
+  const touchStartXRef = useRef(null);
+
+  const handleTouchStart = (e) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = (e) => {
+    setIsPaused(false);
+    if (touchStartXRef.current === null) return;
+    const diff = touchStartXRef.current - e.changedTouches[0].clientX;
+    if (diff > 45) {
+      handleNext();
+    } else if (diff < -45) {
+      handlePrev();
+    }
+    touchStartXRef.current = null;
+  };
+
   return (
     <div
-      className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-gray-800 bg-slate-950 text-white select-none transition-all min-h-[520px] sm:min-h-[560px] lg:min-h-[600px] xl:min-h-[620px]"
+      className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-gray-800 bg-slate-950 text-white select-none transition-all min-h-[440px] sm:min-h-[560px] lg:min-h-[600px] xl:min-h-[620px]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Slides Container with Cross-fade & Ken Burns Zoom */}
       {activeBanners.map((banner, idx) => {
@@ -121,14 +142,14 @@ export default function HeroBannerCarousel({
 
             {/* Content Container: Clean floating text without artificial box borders */}
             <div
-              className={`relative z-10 p-6 sm:p-10 lg:p-14 max-w-xl lg:max-w-2xl flex flex-col justify-center min-h-[520px] sm:min-h-[560px] lg:min-h-[600px] xl:min-h-[620px] transition-all duration-700 ease-out ${
+              className={`relative z-10 p-5 sm:p-10 lg:p-14 max-w-xl lg:max-w-2xl flex flex-col justify-center min-h-[440px] sm:min-h-[560px] lg:min-h-[600px] xl:min-h-[620px] transition-all duration-700 ease-out ${
                 isActive ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
               }`}
             >
               {/* Campaign Tag Badge */}
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-2 sm:mb-3">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-md ${
+                  className={`px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-md ${
                     banner.tagColor || "bg-[#FFDE17] text-slate-950"
                   }`}
                 >
@@ -141,30 +162,30 @@ export default function HeroBannerCarousel({
               </div>
 
               {/* Title with crisp contrast drop-shadow */}
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] mb-4">
+              <h2 className="text-xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white leading-tight sm:leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] mb-2 sm:mb-4">
                 {banner.title}
               </h2>
 
               {/* Subtitle */}
-              <p className="text-xs sm:text-sm lg:text-base text-gray-100 line-clamp-3 leading-relaxed max-w-lg drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] mb-8 font-medium">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-100 line-clamp-2 sm:line-clamp-3 leading-relaxed max-w-lg drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] mb-5 sm:mb-8 font-medium">
                 {banner.subtitle}
               </p>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                 <button
                   onClick={() => handleActionClick(banner)}
-                  className="px-6 py-3.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all flex items-center gap-2.5 shadow-xl shadow-black/50 active:scale-95 cursor-pointer"
+                  className="px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all flex items-center gap-2 shadow-xl shadow-black/50 active:scale-95 cursor-pointer"
                 >
                   <span>{banner.ctaText || "Ver Detalles"}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
 
                 <button
                   onClick={onOpenPCBuilder}
-                  className="px-5 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-black/60 hover:bg-black/85 backdrop-blur-md border border-gray-600/80 text-white transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-black/40"
+                  className="px-3.5 sm:px-5 py-2.5 sm:py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-black/60 hover:bg-black/85 backdrop-blur-md border border-gray-600/80 text-white transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-lg shadow-black/40"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
                   <span>Cotizar en PC Builder</span>
                 </button>
               </div>
@@ -173,7 +194,7 @@ export default function HeroBannerCarousel({
         );
       })}
 
-      {/* Prev / Next Arrows */}
+      {/* Prev / Next Arrows: desktop only, swipe on mobile */}
       {activeBanners.length > 1 && (
         <>
           <button
@@ -181,7 +202,7 @@ export default function HeroBannerCarousel({
               e.stopPropagation();
               handlePrev();
             }}
-            className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md border border-gray-700/60 transition-all cursor-pointer active:scale-90"
+            className="hidden sm:flex absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md border border-gray-700/60 transition-all cursor-pointer active:scale-90 items-center justify-center"
             aria-label="Banner anterior"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -192,7 +213,7 @@ export default function HeroBannerCarousel({
               e.stopPropagation();
               handleNext();
             }}
-            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md border border-gray-700/60 transition-all cursor-pointer active:scale-90"
+            className="hidden sm:flex absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md border border-gray-700/60 transition-all cursor-pointer active:scale-90 items-center justify-center"
             aria-label="Banner siguiente"
           >
             <ChevronRight className="w-5 h-5" />

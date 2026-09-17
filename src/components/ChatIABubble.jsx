@@ -701,7 +701,7 @@ export default function ChatIABubble({
         href={whatsappDirectUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-[#25D366] text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+        className="fixed bottom-6 right-4 sm:right-6 z-40 w-14 h-14 rounded-full bg-[#25D366] text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer group"
         aria-label="Contactar por WhatsApp Oficial de Spartan Games"
       >
         <WhatsAppIcon className="w-7 h-7" colored={false} />
@@ -713,7 +713,7 @@ export default function ChatIABubble({
       </a>
 
       {/* 2. SPARTAN Button */}
-      <div className="fixed bottom-22 sm:bottom-24 right-6 z-40">
+      <div className="fixed bottom-24 right-4 sm:right-6 z-40">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`flex items-center gap-2.5 p-1.5 pr-3.5 rounded-2xl border-2 shadow-xl transition-all cursor-pointer group ${
@@ -758,7 +758,7 @@ export default function ChatIABubble({
             minWidth: "320px",
             minHeight: "380px"
           }}
-          className={`fixed bottom-22 sm:bottom-24 right-6 z-50 rounded-3xl border-0 shadow-2xl shadow-black/80 flex flex-col overflow-hidden select-text origin-bottom-right ${
+          className={`fixed bottom-24 right-4 sm:right-6 z-50 rounded-3xl border-0 shadow-2xl shadow-black/80 flex flex-col overflow-hidden select-text origin-bottom-right ${
             isClosingChat ? "animate-spartan-chat-exit" : "animate-spartan-chat"
           } ${
             isDarkMode
