@@ -3,7 +3,7 @@
 Este documento describe la arquitectura de alto nivel de **Spartan Games Web**.
 Si acabas de aterrizar en el proyecto, lee esto primero.
 
-Para el sistema de diseño visual (colores, tipografía, tokens, animaciones), consulta `design.md` en la raíz del repositorio.
+Para el sistema de diseño visual (colores, tipografía, tokens, animaciones), consulta `DESIGN.md` en la raíz del repositorio.
 Para la documentación específica del chatbot de IA, consulta `docs/chatbot.md`.
 
 ## Bird's Eye View
