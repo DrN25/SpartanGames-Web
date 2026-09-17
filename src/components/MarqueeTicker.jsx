@@ -17,22 +17,25 @@ export default function MarqueeTicker({ storeInfo = {} }) {
   const renderIcon = (type) => {
     switch (type) {
       case "pin":
-        return <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-amber-600 dark:text-[#FFDE17]" />;
+        return <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-[#FFDE17]" />;
       case "wallet":
-        return <CreditCard className="w-3.5 h-3.5 flex-shrink-0 text-amber-600 dark:text-[#FFDE17]" />;
+        return <CreditCard className="w-3.5 h-3.5 flex-shrink-0 text-[#FFDE17]" />;
       case "truck":
-        return <Truck className="w-3.5 h-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />;
+        return <Truck className="w-3.5 h-3.5 flex-shrink-0 text-emerald-400" />;
       case "shield":
-        return <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />;
+        return <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0 text-emerald-400" />;
       case "cpu":
-        return <Cpu className="w-3.5 h-3.5 flex-shrink-0 text-blue-600 dark:text-blue-400" />;
+        return <Cpu className="w-3.5 h-3.5 flex-shrink-0 text-blue-400" />;
       default:
-        return <Sparkles className="w-3.5 h-3.5 flex-shrink-0 text-amber-600 dark:text-[#FFDE17]" />;
+        return <Sparkles className="w-3.5 h-3.5 flex-shrink-0 text-[#FFDE17]" />;
     }
   };
 
   return (
-    <div className="py-2.5 overflow-hidden select-none border-y transition-colors bg-amber-50 dark:bg-[#0E121A] border-amber-200/70 dark:border-gray-800 text-slate-900 dark:text-gray-200">
+    <div
+      className="py-2.5 overflow-hidden select-none border-y transition-colors bg-[#0D1119] border-gray-800/80 text-gray-300"
+      style={{ backgroundColor: "#0d1119" }}
+    >
       <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
         <div className="flex items-center shrink-0 gap-8 pr-8 text-xs font-semibold">
           {items.map((item, idx) => (

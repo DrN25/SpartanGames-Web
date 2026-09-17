@@ -725,11 +725,11 @@ export default function ChatIABubble({
           }`}
           aria-label={isOpen ? "Cerrar chat SPARTAN" : "Abrir chat SPARTAN"}
         >
-          <div className="w-10 h-10 rounded-xl bg-black border border-amber-400/60 p-1 flex items-center justify-center flex-shrink-0 shadow-inner group-hover:border-amber-400 transition-colors">
+          <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#FFDE17] p-1 shadow-md ring-2 ring-[#FFDE17]/50 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
             <img
               src="/assets/images/spartan_games_logo_base_solo.png"
               alt="SPARTAN Logo"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain rounded-lg"
             />
           </div>
 
@@ -796,11 +796,11 @@ export default function ChatIABubble({
           {/* Header */}
           <div className="p-3.5 border-b border-gray-800 bg-slate-950 text-white flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-black border border-amber-400/60 p-0.5 flex items-center justify-center shadow-inner">
+              <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#FFDE17] p-0.5 shadow-sm ring-1 ring-[#FFDE17]/60 flex items-center justify-center flex-shrink-0">
                 <img
                   src="/assets/images/spartan_games_logo_base_solo.png"
                   alt="SPARTAN"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain rounded-lg"
                 />
               </div>
               <span className="text-sm font-black tracking-widest text-[#FFDE17]">
@@ -858,11 +858,11 @@ export default function ChatIABubble({
                   }`}
                 >
                   {m.sender === "spartan" && (
-                    <div className="w-7 h-7 rounded-lg bg-black border border-amber-400/40 p-0.5 flex-shrink-0 flex items-center justify-center mt-0.5 shadow-xs">
+                    <div className="w-7 h-7 rounded-lg overflow-hidden bg-[#FFDE17] p-0.5 shadow-xs ring-1 ring-[#FFDE17]/50 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <img
                         src="/assets/images/spartan_games_logo_base_solo.png"
                         alt="SPARTAN"
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain rounded-md"
                       />
                     </div>
                   )}

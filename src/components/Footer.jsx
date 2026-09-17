@@ -83,11 +83,11 @@ export default function Footer({ onNavigate, onOpenLocation, storeInfo: propStor
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#FFDE17] p-0.5 shadow-md">
+              <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#FFDE17] p-0.5 shadow-md shadow-amber-500/10 flex items-center justify-center flex-shrink-0">
                 <img
-                  src="/assets/images/spartan_games_logo_base.png"
+                  src="/assets/images/spartan_games_logo_base_solo.png"
                   alt="Spartan Games Logo"
-                  className="w-full h-full object-cover rounded-[10px] bg-black"
+                  className="w-full h-full object-contain"
                 />
               </div>
               <div>
