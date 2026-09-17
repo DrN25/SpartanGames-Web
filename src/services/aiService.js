@@ -190,24 +190,43 @@ export async function sendChatMessage({
     storeStatus: timeCtx.storeStatus
   };
 
-  try {
-    const netlifyRes = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages,
-        catalogContext,
-        storeContext
-      })
-    });
+  const endpoints = ["/.netlify/functions/chat", "/api/chat"];
+  let lastError = null;
 
-    if (netlifyRes.ok) {
+  for (const endpoint of endpoints) {
+    try {
+      const netlifyRes = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages,
+          catalogContext,
+          storeContext
+        })
+      });
+
+      const contentType = netlifyRes.headers.get("content-type") || "";
+
+      // If Netlify redirected to index.html (HTML instead of JSON), try next endpoint
+      if (!contentType.includes("application/json")) {
+        console.warn(`[SpartanAI] ${endpoint} returned non-JSON (${contentType}). Trying fallback.`);
+        continue;
+      }
+
       const data = await netlifyRes.json();
-      if (data.reply) return data.reply;
+
+      if (netlifyRes.ok && data.reply) {
+        return data.reply;
+      } else {
+        lastError = data?.error || `HTTP ${netlifyRes.status}`;
+        console.error(`[SpartanAI] Error from ${endpoint} (${netlifyRes.status}):`, data);
+      }
+    } catch (err) {
+      lastError = err.message;
+      console.warn(`[SpartanAI] Could not reach ${endpoint}:`, err);
     }
-  } catch (err) {
-    console.debug("Netlify function endpoint not reachable:", err);
   }
 
+  console.error("[SpartanAI] All chat endpoints failed. Last error:", lastError);
   return "🛡️ En este momento no pude consultar el inventario en vivo. Escríbenos directamente a nuestro WhatsApp oficial (+51 912 930 004) para atenderte al instante en Spartan Games Compuplaza. ⚡";
 }

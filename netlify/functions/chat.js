@@ -75,9 +75,32 @@ export async function handler(event) {
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Methods": "POST, OPTIONS"
+        "Access-Control-Allow-Methods": "POST, OPTIONS, GET"
       },
       body: ""
+    };
+  }
+
+  if (event.httpMethod === "GET") {
+    const rawKey = (process.env.OPENROUTER_API_KEY || "").trim().replace(/^["']|["']$/g, "");
+    const activeModel = (process.env.OPENROUTER_MODEL || "deepseek/deepseek-v4.1-flash").trim().replace(/^["']|["']$/g, "");
+    if (event.queryStringParameters?.health === "1") {
+      return {
+        statusCode: 200,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({
+          status: "healthy",
+          hasApiKey: Boolean(rawKey),
+          apiKeyPrefix: rawKey ? rawKey.slice(0, 10) + "..." : null,
+          model: activeModel,
+          nodeVersion: process.version
+        })
+      };
+    }
+    return {
+      statusCode: 405,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "Method Not Allowed" })
     };
   }
 
@@ -90,7 +113,15 @@ export async function handler(event) {
   }
 
   try {
-    const { messages, catalogContext, storeContext } = JSON.parse(event.body || "{}");
+    let rawBody = event.body || "{}";
+    if (event.isBase64Encoded) {
+      try {
+        rawBody = Buffer.from(rawBody, "base64").toString("utf-8");
+      } catch (decodeErr) {
+        console.error("Failed to decode base64 body:", decodeErr);
+      }
+    }
+    const { messages, catalogContext, storeContext } = JSON.parse(rawBody || "{}");
 
     const guardrailReply = checkGuardrails(messages);
     if (guardrailReply) {
@@ -101,13 +132,16 @@ export async function handler(event) {
       };
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY || "";
+    const apiKey = (process.env.OPENROUTER_API_KEY || "").trim().replace(/^["']|["']$/g, "");
     if (!apiKey) {
       console.error("OPENROUTER_API_KEY is not configured in Netlify environment.");
       return {
         statusCode: 500,
-        headers: { "Access-Control-Allow-Origin": "*" },
-        body: JSON.stringify({ error: "Missing server OPENROUTER_API_KEY configuration." })
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({
+          error: "Missing server OPENROUTER_API_KEY configuration.",
+          hint: "Configure OPENROUTER_API_KEY in Netlify under Site Configuration > Environment Variables with Functions scope enabled."
+        })
       };
     }
 

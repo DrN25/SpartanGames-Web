@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
       {
         name: 'local-api-chat',
         configureServer(server) {
-          server.middlewares.use('/api/chat', async (req, res) => {
+          const handleChat = async (req, res) => {
             if (req.method === 'POST') {
               let body = '';
               req.on('data', chunk => body += chunk);
@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
                   res.setHeader('Content-Type', 'application/json');
                   res.end(result.body);
                 } catch (e) {
-                  console.error('Local /api/chat error:', e);
+                  console.error('Local chat error:', e);
                   res.statusCode = 500;
                   res.setHeader('Content-Type', 'application/json');
                   res.end(JSON.stringify({ error: e.message }));
@@ -37,7 +37,10 @@ export default defineConfig(({ mode }) => {
               res.statusCode = 405;
               res.end(JSON.stringify({ error: 'Method not allowed' }));
             }
-          });
+          };
+
+          server.middlewares.use('/.netlify/functions/chat', handleChat);
+          server.middlewares.use('/api/chat', handleChat);
         }
       }
     ],
