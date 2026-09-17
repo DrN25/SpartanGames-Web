@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Topbar from "./components/Topbar";
 import Navbar from "./components/Navbar";
 import MarqueeTicker from "./components/MarqueeTicker";
@@ -11,30 +11,26 @@ import FaqModal from "./components/FaqModal";
 import LocationModal from "./components/LocationModal";
 import ChatIABubble from "./components/ChatIABubble";
 import Footer from "./components/Footer";
+import HeroBannerCarousel from "./components/HeroBannerCarousel";
+import CategorySlider from "./components/CategorySlider";
+import CustomerReviewsSection from "./components/CustomerReviewsSection";
 import {
   fetchLiveCatalog,
   getCachedCatalog,
   getCachedCategories,
   getCachedConfig,
+  getCachedBanners,
   countCategories
 } from "./services/catalogService";
 import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
-  Truck,
-  Cpu,
   ShoppingCart,
-  Layers,
-  Laptop,
-  Tv,
-  Headphones,
-  Gamepad2,
-  Database,
-  HardDrive,
-  Wrench,
   Flame,
-  MapPin
+  MapPin,
+  ChevronLeft,
+  ChevronRight
 } from "./components/Icons";
 
 export default function App() {
@@ -42,6 +38,7 @@ export default function App() {
   const [products, setProducts] = useState(() => getCachedCatalog());
   const [categories, setCategories] = useState(() => countCategories(getCachedCategories(), getCachedCatalog()));
   const [storeInfo, setStoreInfo] = useState(() => getCachedConfig());
+  const [banners, setBanners] = useState(() => getCachedBanners());
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState("");
 
@@ -78,6 +75,9 @@ export default function App() {
         }
         if (data.storeInfo) {
           setStoreInfo(data.storeInfo);
+        }
+        if (data.banners && data.banners.length > 0) {
+          setBanners(data.banners);
         }
         setLastSyncTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
       }
@@ -207,29 +207,33 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Distinct icon per category
-  const renderCategoryIcon = (iconName) => {
-    switch (iconName) {
-      case "Laptop":
-        return <Laptop className="w-5 h-5" />;
-      case "Layers":
-        return <Layers className="w-5 h-5" />;
-      case "Cpu":
-        return <Cpu className="w-5 h-5" />;
-      case "Gamepad2":
-        return <Gamepad2 className="w-5 h-5" />;
-      case "HardDrive":
-        return <HardDrive className="w-5 h-5" />;
-      case "Tv":
-        return <Tv className="w-5 h-5" />;
-      case "Database":
-        return <Database className="w-5 h-5" />;
-      case "Headphones":
-        return <Headphones className="w-5 h-5" />;
-      default:
-        return <Layers className="w-5 h-5" />;
-    }
+  // Promo carousel scroll state & autoplay
+  const promoScrollRef = useRef(null);
+  const [isPromoPaused, setIsPromoPaused] = useState(false);
+
+  const handlePromoScroll = (direction) => {
+    if (!promoScrollRef.current) return;
+    const scrollAmount = 340;
+    promoScrollRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth"
+    });
   };
+
+  useEffect(() => {
+    if (isPromoPaused || view !== "home") return;
+    const timer = setInterval(() => {
+      if (!promoScrollRef.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = promoScrollRef.current;
+      if (scrollLeft + clientWidth >= scrollWidth - 15) {
+        promoScrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        promoScrollRef.current.scrollBy({ left: 340, behavior: "smooth" });
+      }
+    }, 4500);
+
+    return () => clearInterval(timer);
+  }, [isPromoPaused, view]);
 
   return (
     <div
@@ -274,81 +278,31 @@ export default function App() {
             {/* Hero Grid Section: Ultrawide optimized layout */}
             <section className="pt-6 px-4 sm:px-6 lg:px-8 xl:px-12 max-w-[1720px] mx-auto">
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
-                {/* Main Hero Banner: 8 cols on large screens */}
-                <div
-                  className={`relative rounded-3xl overflow-hidden border p-8 sm:p-12 lg:p-14 shadow-sm xl:col-span-8 flex flex-col justify-between ${
-                    isDarkMode
-                      ? "bg-gradient-to-r from-black via-[#111620] to-black border-gray-800"
-                      : "bg-gradient-to-r from-amber-50 via-white to-amber-50/40 border-slate-200"
-                  }`}
-                >
-                  {/* Artwork Background */}
-                  <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-15 pointer-events-none hidden md:block">
-                    <img
-                      src="/assets/images/spartan_games_banner.jpg"
-                      alt="Spartan Games Arequipa"
-                      className="w-full h-full object-cover object-right"
-                    />
-                  </div>
-
-                  <div className="relative z-10 max-w-2xl">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 bg-[#FFDE17] text-slate-950 shadow-xs">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      Hardware Gamer Oficial en Arequipa
-                    </div>
-
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-tight mb-4 text-slate-950 dark:text-white">
-                      COMPONENTES Y PCs GAMER CON GARANTÍA LOCAL
-                    </h1>
-
-                    <p
-                      className={`text-sm sm:text-base leading-relaxed mb-8 ${
-                        isDarkMode ? "text-gray-300" : "text-slate-600"
-                      }`}
-                    >
-                      Tarjetas de video RTX, procesadores AMD Ryzen/Intel, laptops gamer y ensambles
-                      a medida con Windows 11 activado. Atención directa en Calle Octavio Muñoz Najar 223 Int 211, Compuplaza y
-                      delivery express en Arequipa.
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                      <button
-                        onClick={() => handleNavigate("catalog")}
-                        className="py-3 px-6 rounded-xl font-bold uppercase text-xs tracking-wider bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 active:scale-95 transition-all flex items-center gap-2 shadow-sm"
-                      >
-                        <span>Ver Catálogo Completo</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        onClick={() => setIsPCBuilderOpen(true)}
-                        className={`py-3 px-5 rounded-xl font-semibold uppercase text-xs tracking-wider border transition-colors flex items-center gap-2 ${
-                          isDarkMode
-                            ? "border-gray-700 hover:border-white text-white bg-[#111620]"
-                            : "border-slate-300 hover:border-slate-900 text-slate-900 bg-white shadow-xs"
-                        }`}
-                      >
-                        <Wrench className="w-3.5 h-3.5 text-amber-500" />
-                        <span>Arma tu PC a Medida</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Trust Footer inside Hero */}
-                  <div className="relative z-10 pt-8 mt-8 border-t border-slate-200/80 dark:border-gray-800/80 grid grid-cols-3 gap-4 text-xs font-semibold">
-                    <div className="flex items-center gap-2 text-slate-700 dark:text-gray-300">
-                      <Truck className="w-4 h-4 text-amber-600 dark:text-[#FFDE17] flex-shrink-0" />
-                      <span>Delivery Express Arequipa</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-700 dark:text-gray-300">
-                      <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-[#FFDE17] flex-shrink-0" />
-                      <span>Garantía Física de 1 a 3 Años</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-700 dark:text-gray-300">
-                      <Cpu className="w-4 h-4 text-amber-600 dark:text-[#FFDE17] flex-shrink-0" />
-                      <span>Ensamble & Pruebas en Tienda</span>
-                    </div>
-                  </div>
+                {/* Main Hero Banner: Interactive rotating promotional carousel */}
+                <div className="xl:col-span-8 flex flex-col">
+                  <HeroBannerCarousel
+                    banners={banners}
+                    isDarkMode={isDarkMode}
+                    onNavigate={handleNavigate}
+                    onSelectCategory={handleSelectCategory}
+                    onSelectProduct={(target) => {
+                      const found = products.find(
+                        (p) =>
+                          p.id === target ||
+                          String(p.id) === String(target) ||
+                          (p.sku && p.sku.toLowerCase() === String(target).toLowerCase()) ||
+                          (p.name && p.name.toLowerCase().includes(String(target).toLowerCase()))
+                      );
+                      if (found) {
+                        handleSelectProduct(found);
+                      } else {
+                        setSearchQuery(String(target));
+                        handleNavigate("catalog");
+                      }
+                    }}
+                    onSearchChange={setSearchQuery}
+                    onOpenPCBuilder={() => setIsPCBuilderOpen(true)}
+                  />
                 </div>
 
                 {/* Right Retail Highlights (visible on large screens to eliminate blank side spaces) */}
@@ -428,55 +382,165 @@ export default function App() {
               </div>
             </section>
 
-            {/* Departamentos / Categorías: Clean Hardware Retail Tiles */}
+            {/* Categorías Gamer: Interactive Visual Slider with Real Hardware Images */}
             <section className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-800 dark:text-[#FFDE17]">
-                    Exploración Rápida
-                  </span>
-                  <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-slate-950 dark:text-white mt-0.5">
-                    Departamentos de Hardware
-                  </h2>
-                </div>
-                <button
-                  onClick={() => setIsMegaMenuOpen(true)}
-                  className="text-xs text-amber-800 dark:text-[#FFDE17] hover:underline font-bold"
-                >
-                  Ver todas las categorías →
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 2xl:grid-cols-8 gap-3 sm:gap-4">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => handleSelectCategory(cat.id)}
-                    className={`p-3.5 sm:p-4 rounded-2xl border text-center transition-all group ${
-                      isDarkMode
-                        ? "bg-[#111620] border-gray-800 hover:border-[#FFDE17] hover:-translate-y-0.5"
-                        : "bg-white border-slate-200 hover:border-amber-400 hover:shadow-sm hover:-translate-y-0.5"
-                    }`}
-                  >
-                    <div
-                      className={`w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2.5 group-hover:scale-105 transition-transform ${
-                        isDarkMode
-                          ? "bg-black/40 text-[#FFDE17]"
-                          : "bg-slate-100 text-slate-900 group-hover:bg-amber-100 group-hover:text-amber-900"
-                      }`}
-                    >
-                      {renderCategoryIcon(cat.icon)}
-                    </div>
-                    <div className="font-bold text-xs leading-tight truncate text-slate-950 dark:text-white">
-                      {cat.name}
-                    </div>
-                    <div className="text-[11px] text-slate-500 dark:text-gray-400 mt-1 font-medium">
-                      {cat.count} unid.
-                    </div>
-                  </button>
-                ))}
-              </div>
+              <CategorySlider
+                categories={categories}
+                isDarkMode={isDarkMode}
+                onSelectCategory={handleSelectCategory}
+                onOpenMegaMenu={() => setIsMegaMenuOpen(true)}
+              />
             </section>
+
+            {/* Ofertas Relámpago y Promociones: Interactive Auto-scrolling Ribbon */}
+            {products.some((p) => p.isPromo || (p.oldPrice && p.oldPrice > p.price)) && (
+              <section className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <span className="p-2 rounded-xl bg-red-500/10 text-red-500 border border-red-500/30">
+                      <Flame className="w-4 h-4 text-red-500" />
+                    </span>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">
+                        Precios Especiales de Temporada
+                      </span>
+                      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-950 dark:text-white mt-0.5">
+                        Ofertas Relámpago en Arequipa
+                      </h2>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedCategory(null);
+                        handleNavigate("catalog");
+                      }}
+                      className="hidden sm:inline-flex text-xs font-bold text-red-600 dark:text-red-400 hover:underline items-center gap-1 mr-2"
+                    >
+                      <span>Ver todas</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      onClick={() => handlePromoScroll("left")}
+                      className={`p-2 rounded-xl border transition-all cursor-pointer active:scale-95 ${
+                        isDarkMode
+                          ? "bg-[#111620] border-gray-800 text-gray-300 hover:text-white hover:border-gray-700"
+                          : "bg-white border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-xs"
+                      }`}
+                      aria-label="Ofertas anteriores"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      onClick={() => handlePromoScroll("right")}
+                      className={`p-2 rounded-xl border transition-all cursor-pointer active:scale-95 ${
+                        isDarkMode
+                          ? "bg-[#111620] border-gray-800 text-gray-300 hover:text-white hover:border-gray-700"
+                          : "bg-white border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-xs"
+                      }`}
+                      aria-label="Ofertas siguientes"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  ref={promoScrollRef}
+                  onMouseEnter={() => setIsPromoPaused(true)}
+                  onMouseLeave={() => setIsPromoPaused(false)}
+                  onTouchStart={() => setIsPromoPaused(true)}
+                  onTouchEnd={() => setIsPromoPaused(false)}
+                  className="flex items-stretch gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth scrollbar-none no-scrollbar select-none"
+                  style={{ scrollSnapType: "x mandatory" }}
+                >
+                  {products
+                    .filter((p) => p.isPromo || (p.oldPrice && p.oldPrice > p.price))
+                    .map((product) => {
+                      const discount = product.oldPrice
+                        ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
+                        : 0;
+                      const savings = product.oldPrice ? (product.oldPrice - product.price).toFixed(2) : 0;
+
+                      return (
+                        <div
+                          key={product.id}
+                          onClick={() => handleSelectProduct(product)}
+                          className={`group flex-shrink-0 w-72 sm:w-80 rounded-3xl border p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                            isDarkMode
+                              ? "bg-gradient-to-b from-[#161D2A] to-[#111620] border-red-500/30 hover:border-red-500/60"
+                              : "bg-white border-red-200 hover:border-red-400 hover:shadow-red-500/5"
+                          }`}
+                          style={{ scrollSnapAlign: "start" }}
+                        >
+                          <div>
+                            {/* Top badge */}
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase bg-[#FF334B] text-white shadow-xs">
+                                Ahorra S/. {savings} ({discount}% OFF)
+                              </span>
+                              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                Stock: {product.stock} unid.
+                              </span>
+                            </div>
+
+                            {/* Image */}
+                            <div className={`relative aspect-square rounded-2xl p-4 flex items-center justify-center overflow-hidden mb-3 ${
+                              isDarkMode ? "bg-black/40" : "bg-slate-50"
+                            }`}>
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                                onError={(e) => {
+                                  e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
+                                }}
+                              />
+                            </div>
+
+                            {/* Info */}
+                            <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-gray-400 mb-1">
+                              {product.category} • {product.brand}
+                            </div>
+                            <h3 className="font-black text-sm text-slate-950 dark:text-white line-clamp-2 leading-snug group-hover:text-red-500 transition-colors">
+                              {product.name}
+                            </h3>
+                          </div>
+
+                          {/* Price and Cart */}
+                          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-gray-800/80">
+                            <div className="flex items-baseline gap-2 mb-3">
+                              <span className="text-xl font-black text-[#FF334B]">
+                                S/. {product.price.toFixed(2)}
+                              </span>
+                              {product.oldPrice && (
+                                <span className="text-xs line-through text-slate-400">
+                                  S/. {product.oldPrice.toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(product);
+                              }}
+                              className="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-[#FF334B] hover:bg-red-600 text-white transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98 cursor-pointer"
+                            >
+                              <ShoppingCart className="w-4 h-4" />
+                              <span>Aprovechar Oferta</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </section>
+            )}
 
             {/* Productos Destacados: Ultrawide Grid (up to 5 and 6 columns on large monitors) */}
             <section className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
@@ -661,6 +725,11 @@ export default function App() {
                   <span>Abrir Configurador de PC</span>
                 </button>
               </div>
+            </section>
+
+            {/* Sección de Confianza & Clientes Felices en Compuplaza */}
+            <section className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+              <CustomerReviewsSection isDarkMode={isDarkMode} storeInfo={storeInfo} />
             </section>
           </main>
         )}

@@ -1,7 +1,8 @@
 import {
   productsCatalog as defaultProducts,
   categoriesTree as defaultCategories,
-  storeInfo as defaultStoreInfo
+  storeInfo as defaultStoreInfo,
+  defaultBanners
 } from "../data/storeData.js";
 
 export const GOOGLE_SHEET_ID = "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno";
@@ -10,6 +11,7 @@ export const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${G
 const CACHE_KEY = "spartan_catalog_cache_v5";
 const CACHE_CAT_KEY = "spartan_categories_cache";
 const CACHE_CONFIG_KEY = "spartan_config_cache_v5";
+const CACHE_BANNERS_KEY = "spartan_banners_cache_v5";
 const CACHE_TIME_KEY = "spartan_catalog_timestamp_v5";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos de caché
 
@@ -263,11 +265,22 @@ async function fetchTabRaw(tabName, timestamp) {
 }
 
 export function getCachedCatalog() {
+  if (typeof localStorage === "undefined") return defaultProducts;
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Garantizar que los productos de banners promocionales siempre existan
+        const bannerIds = [5080, 801, 802, 803];
+        bannerIds.forEach((bId) => {
+          if (!parsed.some((p) => p.id === bId || String(p.id) === String(bId))) {
+            const fallbackProd = defaultProducts.find((p) => p.id === bId);
+            if (fallbackProd) parsed.push(fallbackProd);
+          }
+        });
+        return parsed;
+      }
     }
   } catch (e) {
     console.warn("Could not read catalog cache", e);
@@ -276,6 +289,7 @@ export function getCachedCatalog() {
 }
 
 export function getCachedCategories() {
+  if (typeof localStorage === "undefined") return defaultCategories;
   try {
     const raw = localStorage.getItem(CACHE_CAT_KEY);
     if (raw) {
@@ -289,6 +303,7 @@ export function getCachedCategories() {
 }
 
 export function getCachedConfig() {
+  if (typeof localStorage === "undefined") return defaultStoreInfo;
   try {
     const raw = localStorage.getItem(CACHE_CONFIG_KEY);
     if (raw) return JSON.parse(raw);
@@ -296,6 +311,20 @@ export function getCachedConfig() {
     console.warn("Could not read config cache", e);
   }
   return defaultStoreInfo;
+}
+
+export function getCachedBanners() {
+  if (typeof localStorage === "undefined") return defaultBanners;
+  try {
+    const raw = localStorage.getItem(CACHE_BANNERS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Could not read banners cache", e);
+  }
+  return defaultBanners;
 }
 
 /**
@@ -315,7 +344,7 @@ export function countCategories(categoriesList, productsList) {
 }
 
 /**
- * Fetches all tabs in parallel (Productos, Categorias, Configuracion)
+ * Fetches all tabs in parallel (Productos, Categorias, Configuracion, Banners)
  */
 export async function fetchLiveCatalog(force = false) {
   try {
@@ -326,14 +355,16 @@ export async function fetchLiveCatalog(force = false) {
       return {
         products: getCachedCatalog(),
         categories: countCategories(getCachedCategories(), getCachedCatalog()),
-        storeInfo: getCachedConfig()
+        storeInfo: getCachedConfig(),
+        banners: getCachedBanners()
       };
     }
 
-    const [prodCsv, catCsv, cfgCsv] = await Promise.allSettled([
+    const [prodCsv, catCsv, cfgCsv, banCsv] = await Promise.allSettled([
       fetchTabRaw("Productos", now),
       fetchTabRaw("Categorias", now),
-      fetchTabRaw("Configuracion", now)
+      fetchTabRaw("Configuracion", now),
+      fetchTabRaw("Banners", now)
     ]);
 
     // 1. Process Products
@@ -344,24 +375,36 @@ export async function fetchLiveCatalog(force = false) {
         const headers = rows[0].map((h) => h.trim());
         const parsed = rows.slice(1).map((r) => parseProductRow(headers, r)).filter((p) => p.name);
         if (parsed.length > 0) {
+          // Garantizar que los productos de banners promocionales no se pierdan si la hoja no los tiene
+          const bannerIds = [5080, 801, 802, 803];
+          bannerIds.forEach((bId) => {
+            if (!parsed.some((p) => p.id === bId || String(p.id) === String(bId))) {
+              const fallbackProd = defaultProducts.find((p) => p.id === bId);
+              if (fallbackProd) parsed.push(fallbackProd);
+            }
+          });
           products = parsed;
           localStorage.setItem(CACHE_KEY, JSON.stringify(products));
         }
       }
     }
 
-    // 2. Process Categories
+    // 2. Process Categories with images
     let categories = getCachedCategories();
     if (catCsv.status === "fulfilled") {
       const rows = parseCSV(catCsv.value);
       if (rows.length > 1) {
-        const parsedCats = rows.slice(1).map((r) => ({
-          id: r[0]?.trim() || "",
-          name: r[1]?.trim() || "",
-          icon: r[2]?.trim() || "Layers",
-          subCategories: r[3] ? r[3].split(",").map((s) => s.trim()) : [],
-          description: r[4]?.trim() || ""
-        })).filter((c) => c.id && c.name);
+        const parsedCats = rows.slice(1).map((r) => {
+          const id = r[0]?.trim() || "";
+          const name = r[1]?.trim() || "";
+          const icon = r[2]?.trim() || "Layers";
+          const subCategories = r[3] ? r[3].split(",").map((s) => s.trim()) : [];
+          const description = r[4]?.trim() || "";
+          const rawImg = r[5]?.trim();
+          const defaultCat = defaultCategories.find((c) => c.id === id);
+          const image = rawImg ? normalizeImageUrl(rawImg) : (defaultCat?.image || "/assets/images/spartan_games_banner.jpg");
+          return { id, name, icon, subCategories, description, image };
+        }).filter((c) => c.id && c.name);
 
         if (parsedCats.length > 0) {
           categories = parsedCats;
@@ -398,12 +441,44 @@ export async function fetchLiveCatalog(force = false) {
       }
     }
 
+    // 4. Process Banners
+    let banners = getCachedBanners();
+    if (banCsv.status === "fulfilled") {
+      const rows = parseCSV(banCsv.value);
+      if (rows.length > 1) {
+        const parseBoolean = (val) => {
+          if (!val) return false;
+          const s = String(val).trim().toUpperCase();
+          return s === "SI" || s === "TRUE" || s === "1" || s === "YES";
+        };
+
+        const parsedBanners = rows.slice(1).map((r, idx) => {
+          const id = r[0]?.trim() || `banner-${idx + 1}`;
+          const title = r[1]?.trim();
+          const subtitle = r[2]?.trim() || "";
+          const tag = r[3]?.trim() || "OFERTA";
+          const image = normalizeImageUrl(r[4]?.trim());
+          const actionType = r[5]?.trim() || "category";
+          const ctaText = r[6]?.trim() || "Ver Más";
+          const actionTarget = r[7]?.trim() || "";
+          const active = r[8] !== undefined && r[8] !== "" ? parseBoolean(r[8]) : true;
+          return { id, title, subtitle, tag, image, actionType, ctaText, actionTarget, active };
+        }).filter((b) => b.title && b.active);
+
+        if (parsedBanners.length > 0) {
+          banners = parsedBanners;
+          localStorage.setItem(CACHE_BANNERS_KEY, JSON.stringify(banners));
+        }
+      }
+    }
+
     localStorage.setItem(CACHE_TIME_KEY, String(now));
 
     return {
       products,
       categories: countCategories(categories, products),
-      storeInfo: config
+      storeInfo: config,
+      banners
     };
   } catch (err) {
     console.warn("Using cached data due to sync exception:", err);
@@ -413,6 +488,7 @@ export async function fetchLiveCatalog(force = false) {
   return {
     products: cachedP,
     categories: countCategories(getCachedCategories(), cachedP),
-    storeInfo: getCachedConfig()
+    storeInfo: getCachedConfig(),
+    banners: getCachedBanners()
   };
 }

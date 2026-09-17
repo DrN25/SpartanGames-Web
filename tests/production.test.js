@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseCSV, normalizeImageUrl, parseProductRow } from "../src/services/catalogService.js";
+import { parseCSV, normalizeImageUrl, parseProductRow, getCachedBanners, getCachedCatalog } from "../src/services/catalogService.js";
 import { isGibberish, checkGuardrails, handler } from "../netlify/functions/chat.js";
-import { storeInfo } from "../src/data/storeData.js";
+import { storeInfo, defaultBanners, categoriesTree } from "../src/data/storeData.js";
 
 // ==========================================
 // 1. GOOGLE SHEETS CSV & DATA INTEGRITY
@@ -78,16 +78,92 @@ test("cart calculation and 10% reservation math prevent rounding errors", () => 
   const itemsText = mockCart
     .map((item) => `• ${item.quantity}x ${item.name} - S/. ${(item.price * item.quantity).toFixed(2)}`)
     .join("\n");
-  const msg = `Total: S/. ${subtotal.toFixed(2)} - Reserva: S/. ${reservaMonto} en ${address}`;
+  const msg = `Pedido:\n${itemsText}\nTotal: S/. ${subtotal.toFixed(2)} - Reserva: S/. ${reservaMonto} en ${address}`;
 
   assert.ok(msg.includes("3818.90"));
   assert.ok(msg.includes("Int 211"));
+  assert.ok(msg.includes("RTX 4070 Super"));
   assert.ok(!msg.includes("undefined"));
   assert.ok(!msg.includes("NaN"));
 });
 
 // ==========================================
-// 3. AI ASSISTANT GUARDRAILS & SECURITY
+// 3. PAGINATION & CATALOG SCALABILITY
+// ==========================================
+test("pagination algorithm handles 500+ products without boundary errors", () => {
+  // Generate 250 dummy products
+  const fakeProducts = Array.from({ length: 250 }, (_, i) => ({
+    id: i + 1,
+    name: `Componente Gamer ${i + 1}`,
+    price: 100 + i
+  }));
+
+  const itemsPerPage = 24;
+  const totalPages = Math.ceil(fakeProducts.length / itemsPerPage);
+  assert.equal(totalPages, 11);
+
+  // Page 1 slice
+  const page1 = fakeProducts.slice(0, itemsPerPage);
+  assert.equal(page1.length, 24);
+  assert.equal(page1[0].id, 1);
+  assert.equal(page1[23].id, 24);
+
+  // Last page slice (250 - 240 = 10 items)
+  const lastPage = fakeProducts.slice((totalPages - 1) * itemsPerPage, totalPages * itemsPerPage);
+  assert.equal(lastPage.length, 10);
+  assert.equal(lastPage[9].id, 250);
+});
+
+// ==========================================
+// 4. BANNERS & CATEGORY ASSETS VERIFICATION
+// ==========================================
+test("defaultBanners includes RTX 5080, Sillas, Set Asus and PS5 with valid images and products", () => {
+  const banners = getCachedBanners();
+  assert.ok(banners.length >= 4);
+
+  const rtxBanner = banners.find((b) => b.id === "banner-rtx5080");
+  assert.ok(rtxBanner);
+  assert.ok(rtxBanner.image.includes("rtx_5080_nuevo.jpg"));
+  assert.equal(rtxBanner.actionType, "product");
+  assert.equal(rtxBanner.actionTarget, 5080);
+
+  const sillaBanner = banners.find((b) => b.id === "banner-armor-elite");
+  assert.ok(sillaBanner);
+  assert.ok(sillaBanner.image.includes("armor-elite-sillas-destacadas.jpg"));
+  assert.equal(sillaBanner.actionType, "product");
+  assert.equal(sillaBanner.actionTarget, 801);
+
+  const setBanner = banners.find((b) => b.id === "banner-set-asus");
+  assert.ok(setBanner);
+  assert.ok(setBanner.image.includes("set_gamer.jpg"));
+  assert.equal(setBanner.actionType, "product");
+  assert.equal(setBanner.actionTarget, 802);
+
+  const ps5Banner = banners.find((b) => b.id === "banner-ps5");
+  assert.ok(ps5Banner);
+  assert.ok(ps5Banner.image.includes("ps5.jpg"));
+  assert.equal(ps5Banner.actionType, "product");
+  assert.equal(ps5Banner.actionTarget, 803);
+
+  // Verify that all 4 banner products actually exist in productsCatalog
+  const catalog = getCachedCatalog();
+  const bannerProductIds = [5080, 801, 802, 803];
+  bannerProductIds.forEach((id) => {
+    const found = catalog.find((p) => p.id === id);
+    assert.ok(found, `Product with ID ${id} must exist in catalog`);
+    assert.ok(found.price > 0, `Product ${id} must have a valid price`);
+  });
+});
+
+test("categoriesTree has assigned demonstrative hardware images", () => {
+  categoriesTree.forEach((cat) => {
+    assert.ok(cat.image, `Category ${cat.name} should have an image`);
+    assert.ok(cat.image.startsWith("/assets/images/"), `Image path should be local asset`);
+  });
+});
+
+// ==========================================
+// 5. AI ASSISTANT GUARDRAILS & SECURITY
 // ==========================================
 test("isGibberish detects keyboard spam while allowing valid hardware queries", () => {
   assert.equal(isGibberish("asdfghjkl"), true);

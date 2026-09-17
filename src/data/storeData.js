@@ -18,6 +18,7 @@ export const categoriesTree = [
     id: "laptops",
     name: "Laptops Gamer",
     icon: "Laptop",
+    image: "/assets/images/prod_201_lenovo_loq_15.jpg",
     count: 14,
     subCategories: ["Lenovo LOQ & Legion", "ASUS ROG & TUF", "Acer Nitro & Predator", "HP Victus & OMEN"]
   },
@@ -25,6 +26,7 @@ export const categoriesTree = [
     id: "ram",
     name: "Memorias RAM",
     icon: "Layers",
+    image: "/assets/images/prod_115_corsair_vengeance_rgb_ddr5.jpg",
     count: 22,
     subCategories: ["DDR5 6000MHz - 6400MHz", "DDR4 3200MHz - 3600MHz", "Kits Dual Channel 32GB", "Memorias para Laptops SODIMM"]
   },
@@ -32,6 +34,7 @@ export const categoriesTree = [
     id: "procesadores",
     name: "Procesadores (CPU)",
     icon: "Cpu",
+    image: "/assets/images/prod_301_ryzen_7800x3d.jpg",
     count: 18,
     subCategories: ["AMD Ryzen Serie 7000/8000", "AMD Ryzen Serie 5000", "Intel Core 14va Generación", "Intel Core 13va Generación"]
   },
@@ -39,6 +42,7 @@ export const categoriesTree = [
     id: "tarjetas-video",
     name: "Tarjetas de Video (GPU)",
     icon: "Monitor",
+    image: "/assets/images/prod_401_asus_tuf_rtx4070ti_super.jpg",
     count: 16,
     subCategories: ["NVIDIA GeForce RTX Serie 40", "AMD Radeon RX Serie 7000", "Gama de Entrada Esports", "Modelos OC White Edition"]
   },
@@ -46,6 +50,7 @@ export const categoriesTree = [
     id: "placas-madre",
     name: "Placas Madre",
     icon: "HardDrive",
+    image: "/assets/images/prod_601_asus_tuf_b650_wifi.jpg",
     count: 15,
     subCategories: ["Socket AM5 (B650 / X670)", "Socket LGA1700 (B760 / Z790)", "Formatos Micro-ATX & Mini-ITX", "Con Wi-Fi 6E Integrado"]
   },
@@ -53,6 +58,7 @@ export const categoriesTree = [
     id: "monitores",
     name: "Monitores Gamer",
     icon: "Monitor",
+    image: "/assets/images/prod_501_asus_rog_monitor_245.jpg",
     count: 12,
     subCategories: ["240Hz / 255Hz Esports", "144Hz - 180Hz 1ms IPS", "Paneles Curvos 2K / WQHD", "Soportes Hidráulicos y Brazos"]
   },
@@ -60,6 +66,7 @@ export const categoriesTree = [
     id: "almacenamiento",
     name: "Almacenamiento SSD",
     icon: "HardDrive",
+    image: "/assets/images/prod_701_kingston_kc3000_ssd.jpg",
     count: 19,
     subCategories: ["M.2 NVMe PCIe Gen 4.0", "M.2 NVMe PCIe Gen 3.0", "SSD SATA 2.5\"", "Discos Duros Externos"]
   },
@@ -67,8 +74,129 @@ export const categoriesTree = [
     id: "perifericos",
     name: "Periféricos y Audio",
     icon: "SlidersHorizontal",
+    image: "/assets/images/banners/set_gamer.jpg",
     count: 35,
     subCategories: ["Teclados Mecánicos", "Mouse Ópticos 1K/8K Hz", "Auriculares 7.1 Espaciales", "Mousepads XL Speed/Control"]
+  }
+];
+
+export const defaultBanners = [
+  {
+    id: "banner-rtx5080",
+    tag: "NUEVO INGRESO 2026",
+    tagColor: "bg-emerald-500 text-slate-950",
+    title: "NVIDIA GeForce RTX 5080 16GB",
+    subtitle: "Arquitectura Blackwell de última generación con DLSS 4 y trazado de rayos a escala completa. Stock físico garantizado en Arequipa.",
+    image: "/assets/images/banners/rtx_5080_nuevo.jpg",
+    actionType: "product",
+    actionTarget: 5080,
+    ctaText: "Ver RTX 5080",
+    active: true
+  },
+  {
+    id: "banner-armor-elite",
+    tag: "CONFORT & ERGONOMÍA",
+    tagColor: "bg-amber-500 text-slate-950",
+    title: "Sillas Gamer Cougar Armor Elite",
+    subtitle: "Estructura de acero reforzado, reclinación a 160° y cojines lumbares viscoelásticos para maratones de juego y trabajo profesional.",
+    image: "/assets/images/banners/armor-elite-sillas-destacadas.jpg",
+    actionType: "product",
+    actionTarget: 801,
+    ctaText: "Ver Silla Cougar",
+    active: true
+  },
+  {
+    id: "banner-set-asus",
+    tag: "COMBO COMPLETO",
+    tagColor: "bg-[#FFDE17] text-slate-950",
+    title: "Pack Pro ASUS TUF Gaming",
+    subtitle: "Equipa tu setup con Monitor 165Hz IPS + Teclado Mecánico + Mouse Óptico + Headset 7.1 con precio especial por lote.",
+    image: "/assets/images/banners/set_gamer.jpg",
+    actionType: "product",
+    actionTarget: 802,
+    ctaText: "Ver Pack ASUS",
+    active: true
+  },
+  {
+    id: "banner-ps5",
+    tag: "CONSOLAS & ACCESORIOS",
+    tagColor: "bg-blue-500 text-white",
+    title: "PlayStation 5 Slim & Accesorios",
+    subtitle: "DualSense inalámbrico, mandos de edición especial y almacenamiento SSD ultra veloz de 1TB garantizado en Arequipa.",
+    image: "/assets/images/banners/ps5.jpg",
+    actionType: "product",
+    actionTarget: 803,
+    ctaText: "Ver PlayStation 5",
+    active: true
+  }
+];
+
+export const customerReviews = [
+  {
+    id: 1,
+    name: "Carlos M.",
+    city: "Arequipa (C.C. Compuplaza Int 211)",
+    role: "Gamer & Creador de Contenido",
+    purchase: "PC Gamer Ryzen 7 7800X3D + RTX 4070 Ti Super",
+    rating: 5,
+    comment: "Excelente atención y diagnóstico. El ensamble quedó impecable con las pruebas de temperatura hechas en la misma tienda. 100% recomendado.",
+    image: "/assets/images/clientes/cliente_1.jpg",
+    badge: "Compra Verificada en Tienda"
+  },
+  {
+    id: 2,
+    name: "Diego V.",
+    city: "Arequipa (Entrega Local)",
+    role: "Arquitectura & Renderizado 3D",
+    purchase: "Laptop ASUS ROG Strix + 32GB RAM DDR5",
+    rating: 5,
+    comment: "Pagué el 10% de seña para apartarla y el recojo en Compuplaza fue súper rápido con factura incluida. Muy buena garantía.",
+    image: "/assets/images/clientes/cliente_2.jpg",
+    badge: "Entrega Física Verificada"
+  },
+  {
+    id: 3,
+    name: "Renato F.",
+    city: "Camaná (Envío por Olva/Shalom)",
+    role: "Competitivo Esports",
+    purchase: "Monitor ASUS TUF 180Hz + Combo Periféricos",
+    rating: 5,
+    comment: "Llegó al día siguiente perfectamente embalado y sellado. Spartan Games tiene los mejores precios de hardware de todo el Sur.",
+    image: "/assets/images/clientes/cliente_3.jpg",
+    badge: "Envío a Provincia Asegurado"
+  },
+  {
+    id: 4,
+    name: "Milagros S.",
+    city: "Arequipa (Cerro Colorado)",
+    role: "Diseño Gráfico",
+    purchase: "PC Armada Intel i7 14700K + SSD Kingston 2TB",
+    rating: 5,
+    comment: "Me asesoraron desde cero para que la placa y la fuente sean compatibles. El Windows 11 vino optimizado y listo para trabajar.",
+    image: "/assets/images/clientes/cliente_4.jpg",
+    badge: "Ensamble Testeado"
+  },
+  {
+    id: 5,
+    name: "Joaquín P.",
+    city: "Arequipa (C.C. Compuplaza)",
+    role: "Estudiante de Ingeniería",
+    purchase: "Tarjeta Gráfica RTX 4060 OC + Fuente 750W Gold",
+    rating: 5,
+    comment: "Fui directamente a la Int 211 y me probaron la gráfica en vivo antes de llevármela. Gran trato y confianza.",
+    image: "/assets/images/clientes/cliente_5.jpg",
+    badge: "Prueba en Vivo en Tienda"
+  },
+  {
+    id: 6,
+    name: "Gabriel T.",
+    city: "Juliaca (Envío Shalom)",
+    role: "Enthusiast Builder",
+    purchase: "Kit Dual Channel Corsair 32GB 6400MHz",
+    rating: 5,
+    comment: "Memorias 100% originales con código de verificación. Rápido despacho y seguimiento por WhatsApp en todo momento.",
+    image: "/assets/images/clientes/cliente_6.jpg",
+    badge: "Cliente Frecuente"
   }
 ];
 
@@ -413,6 +541,119 @@ export const productsCatalog = [
       { label: "Compatibilidad", value: "PC Desktop, Laptops compatibles y PlayStation 5" }
     ],
     warranty: "5 años de garantía oficial Kingston."
+  },
+  {
+    id: 5080,
+    name: "TARJETA DE VIDEO NVIDIA GEFORCE RTX 5080 16GB GDDR7",
+    brand: "Nvidia",
+    category: "Tarjetas de Video (GPU)",
+    categoryId: "tarjetas-video",
+    price: 5499.00,
+    oldPrice: 5899.00,
+    stock: 3,
+    sku: "RTX-5080-16G-GDDR7",
+    rating: 5.0,
+    reviewsCount: 7,
+    isPromo: true,
+    promoTag: "NUEVO INGRESO",
+    featured: true,
+    image: "/assets/images/banners/rtx_5080_nuevo.jpg",
+    images: ["/assets/images/banners/rtx_5080_nuevo.jpg"],
+    specs: ["16 GB GDDR7 256-bit", "Arquitectura Blackwell", "DLSS 4 con Multi-Frame Generation", "PCIe 5.0 x16", "3x DisplayPort 2.1a + HDMI 2.1"],
+    summary: "La GPU de nueva generación para gaming 4K extremo y creación con IA acelerada en Arequipa.",
+    description: "La GeForce RTX 5080 incorpora la arquitectura NVIDIA Blackwell con núcleos Tensor de 5ta generación y núcleos RT de 4ta generación. Potencia bruta sin precedentes para jugar en resolución 4K con Ray Tracing al máximo y DLSS 4. Stock físico garantizado en Arequipa.",
+    detailedSpecs: [
+      { label: "GPU", value: "NVIDIA GeForce RTX 5080" },
+      { label: "Memoria", value: "16 GB GDDR7 (28 Gbps)" },
+      { label: "Bus de Memoria", value: "256-bit" },
+      { label: "Consumo / TDP", value: "400W (Requiere conector 12V-2x6)" },
+      { label: "Fuente Recomendada", value: "850W 80+ Gold ATX 3.0" }
+    ],
+    warranty: "3 años de garantía oficial con boleta o factura en Spartan Games Compuplaza."
+  },
+  {
+    id: 801,
+    name: "SILLA GAMER COUGAR ARMOR ELITE ERGONÓMICA BLACK/ORANGE",
+    brand: "Cougar",
+    category: "Periféricos y Audio",
+    categoryId: "perifericos",
+    price: 789.00,
+    oldPrice: 899.00,
+    stock: 5,
+    sku: "COUGAR-ARMOR-ELITE-BO",
+    rating: 4.9,
+    reviewsCount: 16,
+    isPromo: true,
+    promoTag: "ERGONOMÍA",
+    featured: true,
+    image: "/assets/images/banners/armor-elite-sillas-destacadas.jpg",
+    images: ["/assets/images/banners/armor-elite-sillas-destacadas.jpg"],
+    specs: ["Reclinación hasta 160°", "Estructura de Acero Reforzado", "Pistón de Gas Clase 4", "Cojines Cervical y Lumbar", "Cuero PVC Transpirable"],
+    summary: "Comodidad suprema para largas sesiones de juego o trabajo continuo con soporte ergonómico.",
+    description: "La Cougar Armor Elite proporciona el confort y la estabilidad que necesitas. Fabricada con materiales de primera calidad y diseño envolvente con patrón de diamantes, soporta hasta 120 kg con base de 5 radios de alta resistencia.",
+    detailedSpecs: [
+      { label: "Estructura", value: "Acero de alta resistencia" },
+      { label: "Tapicería", value: "Cuero sintético PVC transpirable" },
+      { label: "Reclinable", value: "De 90° a 160° con bloqueo" },
+      { label: "Pistón", value: "Elevador de gas Clase 4 certificado" }
+    ],
+    warranty: "1 año de garantía en tienda Compuplaza Int 211."
+  },
+  {
+    id: 802,
+    name: "COMBO GAMER ASUS TUF (MONITOR 165Hz + PARLANTES + TECLADO + MOUSE)",
+    brand: "Asus ROG",
+    category: "Periféricos y Audio",
+    categoryId: "perifericos",
+    price: 1650.00,
+    oldPrice: 1899.00,
+    stock: 4,
+    sku: "ASUS-TUF-GAMER-PACK",
+    rating: 5.0,
+    reviewsCount: 22,
+    isPromo: true,
+    promoTag: "COMBO AHORRO",
+    featured: true,
+    image: "/assets/images/banners/set_gamer.jpg",
+    images: ["/assets/images/banners/set_gamer.jpg"],
+    specs: ["Monitor TUF 24\" 165Hz IPS", "Teclado Mecánico TUF K1 RGB", "Mouse TUF M3 Gen II 8K DPI", "Parlantes Gaming Estéreo 2.0", "Garantía Oficial Asus"],
+    summary: "Equipa tu setup completo de una sola vez con periféricos y monitor ASUS TUF con descuento de paquete.",
+    description: "El Pack Pro ASUS TUF Gaming incluye todo lo necesario para empezar a competir: Monitor gamer con panel IPS rápido de 165Hz y 1ms, teclado para juego con teclas táctiles y rueda de volumen dedicada, mouse ultraliviano de alta precisión y parlantes estéreo con sonido envolvente.",
+    detailedSpecs: [
+      { label: "Monitor", value: "ASUS TUF 23.8\" Full HD 165Hz 1ms IPS FreeSync" },
+      { label: "Teclado", value: "ASUS TUF K1 con iluminación RGB Aura Sync" },
+      { label: "Mouse", value: "ASUS TUF M3 Gen II con sensor óptico 8000 DPI" },
+      { label: "Audio", value: "Parlantes estéreo 2.0 con conexión 3.5mm + USB" }
+    ],
+    warranty: "2 años de garantía oficial Asus Perú con atención en Spartan Games."
+  },
+  {
+    id: 803,
+    name: "CONSOLA SONY PLAYSTATION 5 SLIM 1TB SSD + DUALSENSE",
+    brand: "Sony",
+    category: "Periféricos y Audio",
+    categoryId: "perifericos",
+    price: 2499.00,
+    oldPrice: 2699.00,
+    stock: 6,
+    sku: "SONY-PS5-SLIM-1TB",
+    rating: 5.0,
+    reviewsCount: 34,
+    isPromo: true,
+    promoTag: "CONSOLA SLIM",
+    featured: true,
+    image: "/assets/images/banners/ps5.jpg",
+    images: ["/assets/images/banners/ps5.jpg"],
+    specs: ["1 TB SSD de Alta Velocidad", "Control Inalámbrico DualSense", "Gráficos 4K HDR hasta 120 FPS", "Tecnología de Audio 3D Tempest", "Diseño Slim Compacto"],
+    summary: "Experimenta cargas ultra rápidas y respuesta háptica inmersiva con la nueva PS5 Slim en Arequipa.",
+    description: "La consola PlayStation 5 Slim pone a tu disposición nuevas posibilidades de juego. Disfruta de una velocidad sorprendente con una SSD de estado sólido de 1TB integrada, retrocompatibilidad con PS4 y gatillos adaptativos dinámicos en el mando DualSense incluido.",
+    detailedSpecs: [
+      { label: "Almacenamiento", value: "SSD NVMe integrado de 1 TB" },
+      { label: "Resolución", value: "Hasta 4K a 120Hz con HDMI 2.1" },
+      { label: "Audio", value: "Tempest 3D AudioTech" },
+      { label: "Contenido de Caja", value: "Consola PS5 Slim, Mando DualSense, Cable HDMI, Base de soporte" }
+    ],
+    warranty: "1 año de garantía oficial Sony Perú con boleta/factura."
   }
 ];
 

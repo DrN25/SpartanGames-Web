@@ -33,6 +33,7 @@ export {
   Share2,
   Tag,
   CheckCircle2,
+  CheckCircle2 as CheckCircle,
   RotateCcw,
   HelpCircle,
   User,

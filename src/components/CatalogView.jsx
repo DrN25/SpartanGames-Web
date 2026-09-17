@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import {
   Search,
@@ -9,7 +9,9 @@ import {
   X,
   ArrowUpDown,
   ShoppingCart,
-  Sparkles
+  Sparkles,
+  ChevronLeft,
+  ChevronRight
 } from "./Icons";
 
 export default function CatalogView({
@@ -105,6 +107,31 @@ export default function CatalogView({
         return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
       });
   }, [products, selectedCategory, searchQuery, selectedBrands, priceRange, onlyInStock, sortBy]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(24);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, selectedBrands, priceRange, onlyInStock, sortBy]);
+
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (validCurrentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, validCurrentPage, itemsPerPage]);
+
+  const startIndex = totalItems === 0 ? 0 : (validCurrentPage - 1) * itemsPerPage + 1;
+  const endIndex = Math.min(validCurrentPage * itemsPerPage, totalItems);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const currentCategoryObj = categories.find(
     (c) => c.id === selectedCategory || c.name === selectedCategory
@@ -514,7 +541,7 @@ export default function CatalogView({
             </div>
           ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-5">
-              {filteredProducts.map((product) => {
+              {paginatedProducts.map((product) => {
                 const discount = product.oldPrice
                   ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
                   : 0;
@@ -630,7 +657,7 @@ export default function CatalogView({
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredProducts.map((product) => {
+              {paginatedProducts.map((product) => {
                 const discount = product.oldPrice
                   ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
                   : 0;
@@ -722,6 +749,101 @@ export default function CatalogView({
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div
+              className={`mt-8 p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 ${
+                isDarkMode ? "bg-[#111620] border-gray-800" : "bg-white border-slate-200 shadow-xs"
+              }`}
+            >
+              {/* Counter Indicator */}
+              <div className="text-xs text-slate-500 dark:text-gray-400 font-medium">
+                Mostrando <strong className="text-slate-900 dark:text-white font-mono">{startIndex} - {endIndex}</strong> de{" "}
+                <strong className="text-slate-900 dark:text-white font-mono">{totalItems}</strong> productos
+              </div>
+
+              {/* Page Buttons */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => handlePageChange(validCurrentPage - 1)}
+                  disabled={validCurrentPage <= 1}
+                  className="p-2 rounded-xl border border-slate-200 dark:border-gray-800 disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-700 dark:text-gray-300 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                  aria-label="Página anterior"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                {[...Array(totalPages)].map((_, i) => {
+                  const pageNum = i + 1;
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    Math.abs(pageNum - validCurrentPage) <= 1
+                  ) {
+                    const isCurrent = pageNum === validCurrentPage;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`min-w-[36px] h-9 px-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
+                          isCurrent
+                            ? "bg-[#FFDE17] text-slate-950 shadow-xs"
+                            : isDarkMode
+                            ? "border border-gray-800 text-gray-300 hover:bg-gray-800"
+                            : "border border-slate-200 text-slate-700 hover:bg-slate-100"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  } else if (
+                    pageNum === validCurrentPage - 2 ||
+                    pageNum === validCurrentPage + 2
+                  ) {
+                    return (
+                      <span key={pageNum} className="px-1 text-slate-400 dark:text-gray-600 text-xs">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+
+                <button
+                  onClick={() => handlePageChange(validCurrentPage + 1)}
+                  disabled={validCurrentPage >= totalPages}
+                  className="p-2 rounded-xl border border-slate-200 dark:border-gray-800 disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-700 dark:text-gray-300 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                  aria-label="Página siguiente"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Items per page selector */}
+              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium">
+                <span>Por pág:</span>
+                <div className="flex items-center gap-1">
+                  {[12, 24, 48].map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => {
+                        setItemsPerPage(size);
+                        setCurrentPage(1);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-colors ${
+                        itemsPerPage === size
+                          ? "bg-slate-900 text-white dark:bg-[#FFDE17] dark:text-slate-950"
+                          : "text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </main>
