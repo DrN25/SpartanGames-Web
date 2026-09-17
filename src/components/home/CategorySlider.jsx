@@ -50,7 +50,7 @@ export default function CategorySlider({
             <span>Exploración por Hardware</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-950 dark:text-white">
-            Categorías Gamer Destacadas
+            Categorías Destacadas
           </h2>
         </div>
 

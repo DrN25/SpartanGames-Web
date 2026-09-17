@@ -72,7 +72,7 @@ export default function CartDrawer({
             </div>
             <div>
               <h2 className="font-black text-sm uppercase tracking-wide">
-                Tu Carrito Gamer
+                Tu Carrito
               </h2>
               <span className="text-[11px] text-slate-500 dark:text-gray-400">
                 {cartItems.length} {cartItems.length === 1 ? "componente" : "componentes"}
@@ -257,7 +257,7 @@ export default function CartDrawer({
             </a>
 
             <div className="text-[10px] text-center text-slate-500 dark:text-gray-400 leading-tight">
-              Al hacer clic te redirigiremos a WhatsApp oficial de Spartan Games para confirmar stock y datos de entrega en Arequipa.
+              Confirmaremos stock y datos de entrega directamente por WhatsApp.
             </div>
           </div>
         )}

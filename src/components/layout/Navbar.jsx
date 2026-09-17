@@ -163,7 +163,7 @@ export default function Navbar({
           <button
             onClick={onToggleTheme}
             className="p-2.5 rounded-xl border border-gray-800 bg-[#121824] hover:bg-[#1A2232] text-amber-300 hover:border-gray-700 transition-all flex items-center justify-center cursor-pointer shadow-xs"
-            title={isDarkMode ? "Cambiar a Tema Claro" : "Cambiar a Tema Oscuro Gamer"}
+            title={isDarkMode ? "Cambiar a Tema Claro" : "Cambiar a Tema Oscuro"}
             aria-label="Cambiar tema"
           >
             {isDarkMode ? <Sun className="w-4 h-4 text-[#FFDE17]" /> : <Moon className="w-4 h-4 text-gray-300" />}

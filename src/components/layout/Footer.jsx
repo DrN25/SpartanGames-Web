@@ -172,7 +172,7 @@ export default function Footer({ onNavigate, onOpenLocation, storeInfo: propStor
                   onClick={() => onNavigate("catalog")}
                   className="text-slate-300 hover:text-[#FFDE17] transition-colors text-left"
                 >
-                  Laptops Gamer con Windows
+                  Laptops con Windows
                 </button>
               </li>
               <li>

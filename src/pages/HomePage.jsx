@@ -111,7 +111,7 @@ export default function HomePage({
                   <Sparkles className="w-4 h-4 text-amber-500" />
                 </div>
                 <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
-                  Configurador PC Gamer
+                  Configurador de PC
                 </h3>
                 <ul className="space-y-1 text-xs text-slate-600 dark:text-gray-400">
                   <li className="flex items-center gap-1.5">
@@ -130,7 +130,7 @@ export default function HomePage({
                 className="mt-3 w-full py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-slate-950" />
-                <span>Armar Mi PC Gamer</span>
+                <span>Armar Mi PC</span>
               </button>
             </div>
 
@@ -353,7 +353,7 @@ export default function HomePage({
                             </span>
                           )}
                         </div>
-                        <span className="text-[9px] text-slate-500">Garantía oficial Arequipa</span>
+                        <span className="text-[9px] text-slate-500">Garantía local Arequipa</span>
                       </div>
 
                       <button
@@ -385,7 +385,7 @@ export default function HomePage({
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-slate-950 dark:text-white">
-              Componentes & Laptops Gamer Destacadas
+              Componentes & Laptops Destacadas
             </h2>
           </div>
 
@@ -518,7 +518,7 @@ export default function HomePage({
               Herramienta de Cotización Gratuita
             </span>
             <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight mt-0.5 text-slate-950 dark:text-white">
-              ¿Quieres armar tu PC Gamer pieza por pieza?
+              ¿Quieres armar tu PC pieza por pieza?
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-400 mt-1 max-w-2xl leading-relaxed">
               Prueba nuestro configurador paso a paso con cálculo de presupuesto en Soles en

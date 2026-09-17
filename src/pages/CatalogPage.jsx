@@ -245,10 +245,10 @@ export default function CatalogPage({
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-[#FFDE17] text-slate-950 shadow-xs">
               <Sparkles className="w-3.5 h-3.5" />
-              Catálogo Oficial Spartan Games
+              Catálogo Spartan Games
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-slate-950 dark:text-white">
-              {currentCategoryObj ? currentCategoryObj.name : "Hardware & Laptops Gamer Arequipa"}
+              {currentCategoryObj ? currentCategoryObj.name : "Hardware & Laptops en Arequipa"}
             </h1>
             <p className={`text-sm mt-1 max-w-2xl ${isDarkMode ? "text-gray-400" : "text-slate-600"}`}>
               {currentCategoryObj
@@ -502,15 +502,15 @@ export default function CatalogPage({
                       : isDarkMode ? "border-gray-800 hover:border-gray-700 text-gray-300" : "border-slate-200 hover:border-slate-300 text-slate-700"
                   }`}
                 >
-                  Gamer Gama Alta
+                  Gama Alta
                 </button>
               </div>
             </div>
 
-            {/* Marcas Oficiales */}
+            {/* Marcas */}
             <div className="mb-6 pt-5 border-t border-slate-200 dark:border-gray-800">
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-3">
-                Marcas Oficiales
+                Marcas
               </h3>
               <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                 {availableBrands.map(({ brand, count }) => {

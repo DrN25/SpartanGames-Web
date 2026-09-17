@@ -94,7 +94,7 @@ export default function LocationModal({
                 </span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 border border-emerald-500/40 text-emerald-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Tienda Física Oficial
+                  Tienda Física
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium">
@@ -295,7 +295,7 @@ export default function LocationModal({
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
               >
                 <WhatsAppIcon className="w-4 h-4" colored={false} />
-                <span>Avisar llegada por WhatsApp Oficial</span>
+                <span>Avisar llegada por WhatsApp</span>
               </a>
             </div>
           </div>

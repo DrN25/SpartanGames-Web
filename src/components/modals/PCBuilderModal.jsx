@@ -196,7 +196,7 @@ export default function PCBuilderModal({
             </div>
             <div>
               <h2 className="text-base font-black uppercase tracking-wide">
-                Configurador de PC Gamer Spartan
+                Configurador de PC
               </h2>
               <span className="text-[11px] text-slate-500 dark:text-gray-400">
                 Componentes 100% compatibles con armado y testeo gratis en Arequipa

@@ -361,14 +361,14 @@ export default function ChatIABubble({
   const initialMessage = {
     id: 1,
     sender: "spartan",
-    text: "⚔️ ¡Listo para la batalla! Soy SPARTAN. Te asesoro con stock físico, compatibilidad técnica, precios y armado de PC en nuestra tienda de Compuplaza Arequipa. 🛡️ ¿Qué máquina de combate o componente buscas hoy? ⚡",
+    text: "Hola, soy el asistente de Spartan Games. Te ayudo con stock en tienda, compatibilidad técnica, precios y armado de computadoras en Compuplaza Arequipa. ¿Qué componente o equipo buscas hoy?",
     time: "Ahora",
     suggestions: [
-      "🎮 Tarjetas de video para 1440p",
-      "⚡ Procesadores y placas en stock",
-      "🛠️ Armar una PC gamer paso a paso",
-      "📍 ¿Cómo llegar a Compuplaza Arequipa?",
-      "🌐 Redes sociales oficiales de Spartan Games"
+      "Tarjetas de video para 1440p",
+      "Procesadores y placas en stock",
+      "Armar una PC paso a paso",
+      "¿Cómo llegar a Compuplaza Arequipa?",
+      "Redes sociales de Spartan Games"
     ],
     productCards: [],
     actions: []
@@ -466,7 +466,7 @@ export default function ChatIABubble({
         const confirmMsg = {
           id: Date.now() + 1,
           sender: "spartan",
-          text: `⚔️ ¡Listo para la batalla! He añadido los **${lastWithProducts.productCards.length} componentes** de tu cotización directamente al carrito de compras (Total: **S/. ${totalQuote.toFixed(2)}**). 🛒\n\nEl carrito de compras se ha abierto a la derecha para que puedas verificar cada pieza, apartarlas con el 10% de seña o exportar la orden oficial hacia WhatsApp para coordinar tu armado o recojo en ${storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza"}. 🛡️⚡`,
+          text: `He añadido los **${lastWithProducts.productCards.length} componentes** de tu cotización al carrito de compras (Total: **S/. ${totalQuote.toFixed(2)}**).\n\nPuedes revisar cada pieza en el carrito a la derecha, apartarlas con el 10% de seña o coordinar por WhatsApp para recojo o armado en ${storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza"}.`,
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           productCards: lastWithProducts.productCards,
           actions: [
@@ -519,7 +519,7 @@ export default function ChatIABubble({
         {
           id: Date.now() + 1,
           sender: "spartan",
-          text: "🛡️ En este momento no pude consultar el inventario en vivo. Escríbenos directamente a nuestro WhatsApp oficial para atenderte al instante. ⚡",
+          text: "En este momento no pude consultar el inventario en vivo. Escríbenos directamente a nuestro WhatsApp para atenderte al instante.",
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           actions: [
             {
@@ -595,13 +595,13 @@ export default function ChatIABubble({
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-4 sm:right-6 z-40 w-14 h-14 rounded-full bg-[#25D366] text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer group"
-        aria-label="Contactar por WhatsApp Oficial de Spartan Games"
+        aria-label="Contactar por WhatsApp de Spartan Games"
       >
         <WhatsAppIcon className="w-7 h-7" colored={false} />
         <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white dark:border-slate-900 animate-ping" />
         <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white dark:border-slate-900" />
         <span className="absolute right-16 px-3.5 py-1.5 rounded-xl bg-slate-950 text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-800 shadow-xl">
-          WhatsApp Oficial Spartan
+          WhatsApp Spartan Games
         </span>
       </a>
 
