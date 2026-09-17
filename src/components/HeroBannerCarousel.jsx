@@ -80,7 +80,7 @@ export default function HeroBannerCarousel({
 
   return (
     <div
-      className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-gray-800 bg-slate-950 text-white select-none transition-all min-h-[580px] sm:min-h-[620px] lg:min-h-[660px] xl:min-h-[680px]"
+      className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-gray-800 bg-slate-950 text-white select-none transition-all min-h-[520px] sm:min-h-[560px] lg:min-h-[600px] xl:min-h-[620px]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -96,7 +96,7 @@ export default function HeroBannerCarousel({
                 : "opacity-0 z-0 pointer-events-none"
             }`}
           >
-            {/* Background Image Stage with High Transparency / Enhanced Visibility */}
+            {/* Background Image Stage with Intelligent Multi-stop Gradient */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
                 src={banner.image}
@@ -109,14 +109,19 @@ export default function HeroBannerCarousel({
                   e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
                 }}
               />
-              {/* Soft transparent gradient overlay so the hardware background photo is clearly appreciated */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/25 to-transparent sm:from-black/60 sm:via-black/15 sm:to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+
+              {/* Intelligent Multi-Stop Directional Gradient:
+                  - 0% to 35%: Deep obsidian dark (92% -> 80%) so text and buttons are 100% legible even over pure white images
+                  - 35% to 65%: Smooth organic transition into transparency
+                  - 65% to 100%: 100% transparent so hardware photos, fans, RGB, and products are clear and uncompromised
+              */}
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 via-35% to-transparent sm:via-slate-950/75 sm:via-40% sm:to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
             </div>
 
-            {/* Content Container */}
+            {/* Content Container: Clean floating text without artificial box borders */}
             <div
-              className={`relative z-10 p-6 sm:p-10 lg:p-14 max-w-2xl flex flex-col justify-center min-h-[580px] sm:min-h-[620px] lg:min-h-[660px] xl:min-h-[680px] transition-all duration-700 ease-out ${
+              className={`relative z-10 p-6 sm:p-10 lg:p-14 max-w-xl lg:max-w-2xl flex flex-col justify-center min-h-[520px] sm:min-h-[560px] lg:min-h-[600px] xl:min-h-[620px] transition-all duration-700 ease-out ${
                 isActive ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
               }`}
             >
@@ -135,21 +140,21 @@ export default function HeroBannerCarousel({
                 </span>
               </div>
 
-              {/* Title with crisp drop-shadow for legibility over bright hardware graphics */}
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white leading-none drop-shadow-[0_4px_14px_rgba(0,0,0,0.95)] mb-4">
+              {/* Title with crisp contrast drop-shadow */}
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] mb-4">
                 {banner.title}
               </h2>
 
               {/* Subtitle */}
-              <p className="text-xs sm:text-sm lg:text-base text-gray-100 line-clamp-3 leading-relaxed max-w-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] mb-8 font-medium">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-100 line-clamp-3 leading-relaxed max-w-lg drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] mb-8 font-medium">
                 {banner.subtitle}
               </p>
 
-              {/* Action Button */}
+              {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => handleActionClick(banner)}
-                  className="px-6 py-3.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all flex items-center gap-2.5 shadow-xl shadow-black/40 active:scale-95 cursor-pointer"
+                  className="px-6 py-3.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all flex items-center gap-2.5 shadow-xl shadow-black/50 active:scale-95 cursor-pointer"
                 >
                   <span>{banner.ctaText || "Ver Detalles"}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -157,7 +162,7 @@ export default function HeroBannerCarousel({
 
                 <button
                   onClick={onOpenPCBuilder}
-                  className="px-5 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-black/60 hover:bg-black/85 backdrop-blur-md border border-gray-600/80 text-white transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-black/30"
+                  className="px-5 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-black/60 hover:bg-black/85 backdrop-blur-md border border-gray-600/80 text-white transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-black/40"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   <span>Cotizar en PC Builder</span>

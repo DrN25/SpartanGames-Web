@@ -30,7 +30,10 @@ import {
   Flame,
   MapPin,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  CheckCircle2,
+  Truck,
+  MessageCircle
 } from "./components/Icons";
 
 export default function App() {
@@ -308,18 +311,18 @@ export default function App() {
                   />
                 </div>
 
-                {/* Right Retail Highlights (Slimmer, elegant 290px sidebar) */}
-                <div className="hidden xl:flex flex-col gap-4 w-[290px] 2xl:w-[310px] shrink-0">
+                {/* Right Retail Highlights: 3 balanced service cards (No blank voids) */}
+                <div className="hidden xl:flex flex-col gap-3.5 w-[290px] 2xl:w-[310px] shrink-0">
                   {/* Highlight Card 1: PC Configurator Promo */}
                   <div
-                    className={`rounded-3xl p-5 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
+                    className={`rounded-2xl p-4 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
                       isDarkMode
                         ? "bg-[#111620] border-gray-800"
                         : "bg-white border-slate-200"
                     }`}
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-1.5">
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-[#FFDE17]">
                           Servicio Spartan
                         </span>
@@ -328,56 +331,113 @@ export default function App() {
                       <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
                         Configurador PC Gamer
                       </h3>
-                      <p className="text-xs text-slate-600 dark:text-gray-400 leading-relaxed line-clamp-3">
-                        Elige placa, procesador, RAM y GPU con compatibilidad 100% y cotización instantánea en Soles.
-                      </p>
+                      <ul className="space-y-1 text-xs text-slate-600 dark:text-gray-400">
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span>Compatibilidad 100% probada</span>
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span>Cotización instantánea en Soles</span>
+                        </li>
+                      </ul>
                     </div>
 
                     <button
                       onClick={() => setIsPCBuilderOpen(true)}
-                      className="mt-3 w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-900 text-white dark:bg-[#18202F] dark:text-slate-100 hover:bg-amber-500 hover:text-slate-950 dark:hover:bg-[#FFDE17] dark:hover:text-slate-950 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                      className="mt-3 w-full py-2 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-900 text-white dark:bg-[#18202F] dark:text-slate-100 hover:bg-amber-500 hover:text-slate-950 dark:hover:bg-[#FFDE17] dark:hover:text-slate-950 transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                     >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Comenzar Configuración</span>
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Armar Mi PC Gamer</span>
                     </button>
                   </div>
 
-                  {/* Highlight Card 2: Tienda Física Compuplaza */}
+                  {/* Highlight Card 2: Delivery & Shipping */}
                   <div
-                    className={`rounded-3xl p-5 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
+                    className={`rounded-2xl p-4 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
+                      isDarkMode
+                        ? "bg-[#111620] border-gray-800"
+                        : "bg-white border-slate-200"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-900 dark:bg-blue-500/20 dark:text-blue-400">
+                          Despacho Rápido
+                        </span>
+                        <Truck className="w-4 h-4 text-blue-500" />
+                      </div>
+                      <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
+                        Delivery & Envíos
+                      </h3>
+                      <ul className="space-y-1 text-xs text-slate-600 dark:text-gray-400">
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                          <span>Mismo día en Arequipa</span>
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                          <span>A provincias por Shalom / Olva</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        const phone = "51912930004";
+                        const text = encodeURIComponent("Hola Spartan Games, deseo consultar por delivery y envíos.");
+                        window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+                      }}
+                      className="mt-3 w-full py-2 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>Consultar Envíos</span>
+                    </button>
+                  </div>
+
+                  {/* Highlight Card 3: Tienda Física Compuplaza */}
+                  <div
+                    className={`rounded-2xl p-4 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
                       isDarkMode
                         ? "bg-[#111620] border-gray-800"
                         : "bg-slate-50 border-slate-200"
                     }`}
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-1.5">
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-400">
                           Tienda Física
                         </span>
                         <ShieldCheck className="w-4 h-4 text-emerald-500" />
                       </div>
-                      <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-1.5">
-                        Calle Octavio Muñoz Najar 223 Int 211 Compuplaza
+                      <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
+                        Calle Octavio Muñoz Najar 223
                       </h3>
-                      <p className="text-xs text-slate-600 dark:text-gray-400 leading-relaxed line-clamp-2">
-                        Retira tu compra, asesórate con técnicos y paga con 10% de reserva o tarjeta.
-                      </p>
+                      <ul className="space-y-1 text-xs text-slate-600 dark:text-gray-400">
+                        <li className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span className="line-clamp-1">Int 211 C.C. Compuplaza</span>
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span>Retiro con 10% y garantía</span>
+                        </li>
+                      </ul>
                     </div>
 
-                    <div className="mt-3 flex flex-col gap-2">
+                    <div className="mt-3 grid grid-cols-2 gap-2">
                       <button
                         onClick={() => setIsLocationOpen(true)}
-                        className="w-full py-2 px-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all text-center flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                        className="py-2 px-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all text-center flex items-center justify-center gap-1 shadow-xs cursor-pointer"
                       >
-                        <MapPin className="w-3.5 h-3.5" />
-                        <span>Ver Ubicación</span>
+                        <MapPin className="w-3 h-3" />
+                        <span>Ubicación</span>
                       </button>
                       <button
                         onClick={() => setIsFaqOpen(true)}
-                        className="w-full py-1.5 px-2.5 rounded-xl text-xs font-bold uppercase tracking-wider border border-slate-300 dark:border-gray-700 hover:border-slate-900 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 transition-all text-center cursor-pointer"
+                        className="py-2 px-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-slate-300 dark:border-gray-700 hover:border-slate-900 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 transition-all text-center cursor-pointer"
                       >
-                        Horarios & FAQ
+                        Horarios
                       </button>
                     </div>
                   </div>
