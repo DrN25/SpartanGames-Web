@@ -14,7 +14,7 @@ import {
   TikTokIcon,
   WhatsAppIcon
 } from "./Icons";
-import { sendChatMessage } from "../services/aiService";
+import { sendChatMessage, parseBotResponse } from "../services/aiService";
 import { useModalTransition } from "../hooks/useModalTransition";
 
 /**
@@ -432,113 +432,6 @@ export default function ChatIABubble({
     window.addEventListener("pointerup", onPointerUp);
   };
 
-  /**
-   * Parses LLM raw text to extract interactive elements, social media, and actions
-   */
-  const parseBotResponse = (rawText) => {
-    let cleanText = rawText;
-    const foundProductIds = [];
-    const actions = [];
-
-    // 1. Extract [PRODUCT:id] tags
-    const productRegex = /\[PRODUCT:([a-zA-Z0-9_-]+)\]/g;
-    let match;
-    while ((match = productRegex.exec(rawText)) !== null) {
-      foundProductIds.push(match[1]);
-    }
-    cleanText = cleanText.replace(productRegex, "");
-
-    // 2. Extract [ACTION:BUILDER]
-    if (cleanText.includes("[ACTION:BUILDER]")) {
-      actions.push({ type: "builder", label: "Armar PC personalizada" });
-      cleanText = cleanText.replace(/\[ACTION:BUILDER\]/g, "");
-    }
-
-    // 3. Extract [ACTION:CATALOG]
-    if (cleanText.includes("[ACTION:CATALOG]")) {
-      actions.push({ type: "catalog", label: "Ver catálogo" });
-      cleanText = cleanText.replace(/\[ACTION:CATALOG\]/g, "");
-    }
-
-    // 4. Extract [ACTION:WHATSAPP:text]
-    const waRegex = /\[ACTION:WHATSAPP:([^\]]+)\]/g;
-    let waMatch;
-    while ((waMatch = waRegex.exec(cleanText)) !== null) {
-      actions.push({ type: "whatsapp", text: waMatch[1], label: "Consultar por WhatsApp" });
-    }
-    cleanText = cleanText.replace(waRegex, "");
-
-    // 5. Extract [ACTION:FACEBOOK]
-    if (cleanText.includes("[ACTION:FACEBOOK]")) {
-      actions.push({ type: "facebook", label: "Facebook oficial" });
-      cleanText = cleanText.replace(/\[ACTION:FACEBOOK\]/g, "");
-    }
-
-    // 6. Extract [ACTION:INSTAGRAM]
-    if (cleanText.includes("[ACTION:INSTAGRAM]")) {
-      actions.push({ type: "instagram", label: "Instagram oficial" });
-      cleanText = cleanText.replace(/\[ACTION:INSTAGRAM\]/g, "");
-    }
-
-    // 7. Extract [ACTION:TIKTOK]
-    if (cleanText.includes("[ACTION:TIKTOK]")) {
-      actions.push({ type: "tiktok", label: "TikTok oficial" });
-      cleanText = cleanText.replace(/\[ACTION:TIKTOK\]/g, "");
-    }
-
-    // 8. Extract [ACTION:MAPS]
-    if (cleanText.includes("[ACTION:MAPS]")) {
-      actions.push({ type: "maps", label: "Ubicación en Google Maps" });
-      cleanText = cleanText.replace(/\[ACTION:MAPS\]/g, "");
-    }
-
-    // 9. Extract [ACTION:ADDTOCART:id1,id2,...]
-    const addCartRegex = /\[ACTION:ADDTOCART:([^\]]+)\]/g;
-    let addCartMatch;
-    while ((addCartMatch = addCartRegex.exec(cleanText)) !== null) {
-      const ids = addCartMatch[1].split(",").map((s) => s.trim()).filter(Boolean);
-      actions.push({
-        type: "add_to_cart_batch",
-        productIds: ids,
-        label: `🛒 Agregar cotización al carrito (${ids.length} componentes)`
-      });
-    }
-    cleanText = cleanText.replace(addCartRegex, "");
-
-    // 10. Clean up orphan list items / bullet points left behind by extracted tags
-    cleanText = cleanText
-      .split("\n")
-      .filter((line) => {
-        const trimmed = line.trim();
-        if (!trimmed) return true;
-        if (/^[-*•]\s*$/.test(trimmed)) return false;
-        if (/^[-*•]\s*[^:\n]+:\s*$/.test(trimmed)) {
-          if (
-            /whatsapp|cat[aá]logo|redes|facebook|instagram|tiktok|ubicaci[oó]n|maps|proforma|armar/i.test(
-              trimmed
-            )
-          ) {
-            return false;
-          }
-        }
-        return true;
-      })
-      .join("\n")
-      .trim();
-
-    // Match found products with actual catalog items (limit to 10 cards max)
-    const productCards = foundProductIds
-      .slice(0, 10)
-      .map((id) => products.find((p) => String(p.id) === String(id)))
-      .filter(Boolean);
-
-    return {
-      text: cleanText,
-      productCards,
-      actions
-    };
-  };
-
   const handleSendMessage = async (userText) => {
     if (!userText.trim() || isTyping) return;
 
@@ -606,7 +499,7 @@ export default function ChatIABubble({
         storeInfo
       });
 
-      const parsed = parseBotResponse(botRawReply);
+      const parsed = parseBotResponse(botRawReply, products);
 
       setMessages((prev) => [
         ...prev,

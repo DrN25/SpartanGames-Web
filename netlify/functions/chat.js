@@ -231,7 +231,7 @@ FORMATO Y ETIQUETAS DE ACCIÓN:
        [PRODUCT:401]
        [ACTION:ADDTOCART:301,401]
    - NUNCA digas que no puedes modificar el carrito digital. Di con convicción espartana que dejas los componentes listos para cargarlos al carrito en 1 clic.
-3. REGLA CRÍTICA DE ETIQUETAS: NUNCA coloques las etiquetas [ACTION:...] dentro de viñetas ni después de dos puntos. Colócalas ÚNICAMENTE al final de tu mensaje en su propia línea:
+3. REGLA CRÍTICA DE ETIQUETAS: NUNCA coloques las etiquetas [ACTION:...] dentro de viñetas, frases, ni después de dos puntos. Colócalas ÚNICAMENTE al final absoluto de tu mensaje en su propia línea independiente sin texto adicional:
    - [PRODUCT:id] (ej: [PRODUCT:301]) para adjuntar fichas interactivas de productos recomendados o cotizados (hasta un límite de 10 tarjetas).
    - [ACTION:ADDTOCART:id1,id2,...] para habilitar el botón de agregar toda la cotización al carrito en un solo clic.
    - [ACTION:BUILDER] si el usuario desea armar o configurar una PC paso a paso.
@@ -240,7 +240,12 @@ FORMATO Y ETIQUETAS DE ACCIÓN:
    - [ACTION:FACEBOOK] si el usuario pregunta por Facebook o redes.
    - [ACTION:INSTAGRAM] si el usuario pregunta por Instagram.
    - [ACTION:TIKTOK] si el usuario pregunta por TikTok.
-   - [ACTION:MAPS] si el usuario pregunta cómo llegar o pide la ubicación en mapa.`;
+   - [ACTION:MAPS] si el usuario pregunta cómo llegar, pide la dirección o pide la ubicación en mapa.
+
+EJEMPLO EXACTO DE CIERRE CON MAPS:
+📍 Nuestra tienda física queda en Calle Octavio Muñoz Najar 223 Int 211 Compuplaza, Arequipa. Atendemos de Lunes a Sábado de 11:00 am a 8:00 pm.
+
+[ACTION:MAPS]`;
 
     const formattedMessages = [
       { role: "system", content: systemPrompt },

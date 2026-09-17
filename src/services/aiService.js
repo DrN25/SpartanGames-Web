@@ -163,6 +163,144 @@ function checkClientSideGuardrails(text = "", storeInfo = {}) {
   return null;
 }
 
+
+/**
+ * Robustly parses LLM raw text to extract:
+ * 1. [PRODUCT:id1, id2, ...] tags -> interactive product cards
+ * 2. [ACTION:...] tags -> action buttons (maps, builder, catalog, whatsapp, social, cart)
+ * 3. Strips all system tags, orphan bullet points, and leftover brackets
+ */
+export function parseBotResponse(rawText = "", products = []) {
+  let cleanText = String(rawText || "");
+  const foundProductIds = [];
+  const rawActions = [];
+
+  // 1. Extract [PRODUCT:id1, id2, ...] tags (case-insensitive, whitespace & markdown tolerant)
+  const productRegex = /(?:\*{0,2}|`?)\s*\[\s*PRODUCT\s*:\s*([a-zA-Z0-9_,\s-]+)\s*\]\s*(?:\*{0,2}|`?)/gi;
+  let prodMatch;
+  while ((prodMatch = productRegex.exec(cleanText)) !== null) {
+    if (prodMatch[1]) {
+      const ids = prodMatch[1].split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
+      ids.forEach((id) => foundProductIds.push(id));
+    }
+  }
+  cleanText = cleanText.replace(productRegex, "");
+
+  // 2. Extract [ACTION:BUILDER] / [ACTION:PCBUILDER] / [ACTION:ARMAR]
+  const builderRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:BUILDER|PC_?BUILDER|ARMAR(?:_PC)?|CONFIGURADOR)\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (builderRegex.test(cleanText)) {
+    rawActions.push({ type: "builder", label: "Armar PC personalizada" });
+    cleanText = cleanText.replace(builderRegex, "");
+  }
+
+  // 3. Extract [ACTION:CATALOG] / [ACTION:CATALOGO] / [ACTION:TIENDA]
+  const catalogRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:CATALOG(?:O|UE)?|CAT[AÁ]LOGO|TIENDA|STORE|PRODUCTOS)\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (catalogRegex.test(cleanText)) {
+    rawActions.push({ type: "catalog", label: "Ver catálogo" });
+    cleanText = cleanText.replace(catalogRegex, "");
+  }
+
+  // 4. Extract [ACTION:MAPS] / [ACTION:MAP] / [ACTION:UBICACION] / [ACTION:LOCATION]
+  const mapsRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:MAPS?|UBICACI[OÓ]N|LOCATION|MAPA|GOOGLE_?MAPS?)\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (mapsRegex.test(cleanText)) {
+    rawActions.push({ type: "maps", label: "Ubicación en Google Maps" });
+    cleanText = cleanText.replace(mapsRegex, "");
+  }
+
+  // 5. Extract [ACTION:WHATSAPP:text] or [ACTION:WHATSAPP]
+  const waRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:WHATSAPP|WSP|WA)(?:\s*:\s*([^\]]+))?\s*\]\s*(?:\*{0,2}|`?)/gi;
+  let waMatch;
+  while ((waMatch = waRegex.exec(cleanText)) !== null) {
+    const customMsg = waMatch[1]?.trim() || "Hola Spartan Games, deseo realizar una consulta sobre sus productos";
+    rawActions.push({ type: "whatsapp", text: customMsg, label: "Consultar por WhatsApp" });
+  }
+  cleanText = cleanText.replace(waRegex, "");
+
+  // 6. Extract [ACTION:FACEBOOK]
+  const fbRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*FACEBOOK\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (fbRegex.test(cleanText)) {
+    rawActions.push({ type: "facebook", label: "Facebook oficial" });
+    cleanText = cleanText.replace(fbRegex, "");
+  }
+
+  // 7. Extract [ACTION:INSTAGRAM]
+  const igRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*INSTAGRAM\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (igRegex.test(cleanText)) {
+    rawActions.push({ type: "instagram", label: "Instagram oficial" });
+    cleanText = cleanText.replace(igRegex, "");
+  }
+
+  // 8. Extract [ACTION:TIKTOK]
+  const ttRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*TIKTOK\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (ttRegex.test(cleanText)) {
+    rawActions.push({ type: "tiktok", label: "TikTok oficial" });
+    cleanText = cleanText.replace(ttRegex, "");
+  }
+
+  // 9. Extract [ACTION:ADDTOCART:id1,id2,...]
+  const addCartRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:ADDTOCART|ADD_TO_CART|CARRITO|AGREGAR_CARRITO)\s*:\s*([^\]]+)\s*\]\s*(?:\*{0,2}|`?)/gi;
+  let addCartMatch;
+  while ((addCartMatch = addCartRegex.exec(cleanText)) !== null) {
+    const ids = addCartMatch[1].split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
+    if (ids.length > 0) {
+      rawActions.push({
+        type: "add_to_cart_batch",
+        productIds: ids,
+        label: `🛒 Agregar cotización al carrito (${ids.length} componentes)`
+      });
+    }
+  }
+  cleanText = cleanText.replace(addCartRegex, "");
+
+  // 10. SAFETY SCRUB: Strip any remaining unparsed or malformed [ACTION:...] or [PRODUCT:...] tags
+  // This guarantees that raw system tags like [ACTION:XYZ] will NEVER be displayed to the user
+  cleanText = cleanText.replace(/(?:\*{0,2}|`?)\s*\[\s*(?:ACTION|PRODUCT|BOTON|BUTTON)\s*:[^\]]*\]\s*(?:\*{0,2}|`?)/gi, "");
+
+  // 11. Clean up orphan list items / bullet points left behind by extracted tags
+  cleanText = cleanText
+    .split("\n")
+    .filter((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return true;
+      if (/^[-*•]\s*$/.test(trimmed)) return false;
+      if (/^[-*•]?\s*[^:\n]{1,45}:\s*$/.test(trimmed)) {
+        if (
+          /whatsapp|cat[aá]logo|redes|facebook|instagram|tiktok|ubicaci[oó]n|maps?|proforma|armar|horario/i.test(
+            trimmed
+          )
+        ) {
+          return false;
+        }
+      }
+      return true;
+    })
+    .join("\n")
+    .trim();
+
+  // Deduplicate actions while preserving order
+  const actions = [];
+  const seenActionKeys = new Set();
+  for (const act of rawActions) {
+    const key = `${act.type}_${act.text || ""}_${(act.productIds || []).join(",")}`;
+    if (!seenActionKeys.has(key)) {
+      seenActionKeys.add(key);
+      actions.push(act);
+    }
+  }
+
+  // Match found products with actual catalog items (limit to 10 cards max, deduplicated)
+  const uniqueProductIds = Array.from(new Set(foundProductIds)).slice(0, 10);
+  const productCards = uniqueProductIds
+    .map((id) => products.find((p) => String(p.id).toLowerCase() === String(id).toLowerCase()))
+    .filter(Boolean);
+
+  return {
+    text: cleanText,
+    productCards,
+    actions
+  };
+}
+
 /**
  * Sends chat request to Netlify Function (or direct OpenRouter fallback)
  */
@@ -230,3 +368,4 @@ export async function sendChatMessage({
   console.error("[SpartanAI] All chat endpoints failed. Last error:", lastError);
   return "🛡️ En este momento no pude consultar el inventario en vivo. Escríbenos directamente a nuestro WhatsApp oficial (+51 912 930 004) para atenderte al instante en Spartan Games Compuplaza. ⚡";
 }
+

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { parseCSV, normalizeImageUrl, parseProductRow, getCachedBanners, getCachedCatalog } from "../src/services/catalogService.js";
 import { isGibberish, checkGuardrails, handler } from "../netlify/functions/chat.js";
 import { storeInfo, defaultBanners, categoriesTree } from "../src/data/storeData.js";
+import { parseBotResponse } from "../src/services/aiService.js";
 
 // ==========================================
 // 1. GOOGLE SHEETS CSV & DATA INTEGRITY
@@ -224,4 +225,61 @@ test("price filtering correctly applies min, max and clamped manual inputs", () 
   assert.equal(highEnd.length, 1);
   assert.equal(highEnd[0].name, "RTX 5080");
 });
+
+// ==========================================
+// 5. CHATBOT ACTION PARSER & ROBUSTNESS
+// ==========================================
+test("parseBotResponse extracts [ACTION:MAPS] and its variants without leaking tags to text", () => {
+  const mockCatalog = [
+    { id: "301", name: "AMD Ryzen 7 7800X3D", price: 1850 },
+    { id: "401", name: "ASUS TUF RTX 4070 Ti Super", price: 3890 }
+  ];
+
+  // 1. Standard exact format
+  const rawMsg1 = "📍 Nuestra tienda física queda en Compuplaza Int 211.\n\n[ACTION:MAPS]";
+  const res1 = parseBotResponse(rawMsg1, mockCatalog);
+  assert.equal(res1.actions.length, 1);
+  assert.equal(res1.actions[0].type, "maps");
+  assert.ok(!res1.text.includes("[ACTION:MAPS]"));
+
+  // 2. Spaces and case variations: [ACTION: MAPS], [Action: Maps], [action:ubicacion]
+  const rawMsg2 = "Dirección: Octavio Muñoz Najar 223.\n\n[ACTION: MAPS]";
+  const res2 = parseBotResponse(rawMsg2, mockCatalog);
+  assert.equal(res2.actions.length, 1);
+  assert.equal(res2.actions[0].type, "maps");
+  assert.ok(!res2.text.includes("[ACTION: MAPS]"));
+
+  const rawMsg3 = "Visítanos en Compuplaza.\n\n**[action:ubicacion]**";
+  const res3 = parseBotResponse(rawMsg3, mockCatalog);
+  assert.equal(res3.actions.length, 1);
+  assert.equal(res3.actions[0].type, "maps");
+  assert.ok(!res3.text.includes("action:ubicacion"));
+  assert.ok(!res3.text.includes("**"));
+
+  // 3. Builder and Catalog actions
+  const rawMsg4 = "Te ayudo a armar tu máquina.\n\n[ACTION:BUILDER]\n[ACTION:CATALOG]";
+  const res4 = parseBotResponse(rawMsg4, mockCatalog);
+  assert.equal(res4.actions.length, 2);
+  assert.equal(res4.actions[0].type, "builder");
+  assert.equal(res4.actions[1].type, "catalog");
+  assert.ok(!res4.text.includes("[ACTION:"));
+
+  // 4. Products and AddToCart batch
+  const rawMsg5 = "Aquí tienes la cotización:\n- Ryzen 7\n- RTX 4070\n\n[PRODUCT:301]\n[PRODUCT: 401]\n[ACTION:ADDTOCART:301,401]";
+  const res5 = parseBotResponse(rawMsg5, mockCatalog);
+  assert.equal(res5.productCards.length, 2);
+  assert.equal(res5.actions.length, 1);
+  assert.equal(res5.actions[0].type, "add_to_cart_batch");
+  assert.deepEqual(res5.actions[0].productIds, ["301", "401"]);
+  assert.ok(!res5.text.includes("[PRODUCT:"));
+  assert.ok(!res5.text.includes("[ACTION:"));
+
+  // 5. Safety scrub: any unrecognized action or product tag is cleanly removed
+  const rawMsg6 = "Mensaje con tag desconocido:\n[ACTION:UNKNOWN_FEATURE_99]\n[PRODUCT:INVALID]";
+  const res6 = parseBotResponse(rawMsg6, mockCatalog);
+  assert.ok(!res6.text.includes("[ACTION:"));
+  assert.ok(!res6.text.includes("[PRODUCT:"));
+  assert.ok(!res6.text.includes("UNKNOWN_FEATURE"));
+});
+
 
