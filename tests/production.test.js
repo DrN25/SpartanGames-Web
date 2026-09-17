@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseCSV, normalizeImageUrl, parseProductRow, getCachedBanners, getCachedCatalog } from "../src/services/catalogService.js";
-import { isGibberish, checkGuardrails, handler } from "../netlify/functions/chat.js";
+import { parseCSV, normalizeImageUrl, parseProductRow, getCachedBanners, getCachedCatalog, detectPriceChanges } from "../src/services/catalogService.js";
+import { isGibberish, checkGuardrails, handler, validateGvizQuery } from "../netlify/functions/chat.js";
 import { storeInfo, defaultBanners, categoriesTree } from "../src/data/storeData.js";
 import { parseBotResponse } from "../src/services/aiService.js";
 
@@ -280,6 +280,69 @@ test("parseBotResponse extracts [ACTION:MAPS] and its variants without leaking t
   assert.ok(!res6.text.includes("[ACTION:"));
   assert.ok(!res6.text.includes("[PRODUCT:"));
   assert.ok(!res6.text.includes("UNKNOWN_FEATURE"));
+});
+
+// ==========================================
+// 6. GVIZ TEXT-TO-SQL QUERY VALIDATION
+// ==========================================
+test("validateGvizQuery verifies SELECT syntax and blocks dangerous injections", () => {
+  // Valid queries
+  const q1 = validateGvizQuery("SELECT A, B, C WHERE D = 'Laptops' AND C <= 3500 ORDER BY C ASC LIMIT 5");
+  assert.equal(q1.valid, true);
+  assert.equal(q1.query.startsWith("SELECT"), true);
+
+  const q2 = validateGvizQuery("SELECT count(A), avg(C) WHERE C > 0");
+  assert.equal(q2.valid, true);
+
+  // Invalid: missing SELECT
+  const q3 = validateGvizQuery("DELETE FROM Products WHERE id = 1");
+  assert.equal(q3.valid, false);
+
+  // Invalid: dangerous keywords or symbols
+  const q4 = validateGvizQuery("SELECT A, B; DROP TABLE Products");
+  assert.equal(q4.valid, false);
+
+  const q5 = validateGvizQuery("SELECT <script>alert(1)</script>");
+  assert.equal(q5.valid, false);
+
+  const q6 = validateGvizQuery("");
+  assert.equal(q6.valid, false);
+});
+
+// ==========================================
+// 7. REAL-TIME PRICE & STOCK UPDATE DETECTION
+// ==========================================
+test("detectPriceChanges correctly identifies price differences and inventory changes", () => {
+  const current = [
+    { id: 1, name: "RTX 4060", price: 1450, stock: 5 },
+    { id: 2, name: "Ryzen 7 7800X3D", price: 1850, stock: 8 },
+    { id: 3, name: "RAM 32GB", price: 420, stock: 15 }
+  ];
+
+  // Case 1: No changes
+  assert.equal(detectPriceChanges(current, current).length, 0);
+
+  // Case 2: Price drop on RTX 4060 and stock drop on Ryzen 7
+  const updated = [
+    { id: 1, name: "RTX 4060", price: 1399, stock: 5 },
+    { id: 2, name: "Ryzen 7 7800X3D", price: 1850, stock: 4 },
+    { id: 3, name: "RAM 32GB", price: 420, stock: 15 }
+  ];
+
+  const diffs = detectPriceChanges(current, updated);
+  assert.equal(diffs.length, 2);
+
+  const rtxDiff = diffs.find((d) => d.id === 1);
+  assert.ok(rtxDiff);
+  assert.equal(rtxDiff.type, "price");
+  assert.equal(rtxDiff.oldPrice, 1450);
+  assert.equal(rtxDiff.newPrice, 1399);
+
+  const cpuDiff = diffs.find((d) => d.id === 2);
+  assert.ok(cpuDiff);
+  assert.equal(cpuDiff.type, "stock");
+  assert.equal(cpuDiff.oldStock, 8);
+  assert.equal(cpuDiff.newStock, 4);
 });
 
 

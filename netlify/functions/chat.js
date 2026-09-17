@@ -67,7 +67,82 @@ export function checkGuardrails(messages = []) {
 
   return null;
 }
+/**
+ * Validates GViz SQL query syntax before sending to Google Sheets
+ */
+export function validateGvizQuery(query = "") {
+  const trimmed = String(query || "").trim();
+  if (!trimmed) return { valid: false, error: "Consulta vacía" };
 
+  // Debe comenzar obligatoriamente con SELECT
+  if (!/^SELECT\s+/i.test(trimmed)) {
+    return { valid: false, error: "La consulta GViz debe iniciar con SELECT" };
+  }
+
+  // Prevenir inyección de scripts HTML o apilamiento de sentencias (; { } ` <tag)
+  if (/[{};`]|<[a-z/]/i.test(trimmed)) {
+    return { valid: false, error: "Comando o token no permitido en consulta de lectura" };
+  }
+
+  // Prevenir comandos de mutación SQL no aplicables a lectura
+  if (/\b(drop|delete|insert|update|alter|truncate|exec|execute|script)\b/i.test(trimmed)) {
+    return { valid: false, error: "Operación de mutación no permitida" };
+  }
+
+  // Solo caracteres seguros para cláusulas de consulta GViz
+  if (!/^[A-Za-z0-9_.,\s'"()=<>!+/*%-]+$/.test(trimmed)) {
+    return { valid: false, error: "Caracteres no permitidos en la consulta" };
+  }
+
+  return { valid: true, query: trimmed };
+}
+
+/**
+ * Executes a sanitized GViz SQL query directly against the Google Sheets visualization API
+ */
+export async function executeGvizQuery(query, sheetId) {
+  const validation = validateGvizQuery(query);
+  if (!validation.valid) {
+    return { ok: false, error: validation.error };
+  }
+
+  const sid = sheetId || (process.env.GOOGLE_SHEET_ID || "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno").trim();
+  const url = `https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:json&sheet=Productos&tq=${encodeURIComponent(validation.query)}`;
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      return { ok: false, error: `Google Sheets HTTP ${res.status}` };
+    }
+
+    const rawText = await res.text();
+    // Parse Google's JSON wrapper: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+    const jsonStr = rawText.replace(/^\/\*[\s\S]*?\*\/\s*/, "").replace(/^.*setResponse\(|\);?\s*$/g, "");
+    const data = JSON.parse(jsonStr);
+
+    if (data.status === "error") {
+      return { ok: false, error: data.errors?.[0]?.message || "Error en la consulta GViz" };
+    }
+
+    const cols = (data.table?.cols || []).map((c, i) => c.label || c.id || `Col_${i}`);
+    const rows = (data.table?.rows || []).map((r) => {
+      const rowObj = {};
+      (r.c || []).forEach((cell, idx) => {
+        const colName = cols[idx] || `Col_${idx}`;
+        rowObj[colName] = cell ? (cell.f !== undefined ? cell.f : cell.v) : null;
+      });
+      return rowObj;
+    });
+
+    return { ok: true, rows, count: rows.length };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
 export async function handler(event) {
   if (event.httpMethod === "OPTIONS") {
     return {
@@ -242,6 +317,11 @@ FORMATO Y ETIQUETAS DE ACCIÓN:
    - [ACTION:TIKTOK] si el usuario pregunta por TikTok.
    - [ACTION:MAPS] si el usuario pregunta cómo llegar, pide la dirección o pide la ubicación en mapa.
 
+HERRAMIENTA DE CONSULTA SQL EN VIVO (GViz):
+- Tienes acceso a la función 'consultar_catalogo_sheets' para consultar en tiempo real Google Sheets con SQL cuando el cliente pida filtrar por presupuestos específicos, encontrar el más barato/caro, o contar disponibilidad en todo el catálogo.
+- Columnas: A: ID, B: Nombre, C: Precio (S/.), D: Categoría, E: Stock, F: Marca.
+- Ejemplo: SELECT A, B, C, E WHERE D = 'Procesadores' AND C <= 1500 ORDER BY C ASC LIMIT 5.
+
 EJEMPLO EXACTO DE CIERRE CON MAPS:
 📍 Nuestra tienda física queda en Calle Octavio Muñoz Najar 223 Int 211 Compuplaza, Arequipa. Atendemos de Lunes a Sábado de 11:00 am a 8:00 pm.
 
@@ -252,6 +332,31 @@ EJEMPLO EXACTO DE CIERRE CON MAPS:
       ...(Array.isArray(messages) ? messages : [])
     ];
 
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "consultar_catalogo_sheets",
+          description: "Consulta el catálogo completo de Google Sheets mediante SQL seguro (GViz). Columnas: A: ID, B: Nombre, C: Precio (S/.), D: Categoría, E: Stock, F: Marca.",
+          parameters: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "Sentencia SQL GViz iniciando obligatoriamente con SELECT (ej: SELECT A, B, C, E WHERE C <= 2500 ORDER BY C ASC LIMIT 5)"
+              }
+            },
+            required: ["query"]
+          }
+        }
+      }
+    ];
+
+    let modelToUse = (process.env.OPENROUTER_MODEL || process.env.VITE_OPENROUTER_MODEL || "").trim().replace(/^["']|["']$/g, "");
+    if (!modelToUse || modelToUse === "undefined" || modelToUse === "null") {
+      modelToUse = "openai/gpt-5.6-luna";
+    }
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -261,8 +366,9 @@ EJEMPLO EXACTO DE CIERRE CON MAPS:
         "X-Title": "Spartan Games AI"
       },
       body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL || "openai/gpt-5.6-luna",
+        model: modelToUse,
         messages: formattedMessages,
+        tools,
         temperature: 0.35,
         max_tokens: 900
       })
@@ -279,7 +385,71 @@ EJEMPLO EXACTO DE CIERRE CON MAPS:
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || "En este momento no pude consultar el inventario. Escríbenos directamente a nuestro WhatsApp oficial.";
+    let assistantMsg = data.choices?.[0]?.message;
+
+    // Si el LLM decide invocar la herramienta SQL sobre Google Sheets
+    if (assistantMsg?.tool_calls && assistantMsg.tool_calls.length > 0) {
+      const call = assistantMsg.tool_calls[0];
+      if (call.function?.name === "consultar_catalogo_sheets") {
+        let parsedQuery = "";
+        try {
+          const args = JSON.parse(call.function.arguments || "{}");
+          parsedQuery = args.query || "";
+        } catch (e) {
+          parsedQuery = "";
+        }
+
+        const queryResult = await executeGvizQuery(parsedQuery);
+
+        const followUpMessages = [
+          ...formattedMessages,
+          assistantMsg,
+          {
+            role: "tool",
+            tool_call_id: call.id,
+            content: JSON.stringify(queryResult)
+          }
+        ];
+
+        const followUpRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://spartangames.pe",
+            "X-Title": "Spartan Games AI"
+          },
+          body: JSON.stringify({
+            model: modelToUse,
+            messages: followUpMessages,
+            temperature: 0.35,
+            max_tokens: 900
+          })
+        });
+
+        if (followUpRes.ok) {
+          const followUpData = await followUpRes.json();
+          const finalReply = followUpData.choices?.[0]?.message?.content;
+          if (finalReply) {
+            return {
+              statusCode: 200,
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+              },
+              body: JSON.stringify({
+                reply: finalReply,
+                usage: followUpData.usage,
+                model: followUpData.model,
+                gvizExecuted: true
+              })
+            };
+          }
+        }
+      }
+    }
+
+    const reply = assistantMsg?.content || "En este momento no pude consultar el inventario. Escríbenos directamente a nuestro WhatsApp oficial.";
 
     return {
       statusCode: 200,

@@ -14,13 +14,15 @@ import Footer from "./components/Footer";
 import HeroBannerCarousel from "./components/HeroBannerCarousel";
 import CategorySlider from "./components/CategorySlider";
 import CustomerReviewsSection from "./components/CustomerReviewsSection";
+import PriceUpdateToast from "./components/PriceUpdateToast";
 import {
   fetchLiveCatalog,
   getCachedCatalog,
   getCachedCategories,
   getCachedConfig,
   getCachedBanners,
-  countCategories
+  countCategories,
+  detectPriceChanges
 } from "./services/catalogService";
 import {
   Sparkles,
@@ -91,9 +93,59 @@ export default function App() {
     }
   };
 
+  // State for live price/inventory update toast notification
+  const [pendingUpdate, setPendingUpdate] = useState(null);
+
+  const handleApplyPendingUpdate = () => {
+    if (!pendingUpdate?.freshData) return;
+    const { freshData } = pendingUpdate;
+    if (freshData.products && freshData.products.length > 0) {
+      setProducts(freshData.products);
+      setSelectedProduct((prev) => {
+        if (!prev) return freshData.products[0];
+        const match = freshData.products.find((p) => p.id === prev.id);
+        return match || freshData.products[0];
+      });
+    }
+    if (freshData.categories && freshData.categories.length > 0) {
+      setCategories(freshData.categories);
+    }
+    if (freshData.storeInfo) {
+      setStoreInfo(freshData.storeInfo);
+    }
+    if (freshData.banners && freshData.banners.length > 0) {
+      setBanners(freshData.banners);
+    }
+    setLastSyncTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    setPendingUpdate(null);
+  };
+
+  const productsRef = useRef(products);
   useEffect(() => {
-    // Initial fetch on mount
+    productsRef.current = products;
+  }, [products]);
+
+  useEffect(() => {
+    // Initial fetch on mount (run ONLY once)
     handleSyncCatalog(false);
+
+    // Check periodically for price updates without blocking the customer
+    const interval = setInterval(async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      try {
+        const fresh = await fetchLiveCatalog(true);
+        if (fresh?.products?.length > 0 && productsRef.current?.length > 0) {
+          const diffs = detectPriceChanges(productsRef.current, fresh.products);
+          if (diffs.length > 0) {
+            setPendingUpdate({ freshData: fresh, changes: diffs });
+          }
+        }
+      } catch (err) {
+        // Silent error
+      }
+    }, 60 * 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // Theme State: Light Mode is PRIMARY by default
@@ -872,6 +924,15 @@ export default function App() {
         onClose={() => setIsLocationOpen(false)}
         isDarkMode={isDarkMode}
         storeInfo={storeInfo}
+      />
+
+      {/* Floating Live Price / Inventory Update Toast */}
+      <PriceUpdateToast
+        isOpen={Boolean(pendingUpdate)}
+        changedCount={pendingUpdate?.changes?.length || 0}
+        onApply={handleApplyPendingUpdate}
+        onDismiss={() => setPendingUpdate(null)}
+        isDarkMode={isDarkMode}
       />
 
       {/* Floating AI Assistant Chat powered by OpenRouter GPT-5.6 Luna with live catalog */}

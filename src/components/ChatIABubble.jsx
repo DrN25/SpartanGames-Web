@@ -642,16 +642,16 @@ export default function ChatIABubble({
           style={{
             width: isMaximized
               ? "min(920px, calc(100vw - 2rem))"
-              : `${Math.min(dimensions.width, typeof window !== "undefined" ? window.innerWidth - 32 : 420)}px`,
+              : `${Math.min(dimensions.width, typeof window !== "undefined" ? window.innerWidth - 24 : 420)}px`,
             height: isMaximized
-              ? "calc(100vh - 100px)"
-              : `${Math.min(dimensions.height, typeof window !== "undefined" ? window.innerHeight - 100 : 560)}px`,
-            maxWidth: "calc(100vw - 2rem)",
-            maxHeight: "calc(100vh - 100px)",
-            minWidth: "320px",
-            minHeight: "380px"
+              ? "calc(100dvh - 110px)"
+              : `${Math.min(dimensions.height, typeof window !== "undefined" ? window.innerHeight - 120 : 560)}px`,
+            maxWidth: "calc(100vw - 1.5rem)",
+            maxHeight: "calc(100dvh - 110px)",
+            minWidth: "min(320px, calc(100vw - 1.5rem))",
+            minHeight: "340px"
           }}
-          className={`fixed bottom-24 right-4 sm:right-6 z-50 rounded-3xl border-0 shadow-2xl shadow-black/80 flex flex-col overflow-hidden select-text origin-bottom-right ${
+          className={`fixed bottom-20 right-3 sm:bottom-24 sm:right-6 z-50 rounded-3xl border-0 shadow-2xl shadow-black/80 flex flex-col overflow-hidden select-text origin-bottom-right ${
             isClosingChat ? "animate-spartan-chat-exit" : "animate-spartan-chat"
           } ${
             isDarkMode
@@ -659,29 +659,29 @@ export default function ChatIABubble({
               : "bg-white text-slate-900"
           }`}
         >
-          {/* Top Edge Resize Zone */}
+          {/* Top Edge Resize Zone (Desktop only) */}
           {!isMaximized && (
             <div
               onPointerDown={(e) => handleResizeStart("top", e)}
-              className="absolute top-0 left-4 right-4 h-2 cursor-ns-resize z-30"
+              className="hidden sm:block absolute top-0 left-4 right-4 h-2 cursor-ns-resize z-30"
               title="Ajustar altura"
             />
           )}
 
-          {/* Left Edge Resize Zone */}
+          {/* Left Edge Resize Zone (Desktop only) */}
           {!isMaximized && (
             <div
               onPointerDown={(e) => handleResizeStart("left", e)}
-              className="absolute top-4 bottom-4 left-0 w-2 cursor-ew-resize z-30"
+              className="hidden sm:block absolute top-4 bottom-4 left-0 w-2 cursor-ew-resize z-30"
               title="Ajustar ancho"
             />
           )}
 
-          {/* Top-Left Corner Resize Zone */}
+          {/* Top-Left Corner Resize Zone (Desktop only) */}
           {!isMaximized && (
             <div
               onPointerDown={(e) => handleResizeStart("both", e)}
-              className="absolute top-0 left-0 w-5 h-5 cursor-nwse-resize z-40"
+              className="hidden sm:block absolute top-0 left-0 w-5 h-5 cursor-nwse-resize z-40"
               title="Ajustar tamaño"
             />
           )}
@@ -703,10 +703,11 @@ export default function ChatIABubble({
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5" title="En línea" />
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {/* Maximize/Restore button only on desktop where horizontal expansion makes sense */}
               <button
                 onClick={() => setIsMaximized(!isMaximized)}
-                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="hidden sm:inline-flex p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title={isMaximized ? "Restaurar tamaño" : "Maximizar ventana"}
                 aria-label={isMaximized ? "Restaurar tamaño" : "Maximizar ventana"}
               >
@@ -719,7 +720,7 @@ export default function ChatIABubble({
 
               <button
                 onClick={handleResetChat}
-                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Reiniciar chat"
                 aria-label="Reiniciar chat"
               >
@@ -728,11 +729,11 @@ export default function ChatIABubble({
 
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-                title="Cerrar"
-                aria-label="Cerrar ventana"
+                className="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+                title="Cerrar ventana"
+                aria-label="Cerrar chat"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -971,6 +972,7 @@ export default function ChatIABubble({
           <form
             onSubmit={(e) => {
               e.preventDefault();
+              if (isTyping || !inputMsg.trim()) return;
               handleSendMessage(inputMsg);
             }}
             className={`p-3 border-t flex items-center gap-2 flex-shrink-0 ${
@@ -981,10 +983,9 @@ export default function ChatIABubble({
           >
             <input
               type="text"
-              placeholder="Escribe tu consulta sobre stock, precios o armado..."
+              placeholder={isTyping ? "Escribiendo... Puedes redactar tu siguiente consulta" : "Escribe tu consulta sobre stock, precios o armado..."}
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
-              disabled={isTyping}
               className={`flex-1 py-2 px-3 rounded-xl text-xs border outline-none transition-all ${
                 isDarkMode
                   ? "bg-[#131923] border-gray-800 text-white placeholder-gray-500 focus:border-[#FFDE17]"
@@ -994,10 +995,14 @@ export default function ChatIABubble({
             <button
               type="submit"
               disabled={!inputMsg.trim() || isTyping}
-              className="p-2 rounded-xl bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 disabled:opacity-40 transition-colors flex-shrink-0 shadow-xs font-bold cursor-pointer"
+              className="p-2 rounded-xl bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex-shrink-0 shadow-xs font-bold cursor-pointer"
               aria-label="Enviar mensaje"
             >
-              <Send className="w-4 h-4" />
+              {isTyping ? (
+                <div className="w-4 h-4 rounded-full border-2 border-slate-950 border-t-transparent animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
             </button>
           </form>
         </div>

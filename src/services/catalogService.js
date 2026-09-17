@@ -344,6 +344,35 @@ export function countCategories(categoriesList, productsList) {
 }
 
 /**
+ * Detects price and stock changes between current catalog and newly fetched catalog
+ */
+export function detectPriceChanges(currentProducts = [], newProducts = []) {
+  if (!currentProducts?.length || !newProducts?.length) return [];
+  const changes = [];
+  const currentMap = new Map(currentProducts.map((p) => [String(p.id), p]));
+
+  for (const next of newProducts) {
+    const prev = currentMap.get(String(next.id));
+    if (prev) {
+      const priceChanged = Math.abs(Number(prev.price) - Number(next.price)) > 0.01;
+      const stockChanged = Number(prev.stock) !== Number(next.stock);
+      if (priceChanged || stockChanged) {
+        changes.push({
+          id: next.id,
+          name: next.name,
+          oldPrice: Number(prev.price),
+          newPrice: Number(next.price),
+          oldStock: Number(prev.stock),
+          newStock: Number(next.stock),
+          type: priceChanged ? "price" : "stock"
+        });
+      }
+    }
+  }
+  return changes;
+}
+
+/**
  * Fetches all tabs in parallel (Productos, Categorias, Configuracion, Banners)
  */
 export async function fetchLiveCatalog(force = false) {
@@ -358,6 +387,41 @@ export async function fetchLiveCatalog(force = false) {
         storeInfo: getCachedConfig(),
         banners: getCachedBanners()
       };
+    }
+
+    // 1. Intentar primero a través del proxy serverless seguro (/api/catalog)
+    try {
+      const endpoints = ["/api/catalog", "/.netlify/functions/catalog"];
+      for (const endpoint of endpoints) {
+        const proxyRes = await fetch(`${endpoint}?_t=${now}`);
+        if (proxyRes.ok) {
+          const contentType = proxyRes.headers.get("content-type") || "";
+          if (contentType.includes("application/json")) {
+            const proxyData = await proxyRes.json();
+            if (proxyData?.products && Array.isArray(proxyData.products) && proxyData.products.length > 0) {
+              const bannerIds = [5080, 801, 802, 803];
+              bannerIds.forEach((bId) => {
+                if (!proxyData.products.some((p) => p.id === bId || String(p.id) === String(bId))) {
+                  const fallbackProd = defaultProducts.find((p) => p.id === bId);
+                  if (fallbackProd) proxyData.products.push(fallbackProd);
+                }
+              });
+
+              localStorage.setItem(CACHE_KEY, JSON.stringify(proxyData.products));
+              localStorage.setItem(CACHE_TIME_KEY, String(now));
+
+              return {
+                products: proxyData.products,
+                categories: countCategories(getCachedCategories(), proxyData.products),
+                storeInfo: getCachedConfig(),
+                banners: getCachedBanners()
+              };
+            }
+          }
+        }
+      }
+    } catch (proxyErr) {
+      // Fallback a lectura directa si el proxy no responde
     }
 
     const [prodCsv, catCsv, cfgCsv, banCsv] = await Promise.allSettled([
