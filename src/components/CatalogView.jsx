@@ -29,9 +29,90 @@ export default function CatalogView({
 }) {
   const [viewMode, setViewMode] = useState("grid");
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [priceRange, setPriceRange] = useState([0, 8000]);
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
+
+  const maxCatalogPrice = useMemo(() => {
+    if (!products || products.length === 0) return 8000;
+    const highest = Math.max(...products.map((p) => p.price || 0));
+    return Math.max(8000, Math.ceil(highest / 500) * 500);
+  }, [products]);
+
+  const [priceRange, setPriceRange] = useState([0, 8000]);
+  const [minInput, setMinInput] = useState("0");
+  const [maxInput, setMaxInput] = useState("8000");
+
+  useEffect(() => {
+    setMinInput(priceRange[0].toString());
+    setMaxInput(priceRange[1].toString());
+  }, [priceRange]);
+
+  const handleMinInputChange = (e) => {
+    const raw = e.target.value;
+    setMinInput(raw);
+    if (raw === "") return;
+    const num = Number(raw);
+    if (!isNaN(num) && num >= 0 && num <= priceRange[1]) {
+      setPriceRange([num, priceRange[1]]);
+    }
+  };
+
+  const handleMinInputBlur = () => {
+    let num = Number(minInput);
+    if (minInput === "" || isNaN(num) || num < 0) {
+      num = 0;
+    }
+    let newMax = priceRange[1];
+    if (num > newMax) {
+      newMax = Math.min(maxCatalogPrice, num);
+    }
+    setMinInput(num.toString());
+    setPriceRange([num, newMax]);
+  };
+
+  const handleMaxInputChange = (e) => {
+    const raw = e.target.value;
+    setMaxInput(raw);
+    if (raw === "") return;
+    const num = Number(raw);
+    if (!isNaN(num) && num >= priceRange[0] && num <= maxCatalogPrice) {
+      setPriceRange([priceRange[0], num]);
+    }
+  };
+
+  const handleMaxInputBlur = () => {
+    let num = Number(maxInput);
+    if (maxInput === "" || isNaN(num)) {
+      num = maxCatalogPrice;
+    }
+    let newMin = priceRange[0];
+    if (num < newMin) {
+      newMin = Math.max(0, num);
+    }
+    if (num > maxCatalogPrice) {
+      num = maxCatalogPrice;
+    }
+    setMaxInput(num.toString());
+    setPriceRange([newMin, num]);
+  };
+
+  const handleMinSliderChange = (e) => {
+    const val = Number(e.target.value);
+    if (val > priceRange[1]) {
+      setPriceRange([val, val]);
+    } else {
+      setPriceRange([val, priceRange[1]]);
+    }
+  };
+
+  const handleMaxSliderChange = (e) => {
+    const val = Number(e.target.value);
+    if (val < priceRange[0]) {
+      setPriceRange([val, val]);
+    } else {
+      setPriceRange([priceRange[0], val]);
+    }
+  };
 
   const availableBrands = useMemo(() => {
     const brandsMap = {};
@@ -50,14 +131,15 @@ export default function CatalogView({
   };
 
   const handleQuickPrice = (min, max) => {
-    setPriceRange([min, max]);
+    const boundMax = Math.min(max, maxCatalogPrice);
+    setPriceRange([min, boundMax]);
   };
 
   const resetFilters = () => {
     onSelectCategory(null);
     onSearchChange("");
     setSelectedBrands([]);
-    setPriceRange([0, 8000]);
+    setPriceRange([0, maxCatalogPrice]);
     setOnlyInStock(false);
     setSortBy("featured");
   };
@@ -67,7 +149,7 @@ export default function CatalogView({
     Boolean(searchQuery) ||
     selectedBrands.length > 0 ||
     priceRange[0] > 0 ||
-    priceRange[1] < 8000 ||
+    priceRange[1] < maxCatalogPrice ||
     onlyInStock;
 
   const filteredProducts = useMemo(() => {
@@ -215,7 +297,7 @@ export default function CatalogView({
             {/* Categorías */}
             <div className="mb-6">
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-3">
-                CategoriasP
+                Categorías
               </h3>
               <div className="space-y-1">
                 <button
@@ -265,70 +347,159 @@ export default function CatalogView({
 
             {/* Rango de Precios */}
             <div className="mb-6 pt-5 border-t border-slate-200 dark:border-gray-800">
-              <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-3">
-                Rango de Precio (S/.)
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-gray-400">
+                  Rango de Precio
+                </h3>
+                {(priceRange[0] > 0 || priceRange[1] < maxCatalogPrice) && (
+                  <button
+                    type="button"
+                    onClick={() => setPriceRange([0, maxCatalogPrice])}
+                    className="text-[10px] text-amber-600 dark:text-[#FFDE17] hover:underline font-bold"
+                  >
+                    Restablecer
+                  </button>
+                )}
+              </div>
 
+              {/* Entradas Manuales de Números (Min / Max) */}
               <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="p-2 rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-black/30 text-xs">
-                  <span className="text-[10px] text-slate-400 block font-semibold">Min</span>
-                  <span className="font-mono font-bold">S/. {priceRange[0]}</span>
+                <div className={`p-2 rounded-xl border transition-all ${
+                  isDarkMode
+                    ? "bg-[#0b0e14] border-gray-800 focus-within:border-[#FFDE17]"
+                    : "bg-slate-50 border-slate-200 focus-within:border-amber-500 focus-within:bg-white"
+                }`}>
+                  <label htmlFor="price-min-input" className="text-[10px] text-slate-400 dark:text-gray-400 block font-bold uppercase tracking-wider mb-0.5">
+                    Mínimo
+                  </label>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-mono font-bold text-slate-400 dark:text-gray-500 select-none">S/.</span>
+                    <input
+                      id="price-min-input"
+                      type="number"
+                      min="0"
+                      max={maxCatalogPrice}
+                      step="10"
+                      value={minInput}
+                      onChange={handleMinInputChange}
+                      onBlur={handleMinInputBlur}
+                      onKeyDown={(e) => e.key === "Enter" && handleMinInputBlur()}
+                      className="w-full bg-transparent font-mono font-bold text-xs text-slate-900 dark:text-white outline-none"
+                      placeholder="0"
+                    />
+                  </div>
                 </div>
-                <div className="p-2 rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-black/30 text-xs">
-                  <span className="text-[10px] text-slate-400 block font-semibold">Max</span>
-                  <span className="font-mono font-bold">S/. {priceRange[1]}</span>
+
+                <div className={`p-2 rounded-xl border transition-all ${
+                  isDarkMode
+                    ? "bg-[#0b0e14] border-gray-800 focus-within:border-[#FFDE17]"
+                    : "bg-slate-50 border-slate-200 focus-within:border-amber-500 focus-within:bg-white"
+                }`}>
+                  <label htmlFor="price-max-input" className="text-[10px] text-slate-400 dark:text-gray-400 block font-bold uppercase tracking-wider mb-0.5">
+                    Máximo
+                  </label>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-mono font-bold text-slate-400 dark:text-gray-500 select-none">S/.</span>
+                    <input
+                      id="price-max-input"
+                      type="number"
+                      min="0"
+                      max={maxCatalogPrice}
+                      step="10"
+                      value={maxInput}
+                      onChange={handleMaxInputChange}
+                      onBlur={handleMaxInputBlur}
+                      onKeyDown={(e) => e.key === "Enter" && handleMaxInputBlur()}
+                      className="w-full bg-transparent font-mono font-bold text-xs text-slate-900 dark:text-white outline-none"
+                      placeholder={String(maxCatalogPrice)}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Slider Nativo */}
-              <input
-                type="range"
-                min="0"
-                max="8000"
-                step="100"
-                value={priceRange[1]}
-                onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-                className="w-full accent-[#FFDE17] cursor-pointer mb-3"
-              />
+              {/* Sliders: Límite Inferior y Límite Superior */}
+              <div className="space-y-3 mb-4">
+                <div>
+                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-1">
+                    <span>Desde (mínimo):</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17] whitespace-nowrap shrink-0">
+                      S/. {priceRange[0]}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    aria-label="Precio mínimo"
+                    min="0"
+                    max={maxCatalogPrice}
+                    step="50"
+                    value={priceRange[0]}
+                    onChange={handleMinSliderChange}
+                    className="w-full accent-[#FFDE17] cursor-pointer h-1.5 bg-slate-200 dark:bg-gray-800 rounded-lg appearance-none"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-1">
+                    <span>Hasta (máximo):</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17] whitespace-nowrap shrink-0">
+                      S/. {priceRange[1]}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    aria-label="Precio máximo"
+                    min="0"
+                    max={maxCatalogPrice}
+                    step="50"
+                    value={priceRange[1]}
+                    onChange={handleMaxSliderChange}
+                    className="w-full accent-[#FFDE17] cursor-pointer h-1.5 bg-slate-200 dark:bg-gray-800 rounded-lg appearance-none"
+                  />
+                </div>
+              </div>
 
               {/* Botones Rápidos de Presupuesto */}
               <div className="grid grid-cols-2 gap-1.5">
                 <button
+                  type="button"
                   onClick={() => handleQuickPrice(0, 500)}
-                  className={`py-1 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
+                  className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
                     priceRange[0] === 0 && priceRange[1] === 500
                       ? isDarkMode ? "bg-[#FFDE17] text-black border-[#FFDE17]" : "bg-slate-900 text-white border-slate-900"
-                      : isDarkMode ? "border-gray-800 hover:border-gray-700" : "border-slate-200 hover:border-slate-300"
+                      : isDarkMode ? "border-gray-800 hover:border-gray-700 text-gray-300" : "border-slate-200 hover:border-slate-300 text-slate-700"
                   }`}
                 >
                   Hasta S/. 500
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleQuickPrice(500, 1500)}
-                  className={`py-1 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
+                  className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
                     priceRange[0] === 500 && priceRange[1] === 1500
                       ? isDarkMode ? "bg-[#FFDE17] text-black border-[#FFDE17]" : "bg-slate-900 text-white border-slate-900"
-                      : isDarkMode ? "border-gray-800 hover:border-gray-700" : "border-slate-200 hover:border-slate-300"
+                      : isDarkMode ? "border-gray-800 hover:border-gray-700 text-gray-300" : "border-slate-200 hover:border-slate-300 text-slate-700"
                   }`}
                 >
                   S/. 500 - 1500
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleQuickPrice(1500, 3000)}
-                  className={`py-1 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
+                  className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
                     priceRange[0] === 1500 && priceRange[1] === 3000
                       ? isDarkMode ? "bg-[#FFDE17] text-black border-[#FFDE17]" : "bg-slate-900 text-white border-slate-900"
-                      : isDarkMode ? "border-gray-800 hover:border-gray-700" : "border-slate-200 hover:border-slate-300"
+                      : isDarkMode ? "border-gray-800 hover:border-gray-700 text-gray-300" : "border-slate-200 hover:border-slate-300 text-slate-700"
                   }`}
                 >
                   S/. 1500 - 3000
                 </button>
                 <button
-                  onClick={() => handleQuickPrice(3000, 8000)}
-                  className={`py-1 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
-                    priceRange[0] === 3000 && priceRange[1] === 8000
+                  type="button"
+                  onClick={() => handleQuickPrice(3000, maxCatalogPrice)}
+                  className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
+                    priceRange[0] === 3000 && priceRange[1] === maxCatalogPrice
                       ? isDarkMode ? "bg-[#FFDE17] text-black border-[#FFDE17]" : "bg-slate-900 text-white border-slate-900"
-                      : isDarkMode ? "border-gray-800 hover:border-gray-700" : "border-slate-200 hover:border-slate-300"
+                      : isDarkMode ? "border-gray-800 hover:border-gray-700 text-gray-300" : "border-slate-200 hover:border-slate-300 text-slate-700"
                   }`}
                 >
                   Gamer Gama Alta
@@ -501,10 +672,10 @@ export default function CatalogView({
                   </button>
                 </span>
               ))}
-              {(priceRange[0] > 0 || priceRange[1] < 8000) && (
+              {(priceRange[0] > 0 || priceRange[1] < maxCatalogPrice) && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/50 text-emerald-950 dark:text-emerald-400 font-bold">
                   S/. {priceRange[0]} - S/. {priceRange[1]}
-                  <button onClick={() => setPriceRange([0, 8000])} className="hover:opacity-75">
+                  <button onClick={() => setPriceRange([0, maxCatalogPrice])} className="hover:opacity-75" aria-label="Quitar filtro de precio">
                     <X className="w-3 h-3" />
                   </button>
                 </span>

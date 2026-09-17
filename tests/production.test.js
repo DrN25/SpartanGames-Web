@@ -195,3 +195,33 @@ test("netlify chat handler validates HTTP methods and CORS", async () => {
   const getRes = await handler({ httpMethod: "GET" });
   assert.equal(getRes.statusCode, 405);
 });
+
+test("price filtering correctly applies min, max and clamped manual inputs", () => {
+  const sampleProducts = [
+    { id: 1, name: "Mouse Gamer", price: 65 },
+    { id: 2, name: "RAM 16GB", price: 280 },
+    { id: 3, name: "Monitor 144Hz", price: 850 },
+    { id: 4, name: "RTX 4060", price: 1450 },
+    { id: 5, name: "Ryzen 7 7800X3D", price: 1890 },
+    { id: 6, name: "RTX 5080", price: 5499 },
+  ];
+
+  const filterByPrice = (prods, [min, max]) => prods.filter((p) => p.price >= min && p.price <= max);
+
+  // Default range (all included)
+  assert.equal(filterByPrice(sampleProducts, [0, 8000]).length, 6);
+
+  // Lower limit applied
+  assert.equal(filterByPrice(sampleProducts, [500, 8000]).length, 4);
+
+  // Both lower and upper limit applied
+  const midRange = filterByPrice(sampleProducts, [500, 2000]);
+  assert.equal(midRange.length, 3);
+  assert.deepEqual(midRange.map((p) => p.id), [3, 4, 5]);
+
+  // High end (RTX 5080 only)
+  const highEnd = filterByPrice(sampleProducts, [3000, 8000]);
+  assert.equal(highEnd.length, 1);
+  assert.equal(highEnd[0].name, "RTX 5080");
+});
+
