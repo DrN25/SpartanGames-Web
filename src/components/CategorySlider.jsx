@@ -12,7 +12,8 @@ export default function CategorySlider({
 
   const handleScroll = (direction) => {
     if (!scrollContainerRef.current) return;
-    const scrollAmount = 300;
+    const card = scrollContainerRef.current.firstElementChild;
+    const scrollAmount = card ? card.offsetWidth + 16 : 280;
     scrollContainerRef.current.scrollBy({
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth"
@@ -25,12 +26,14 @@ export default function CategorySlider({
     const timer = setInterval(() => {
       if (!scrollContainerRef.current) return;
       const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      if (scrollLeft + clientWidth >= scrollWidth - 20) {
+      const card = scrollContainerRef.current.firstElementChild;
+      const scrollAmount = card ? card.offsetWidth + 16 : 280;
+      if (scrollLeft + clientWidth >= scrollWidth - 15) {
         scrollContainerRef.current.scrollTo({ left: 0, behavior: "smooth" });
       } else {
-        scrollContainerRef.current.scrollBy({ left: 250, behavior: "smooth" });
+        scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
       }
-    }, 4200);
+    }, 4500);
 
     return () => clearInterval(timer);
   }, [isPaused, categories]);
@@ -92,7 +95,7 @@ export default function CategorySlider({
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
         onTouchEnd={() => setIsPaused(false)}
-        className="flex items-stretch gap-3.5 sm:gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth scrollbar-none no-scrollbar select-none"
+        className="flex items-stretch gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth scrollbar-none no-scrollbar select-none"
         style={{ scrollSnapType: "x mandatory" }}
       >
         {categories.map((cat) => {
@@ -100,7 +103,7 @@ export default function CategorySlider({
             <div
               key={cat.id}
               onClick={() => onSelectCategory(cat.id)}
-              className={`group flex-shrink-0 w-44 sm:w-52 md:w-56 rounded-2xl border p-3 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
+              className={`group flex-shrink-0 w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)] md:w-[calc((100%-3rem)/4)] lg:w-[calc((100%-4rem)/5)] xl:w-[calc((100%-5rem)/6)] 2xl:w-[calc((100%-6rem)/7)] rounded-2xl border p-3.5 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
                 isDarkMode
                   ? "bg-[#111620] border-gray-800 hover:border-amber-400/60 hover:shadow-amber-500/5"
                   : "bg-white border-slate-200 hover:border-amber-400 hover:shadow-amber-500/10"

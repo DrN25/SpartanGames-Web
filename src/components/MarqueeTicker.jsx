@@ -33,19 +33,19 @@ export default function MarqueeTicker({ storeInfo = {} }) {
 
   return (
     <div className="py-2.5 overflow-hidden select-none border-y transition-colors bg-amber-50 dark:bg-[#0E121A] border-amber-200/70 dark:border-gray-800 text-slate-900 dark:text-gray-200">
-      <div className="flex w-[200%] animate-marquee">
-        <div className="flex items-center justify-around w-1/2 shrink-0 gap-10 text-xs font-semibold">
+      <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
+        <div className="flex items-center shrink-0 gap-8 pr-8 text-xs font-semibold">
           {items.map((item, idx) => (
-            <span key={idx} className="inline-flex items-center gap-2 shrink-0">
+            <span key={idx} className="inline-flex items-center gap-2 whitespace-nowrap shrink-0">
               {renderIcon(item.icon)}
               <span>{item.text}</span>
               <span className="text-slate-300 dark:text-gray-700 ml-4">•</span>
             </span>
           ))}
         </div>
-        <div className="flex items-center justify-around w-1/2 shrink-0 gap-10 text-xs font-semibold">
+        <div className="flex items-center shrink-0 gap-8 pr-8 text-xs font-semibold" aria-hidden="true">
           {items.map((item, idx) => (
-            <span key={`dup-${idx}`} className="inline-flex items-center gap-2 shrink-0">
+            <span key={`dup-${idx}`} className="inline-flex items-center gap-2 whitespace-nowrap shrink-0">
               {renderIcon(item.icon)}
               <span>{item.text}</span>
               <span className="text-slate-300 dark:text-gray-700 ml-4">•</span>

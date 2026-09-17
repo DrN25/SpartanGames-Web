@@ -11,9 +11,10 @@ export default function CustomerReviewsSection({ isDarkMode, storeInfo }) {
 
   const handleScroll = (direction) => {
     if (!scrollRef.current) return;
-    const cardWidth = 360;
+    const card = scrollRef.current.firstElementChild;
+    const scrollAmount = card ? card.offsetWidth + 16 : 360;
     scrollRef.current.scrollBy({
-      left: direction === "left" ? -cardWidth : cardWidth,
+      left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth"
     });
   };
@@ -24,10 +25,12 @@ export default function CustomerReviewsSection({ isDarkMode, storeInfo }) {
     const timer = setInterval(() => {
       if (!scrollRef.current) return;
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      const card = scrollRef.current.firstElementChild;
+      const scrollAmount = card ? card.offsetWidth + 16 : 360;
       if (scrollLeft + clientWidth >= scrollWidth - 15) {
         scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
       } else {
-        scrollRef.current.scrollBy({ left: 360, behavior: "smooth" });
+        scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
       }
     }, 4500);
 
@@ -108,7 +111,7 @@ export default function CustomerReviewsSection({ isDarkMode, storeInfo }) {
         {reviews.map((review) => (
           <div
             key={review.id}
-            className={`group flex-shrink-0 w-80 sm:w-96 rounded-2xl border p-4 flex gap-3.5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
+            className={`group flex-shrink-0 w-full sm:w-[calc(100%-0.5rem)] md:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)] rounded-2xl border p-4 flex gap-3.5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
               isDarkMode
                 ? "bg-[#111620] border-gray-800 hover:border-emerald-500/40"
                 : "bg-white border-slate-200 hover:border-emerald-400 hover:shadow-emerald-500/5"

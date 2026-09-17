@@ -213,7 +213,8 @@ export default function App() {
 
   const handlePromoScroll = (direction) => {
     if (!promoScrollRef.current) return;
-    const scrollAmount = 340;
+    const card = promoScrollRef.current.firstElementChild;
+    const scrollAmount = card ? card.offsetWidth + 16 : 320;
     promoScrollRef.current.scrollBy({
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth"
@@ -225,10 +226,12 @@ export default function App() {
     const timer = setInterval(() => {
       if (!promoScrollRef.current) return;
       const { scrollLeft, scrollWidth, clientWidth } = promoScrollRef.current;
+      const card = promoScrollRef.current.firstElementChild;
+      const scrollAmount = card ? card.offsetWidth + 16 : 320;
       if (scrollLeft + clientWidth >= scrollWidth - 15) {
         promoScrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
       } else {
-        promoScrollRef.current.scrollBy({ left: 340, behavior: "smooth" });
+        promoScrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
       }
     }, 4500);
 
@@ -277,9 +280,9 @@ export default function App() {
           <main className="space-y-12 pb-16">
             {/* Hero Grid Section: Ultrawide optimized layout */}
             <section className="pt-6 px-4 sm:px-6 lg:px-8 xl:px-12 max-w-[1720px] mx-auto">
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
-                {/* Main Hero Banner: Interactive rotating promotional carousel */}
-                <div className="xl:col-span-8 flex flex-col">
+              <div className="grid grid-cols-1 xl:grid-cols-[1fr_290px] 2xl:grid-cols-[1fr_310px] gap-5 items-stretch">
+                {/* Main Hero Banner: Expanded wide promotional carousel */}
+                <div className="flex flex-col min-w-0">
                   <HeroBannerCarousel
                     banners={banners}
                     isDarkMode={isDarkMode}
@@ -305,34 +308,34 @@ export default function App() {
                   />
                 </div>
 
-                {/* Right Retail Highlights (visible on large screens to eliminate blank side spaces) */}
-                <div className="hidden xl:flex xl:col-span-4 flex-col gap-5">
+                {/* Right Retail Highlights (Slimmer, elegant 290px sidebar) */}
+                <div className="hidden xl:flex flex-col gap-4 w-[290px] 2xl:w-[310px] shrink-0">
                   {/* Highlight Card 1: PC Configurator Promo */}
                   <div
-                    className={`rounded-3xl p-6 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
+                    className={`rounded-3xl p-5 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
                       isDarkMode
                         ? "bg-[#111620] border-gray-800"
                         : "bg-white border-slate-200"
                     }`}
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-[#FFDE17]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-[#FFDE17]">
                           Servicio Spartan
                         </span>
                         <Flame className="w-4 h-4 text-red-500" />
                       </div>
-                      <h3 className="text-lg font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
-                        Configurador Interactivo de PC Gamer
+                      <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
+                        Configurador PC Gamer
                       </h3>
-                      <p className="text-xs text-slate-600 dark:text-gray-400 leading-relaxed">
-                        Elige placa, procesador, RAM y tarjeta gráfica con compatibilidad garantizada y cotización instantánea en Soles.
+                      <p className="text-xs text-slate-600 dark:text-gray-400 leading-relaxed line-clamp-3">
+                        Elige placa, procesador, RAM y GPU con compatibilidad 100% y cotización instantánea en Soles.
                       </p>
                     </div>
 
                     <button
                       onClick={() => setIsPCBuilderOpen(true)}
-                      className="mt-4 w-full py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-900 text-white dark:bg-[#18202F] dark:text-slate-100 hover:bg-amber-500 hover:text-slate-950 dark:hover:bg-[#FFDE17] dark:hover:text-slate-950 transition-all flex items-center justify-center gap-2 shadow-xs"
+                      className="mt-3 w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-900 text-white dark:bg-[#18202F] dark:text-slate-100 hover:bg-amber-500 hover:text-slate-950 dark:hover:bg-[#FFDE17] dark:hover:text-slate-950 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Comenzar Configuración</span>
@@ -341,38 +344,38 @@ export default function App() {
 
                   {/* Highlight Card 2: Tienda Física Compuplaza */}
                   <div
-                    className={`rounded-3xl p-6 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
+                    className={`rounded-3xl p-5 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
                       isDarkMode
                         ? "bg-[#111620] border-gray-800"
                         : "bg-slate-50 border-slate-200"
                     }`}
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-400">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-400">
                           Tienda Física
                         </span>
                         <ShieldCheck className="w-4 h-4 text-emerald-500" />
                       </div>
-                      <h3 className="text-lg font-black uppercase text-slate-950 dark:text-white leading-tight mb-1">
+                      <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-1.5">
                         Calle Octavio Muñoz Najar 223 Int 211 Compuplaza
                       </h3>
-                      <p className="text-xs text-slate-600 dark:text-gray-400 leading-relaxed">
-                        Retira tu compra, asesórate con técnicos expertos y paga con 10% de reserva o tarjeta de crédito en tienda.
+                      <p className="text-xs text-slate-600 dark:text-gray-400 leading-relaxed line-clamp-2">
+                        Retira tu compra, asesórate con técnicos y paga con 10% de reserva o tarjeta.
                       </p>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="mt-3 flex flex-col gap-2">
                       <button
                         onClick={() => setIsLocationOpen(true)}
-                        className="py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all text-center flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                        className="w-full py-2 px-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all text-center flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <MapPin className="w-3.5 h-3.5" />
                         <span>Ver Ubicación</span>
                       </button>
                       <button
                         onClick={() => setIsFaqOpen(true)}
-                        className="py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider border border-slate-300 dark:border-gray-700 hover:border-slate-900 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 transition-all text-center cursor-pointer"
+                        className="w-full py-1.5 px-2.5 rounded-xl text-xs font-bold uppercase tracking-wider border border-slate-300 dark:border-gray-700 hover:border-slate-900 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 transition-all text-center cursor-pointer"
                       >
                         Horarios & FAQ
                       </button>
@@ -469,7 +472,7 @@ export default function App() {
                         <div
                           key={product.id}
                           onClick={() => handleSelectProduct(product)}
-                          className={`group flex-shrink-0 w-72 sm:w-80 rounded-3xl border p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                          className={`group flex-shrink-0 w-full sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)] xl:w-[calc((100%-3rem)/4)] rounded-3xl border p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
                             isDarkMode
                               ? "bg-gradient-to-b from-[#161D2A] to-[#111620] border-red-500/30 hover:border-red-500/60"
                               : "bg-white border-red-200 hover:border-red-400 hover:shadow-red-500/5"
