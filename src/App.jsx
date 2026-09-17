@@ -312,8 +312,9 @@ export default function App() {
                 </div>
 
                 {/* Right Retail Highlights: 3 balanced service cards (No blank voids) */}
+                {/* Right Retail Highlights: 3 balanced service cards (Harmonized Color Themes) */}
                 <div className="hidden xl:flex flex-col gap-3.5 w-[290px] 2xl:w-[310px] shrink-0">
-                  {/* Highlight Card 1: PC Configurator Promo */}
+                  {/* Highlight Card 1: PC Configurator Promo (Unified Amber/Gold Theme) */}
                   <div
                     className={`rounded-2xl p-4 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
                       isDarkMode
@@ -323,21 +324,21 @@ export default function App() {
                   >
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-[#FFDE17]">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                           Servicio Spartan
                         </span>
-                        <Flame className="w-4 h-4 text-red-500" />
+                        <Sparkles className="w-4 h-4 text-amber-500" />
                       </div>
                       <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
                         Configurador PC Gamer
                       </h3>
                       <ul className="space-y-1 text-xs text-slate-600 dark:text-gray-400">
                         <li className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                           <span>Compatibilidad 100% probada</span>
                         </li>
                         <li className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                           <span>Cotización instantánea en Soles</span>
                         </li>
                       </ul>
@@ -345,14 +346,14 @@ export default function App() {
 
                     <button
                       onClick={() => setIsPCBuilderOpen(true)}
-                      className="mt-3 w-full py-2 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-900 text-white dark:bg-[#18202F] dark:text-slate-100 hover:bg-amber-500 hover:text-slate-950 dark:hover:bg-[#FFDE17] dark:hover:text-slate-950 transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                      className="mt-3 w-full py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-slate-950" />
                       <span>Armar Mi PC Gamer</span>
                     </button>
                   </div>
 
-                  {/* Highlight Card 2: Delivery & Shipping */}
+                  {/* Highlight Card 2: Delivery & Shipping (Unified Emerald Theme) */}
                   <div
                     className={`rounded-2xl p-4 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
                       isDarkMode
@@ -362,21 +363,21 @@ export default function App() {
                   >
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-900 dark:bg-blue-500/20 dark:text-blue-400">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                           Despacho Rápido
                         </span>
-                        <Truck className="w-4 h-4 text-blue-500" />
+                        <Truck className="w-4 h-4 text-emerald-500" />
                       </div>
                       <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
                         Delivery & Envíos
                       </h3>
                       <ul className="space-y-1 text-xs text-slate-600 dark:text-gray-400">
                         <li className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                           <span>Mismo día en Arequipa</span>
                         </li>
                         <li className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                           <span>A provincias por Shalom / Olva</span>
                         </li>
                       </ul>
@@ -388,38 +389,38 @@ export default function App() {
                         const text = encodeURIComponent("Hola Spartan Games, deseo consultar por delivery y envíos.");
                         window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
                       }}
-                      className="mt-3 w-full py-2 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                      className="mt-3 w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
                     >
-                      <MessageCircle className="w-3.5 h-3.5" />
+                      <MessageCircle className="w-3.5 h-3.5 text-white" />
                       <span>Consultar Envíos</span>
                     </button>
                   </div>
 
-                  {/* Highlight Card 3: Tienda Física Compuplaza */}
+                  {/* Highlight Card 3: Tienda Física Compuplaza (Unified Blue Theme) */}
                   <div
                     className={`rounded-2xl p-4 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
                       isDarkMode
                         ? "bg-[#111620] border-gray-800"
-                        : "bg-slate-50 border-slate-200"
+                        : "bg-white border-slate-200"
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-400">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                           Tienda Física
                         </span>
-                        <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                        <MapPin className="w-4 h-4 text-blue-500" />
                       </div>
                       <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
                         Calle Octavio Muñoz Najar 223
                       </h3>
                       <ul className="space-y-1 text-xs text-slate-600 dark:text-gray-400">
                         <li className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                           <span className="line-clamp-1">Int 211 C.C. Compuplaza</span>
                         </li>
                         <li className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                           <span>Retiro con 10% y garantía</span>
                         </li>
                       </ul>
@@ -428,14 +429,14 @@ export default function App() {
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       <button
                         onClick={() => setIsLocationOpen(true)}
-                        className="py-2 px-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FFDE17] hover:bg-yellow-400 text-slate-950 transition-all text-center flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                        className="py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-blue-600 hover:bg-blue-500 text-white transition-all text-center flex items-center justify-center gap-1 shadow-sm active:scale-95 cursor-pointer"
                       >
-                        <MapPin className="w-3 h-3" />
+                        <MapPin className="w-3 h-3 text-white" />
                         <span>Ubicación</span>
                       </button>
                       <button
                         onClick={() => setIsFaqOpen(true)}
-                        className="py-2 px-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-slate-300 dark:border-gray-700 hover:border-slate-900 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 transition-all text-center cursor-pointer"
+                        className="py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-300 transition-all text-center active:scale-95 cursor-pointer"
                       >
                         Horarios
                       </button>
