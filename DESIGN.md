@@ -1,22 +1,22 @@
 ---
 name: "Spartan Games Web"
-description: "Design system for a high-performance gaming hardware e-commerce SPA. Tactical, premium, dark-first aesthetic inspired by aerospace and competitive gaming interfaces."
+description: "Sistema de diseño para tienda web de hardware gamer y estaciones de trabajo. Estética táctica, oscura y de alto rendimiento inspirada en instrumental aeroespacial e interfaces de e-sports."
 version: "2.5.0"
 status: "production"
 last_updated: "2026-09-17"
 
 colors:
-  # --- Brand ---
+  # --- Marca ---
   primary: "#FFDE17"
   primary-hover: "#E5C713"
   primary-glow: "rgba(255, 222, 23, 0.18)"
 
-  # --- Semantic ---
+  # --- Semánticos ---
   danger: "#FF334B"
   success: "#25D366"
   info: "#38BDF8"
 
-  # --- Surfaces (Dark) ---
+  # --- Superficies (Modo Oscuro) ---
   canvas-dark: "#07090D"
   surface-dark: "#0B0E14"
   card-dark: "#111620"
@@ -26,7 +26,7 @@ colors:
   text-primary-dark: "#F1F5F9"
   text-muted-dark: "#94A3B8"
 
-  # --- Surfaces (Light) ---
+  # --- Superficies (Modo Claro) ---
   canvas-light: "#F8FAFC"
   surface-light: "#FFFFFF"
   card-light: "#FFFFFF"
@@ -68,45 +68,45 @@ breakpoints:
 
 # DESIGN
 
-Design system specification for **Spartan Games Web**.
-This document defines the visual language, design tokens, component constraints, and interaction patterns.
+Especificación del sistema de diseño de **Spartan Games Web**.
+Este documento define el lenguaje visual, tokens de diseño, restricciones de componentes y patrones de interacción de la interfaz.
 
-For the software architecture (modules, data flow, invariants), see `docs/ARCHITECTURE.md`.
+Para la arquitectura de software (módulos, flujo de datos, invariantes), consulta `docs/ARCHITECTURE.md`.
 
 ---
 
-## 1. Brand Essence
+## 1. Esencia de Marca
 
-### Voice
+### Tono y Voz
 
-Spartan Games is a physical gaming hardware store in Arequipa, Peru. The brand communicates with a **tactical, direct tone**: precise technical specifications, transparent pricing in soles (S/.), and zero decorative filler. Every element exists to help the customer evaluate hardware and make a purchasing decision.
+Spartan Games opera como tienda física de hardware en Compuplaza (Arequipa, Perú). La marca se comunica con un **tono táctico y directo**: especificaciones técnicas precisas, precios definitivos en Soles (S/.) y cero contenido de relleno decorativo. Cada elemento de la pantalla existe para ayudar al usuario a evaluar componentes y tomar decisiones de compra.
 
-### Visual Identity
+### Identidad Visual
 
-The visual system draws from two sources: **aerospace instrument panels** (high contrast, information-dense, functional layouts) and **competitive gaming interfaces** (dark backgrounds, accent-driven highlights, clean typography). The result is an interface that feels premium without being opulent.
+El sistema visual combina dos influencias principales: **paneles de instrumentos aeroespaciales** (alto contraste, densidad informativa, distribución funcional) e **interfaces de e-sports competitivos** (fondos oscuros profundos, acentos dorados focalizados y tipografía limpia). El resultado es una interfaz sobria y prémium sin saturación visual.
 
-### Target Audience
+### Audiencia Objetivo
 
-| Segment | Expectations |
+| Segmento | Expectativas |
 |:---|:---|
-| Competitive Gamers | Latest-gen GPUs, CPU benchmarks, clear stock counts, fast navigation |
-| Content Creators & 3D Professionals | High-frequency RAM, NVMe Gen4/Gen5, assembly services, thermal testing data |
-| Local Customers (Arequipa / Southern Peru) | Physical stock confirmation, local payment methods (Yape, Plin), store pickup at Compuplaza |
+| Gamers Competitivos | Última generación de tarjetas de video (RTX serie 40/50), benchmarks de procesadores, stock en unidades exactas, navegación rápida |
+| Creadores de Contenido y Diseñadores 3D | Memorias de alta frecuencia, almacenamiento NVMe Gen4/Gen5, armado especializado y pruebas térmicas |
+| Clientes Locales (Arequipa y Sur del Perú) | Confirmación de stock físico en tienda, medios de pago inmediatos (Yape, Plin) y retiro en Compuplaza |
 
 ---
 
-## 2. Color System
+## 2. Sistema de Color
 
-### Design Decisions
+### Decisiones de Diseño
 
-- **Gold (`#FFDE17`) is the single accent color.** It carries all calls-to-action, active states, and price highlights. This constraint prevents visual noise from competing accent colors.
-- **Dark mode is the primary theme.** Light mode exists as an accessibility alternative, but the entire palette was designed dark-first.
-- **Red is reserved for urgency.** Flash sales, low stock warnings, and discount badges. Never for decorative emphasis.
-- **Green is reserved for WhatsApp and availability.** Stock indicators and WhatsApp buttons. Never for success toasts or generic confirmations.
+- **El dorado (`#FFDE17`) es el único color de acento de marca.** Concentra todas las llamadas a la acción (CTA), estados activos y destacados de precios. Esta restricción previene la sobrecarga visual de acentos en conflicto.
+- **El modo oscuro es el tema principal.** El modo claro existe como alternativa de accesibilidad, pero toda la paleta de colores fue concebida y probada primero para entornos oscuros.
+- **El rojo se reserva para urgencia y advertencias.** Ofertas relámpago con descuento, avisos de pocas unidades en inventario y badges de liquidación. Nunca se utiliza con fines meramente decorativos.
+- **El verde se reserva para WhatsApp y disponibilidad física.** Indicadores de stock en almacén y botones de contacto por WhatsApp. Nunca para toasts de confirmación genéricos.
 
-### Contrast Ratios (WCAG 2.1 AA)
+### Ratios de Contraste (WCAG 2.1 AA)
 
-| Token | Value | Contrast vs `canvas-dark` | Rating |
+| Token | Valor Hex | Contraste vs `canvas-dark` | Clasificación |
 |:---|:---:|:---:|:---:|
 | `primary` | `#FFDE17` | 14.2:1 | AAA |
 | `primary-hover` | `#E5C713` | 11.8:1 | AAA |
@@ -114,198 +114,196 @@ The visual system draws from two sources: **aerospace instrument panels** (high 
 | `success` | `#25D366` | 8.6:1 | AAA |
 | `info` | `#38BDF8` | 9.4:1 | AAA |
 
-### Surface Elevation (Dark Mode)
+### Elevación de Superficies (Modo Oscuro)
 
-Depth is communicated through incremental lightening of background colors, not through drop shadows alone:
+La profundidad visual se transmite mediante aclarado gradual de las superficies, no únicamente con sombras:
 
-| Level | Token | Hex | Usage |
+| Nivel | Token | Valor Hex | Uso |
 |:---|:---|:---:|:---|
-| 0 — Canvas | `canvas-dark` | `#07090D` | Page background |
-| 1 — Surface | `surface-dark` | `#0B0E14` | Navbar, Footer, Drawers |
-| 2 — Card | `card-dark` | `#111620` | Product cards, panels |
-| 3 — Hover | `card-hover-dark` | `#18202F` | Interactive hover state on cards |
+| 0 — Base | `canvas-dark` | `#07090D` | Fondo general de la aplicación |
+| 1 — Superficie | `surface-dark` | `#0B0E14` | Barras de navegación (Topbar, Navbar), Footer y Drawers |
+| 2 — Tarjeta | `card-dark` | `#111620` | Tarjetas de producto en catálogo y paneles interiores |
+| 3 — Hover | `card-hover-dark` | `#18202F` | Estado interactivo al pasar el cursor sobre tarjetas |
 
 ---
 
-## 3. Typography
+## 3. Tipografía
 
-### Font Pairing
+### Combinación de Fuentes
 
-- **Inter** (sans-serif) — All UI text: headings, body copy, buttons, labels. Chosen for its high legibility at small sizes on screens and its native tabular figures for price alignment.
-- **Consolas** (monospace) — Technical values only: prices in soles, hardware specs (MHz, W, GB), SKU codes, and code snippets in the chatbot.
+- **Inter** (sans-serif) — Texto general de la interfaz: títulos, párrafos, botones y etiquetas. Elegida por su alta legibilidad en pantallas pequeñas y sus números tabulares que alinean columnas de precios.
+- **Consolas** (monospace) — Exclusiva para valores técnicos: precios en Soles, especificaciones de hardware (MHz, Watts, GB), códigos SKU y bloques de código del asistente virtual.
 
-### Type Scale
+### Escala Tipográfica
 
-| Role | Size Range | Weight | Tracking | Usage |
+| Rol | Rango de Tamaño | Peso | Tracking | Uso |
 |:---|:---:|:---:|:---:|:---|
-| Display H1 | 32–48px | 900 (Black) | -0.025em | Hero banner title, product name |
-| Section H2 | 20–30px | 900 (Black) | 0.015em | Catalog headers, modal titles |
-| Card H3 | 14–16px | 700 (Bold) | Normal | Product card title |
-| Price | 20–24px | 900 (Black) | Normal | `S/. 1,450.00` — always monospace |
-| Body | 13–14px | 500 (Medium) | Normal | Descriptions, FAQ answers |
-| Specs | 11–12px | 600 (SemiBold) | Normal | MHz, Watts, VRAM — always monospace |
-| Badge | 10–11px | 800 (ExtraBold) | 0.05em | Stock count, discount %, brand pill |
+| Display H1 | 32–48px | 900 (Black) | -0.025em | Título principal del Hero Banner y nombre en ficha de producto |
+| Section H2 | 20–30px | 900 (Black) | 0.015em | Encabezados de catálogo y títulos de modales |
+| Card H3 | 14–16px | 700 (Bold) | Normal | Título de producto en tarjeta de grilla o lista |
+| Price | 20–24px | 900 (Black) | Normal | Precios comerciales (`S/. 1,450.00`) — siempre en monospace |
+| Body | 13–14px | 500 (Medium) | Normal | Párrafos descriptivos, respuestas de preguntas frecuentes |
+| Specs | 11–12px | 600 (SemiBold) | Normal | Frecuencias, consumos y memoria (MHz, W, VRAM) — monospace |
+| Badge | 10–11px | 800 (ExtraBold) | 0.05em | Etiquetas de stock disponible, porcentaje de descuento y marca |
 
-### Rules
+### Reglas
 
-- Prices are **always rendered in monospace** so digit columns align vertically in lists and tables.
-- Hardware specifications (clock speeds, wattage, memory) use monospace to distinguish technical data from marketing copy.
-- All heading weights are 900 (Black). Do not use lighter weights for `h1`–`h3`.
-
----
-
-## 4. Spacing & Layout
-
-### Grid
-
-All spacing is based on a **4px / 8px grid**. Margins, padding, and gaps must be multiples of 4px. The standard progression is: `4, 8, 12, 16, 24, 32, 48, 64`.
-
-### Container
-
-The maximum content width is **1720px**, centered with auto margins. This accommodates ultra-wide monitors (common among hardware enthusiasts) while maintaining readable line lengths.
-
-### Responsive Breakpoints
-
-| Breakpoint | Width | Target |
-|:---|:---:|:---|
-| `sm` | 640px | Phones in landscape, phablets |
-| `md` | 768px | Tablets |
-| `lg` | 1024px | Laptops |
-| `xl` | 1280px | Desktop 1080p |
-| `2xl` | 1536px | 2K / QHD monitors |
-
-### Border Radius Scale
-
-| Token | Value | Usage |
-|:---|:---:|:---|
-| `sm` | 6px | Badges, pagination buttons, tech chips |
-| `md` | 12px | Text inputs, standard buttons, thumbnails |
-| `lg` | 16px | Product cards, secondary containers |
-| `xl` | 24px | Modals, hero banner, navigation drawers |
-| `full` | 9999px | AI chat button, avatars, status pills |
+- Los precios se representan **siempre en fuente monospace** para mantener alineados los dígitos verticalmente en tablas y carritos.
+- Las especificaciones técnicas de hardware (frecuencias, consumo, bus) usan monospace para diferenciarse visualmente del texto comercial.
+- Los títulos `H1` a `H3` utilizan peso 900 (Black). No se admiten pesos ligeros en encabezados principales.
 
 ---
 
-## 5. Elevation & Z-Index
+## 4. Espaciado y Layout
 
-### Shadow Strategy
+### Grilla de Espaciado
 
-Dark mode shadows use `shadow-black/40` to `shadow-black/90`. Light mode shadows use standard Tailwind defaults. Elevated components always pair a shadow with a subtle border (`border-gray-800/80` in dark mode) to maintain edge definition.
+Todo espaciado se basa en una **grilla base de 4px / 8px**. Márgenes, paddings y separaciones entre elementos deben ser múltiplos de 4px. La progresión estándar es: `4, 8, 12, 16, 24, 32, 48, 64`.
 
-### Stacking Order
+### Ancho de Contenedor
 
-| Z-Index | Layer | Elements |
+El ancho máximo del canvas central es de **1720px**, centrado con márgenes automáticos (`max-w-[1720px] mx-auto`). Esto optimiza la visualización en monitores panorámicos y ultrawide comunes en usuarios de PC gaming, manteniendo un límite de lectura cómodo.
+
+### Breakpoints Responsivos
+
+| Breakpoint | Ancho Mínimo | Dispositivo Objetivo |
+|:---|:---:|:---|
+| `sm` | 640px | Teléfonos en orientación horizontal, phablets |
+| `md` | 768px | Tablets en orientación vertical |
+| `lg` | 1024px | Laptops y monitores compactos |
+| `xl` | 1280px | Monitores de escritorio estándar (1080p) |
+| `2xl` | 1536px | Monitores de alta resolución (2K / QHD) |
+
+### Escala de Radios de Curvatura
+
+| Token | Medida | Uso |
+|:---|:---:|:---|
+| `sm` | 6px | Badges de estado, botones de paginación, chips de filtro |
+| `md` | 12px | Campos de texto (inputs), botones estándar, miniaturas |
+| `lg` | 16px | Tarjetas de producto en catálogo y contenedores secundarios |
+| `xl` | 24px | Modales principales, Hero Banner y cajones laterales |
+| `full` | 9999px | Botón flotante de IA, avatares y píldoras de stock |
+
+---
+
+## 5. Elevación y Z-Index
+
+### Estrategia de Sombras
+
+En modo oscuro, las sombras utilizan intensidades profundas (`shadow-black/40` a `shadow-black/90`). Los contenedores elevados se acompañan siempre de un borde sutil (`border-gray-800/80`) para delimitar los contornos sin generar contrastes duros.
+
+### Jerarquía de Capas (Z-Index)
+
+| Z-Index | Nivel de Capa | Elementos |
 |:---:|:---|:---|
-| `0` | Canvas | Page content, sections |
-| `10` | Elevated cards | Product cards on hover |
-| `40` | Sticky nav | Topbar, Navbar with backdrop blur |
-| `50` | Overlays | All modals, drawers, toasts, chat bubble |
-| `60` | Lightbox | Fullscreen image viewer |
+| `0` | Canvas base | Contenido principal de la página, grillas y secciones |
+| `10` | Tarjetas activas | Tarjetas de producto en estado hover |
+| `40` | Navegación fija | Topbar y Navbar fija con desenfoque de fondo (*backdrop blur*) |
+| `50` | Superposiciones | Modales, cajones (*drawers*), toasts y ventana de chat IA |
+| `60` | Lightbox | Visor de imágenes de producto a pantalla completa |
 
-### Rule
+### Regla de Límite
 
-**No z-index above 60.** If a new overlay needs to appear above the lightbox, the lightbox must be dismissed first. This prevents z-index inflation.
+**No se permite ningún z-index superior a 60.** Cualquier capa emergente que requiera atención sobre el lightbox exige el cierre previo del mismo, evitando la inflación de índices de apilamiento.
 
 ---
 
-## 6. Motion
+## 6. Movimiento y Animaciones GPU
 
-### Easing
+### Curva de Aceleración
 
-All animations use a single easing curve: `cubic-bezier(0.16, 1, 0.3, 1)` — a decelerating curve inspired by macOS spring physics. This gives entrances a natural "settling" feel.
+Todas las animaciones del sistema utilizan una curva cúbica de desaceleración: `cubic-bezier(0.16, 1, 0.3, 1)`. Esta curva produce una llegada suave y natural a la posición final, similar a las transiciones nativas de interfaces de escritorio modernas.
 
-### Animation Catalog
+### Catálogo de Animaciones (`src/index.css`)
 
-All animation classes are defined in `index.css` with the `animate-spartan-*` prefix:
-
-| Class | Effect | Duration | Properties |
+| Clase | Efecto Visual | Duración | Propiedades Aceleradas |
 |:---|:---|:---:|:---|
-| `animate-spartan-fade-in` | Opacity 0 → 1 | 240ms | `opacity` |
-| `animate-spartan-modal` | Scale 0.93 → 1 + Y 18px → 0 | 280ms | `transform, opacity` |
-| `animate-spartan-drawer-right` | X 100% → 0 | 300ms | `transform` |
-| `animate-spartan-drawer-left` | X -100% → 0 | 300ms | `transform` |
-| `animate-spartan-chat` | Scale 0.84 → 1 + Y 28px → 0 | 280ms | `transform, opacity` |
-| `animate-spartan-message` | Y 10px → 0 | 220ms | `transform, opacity` |
-| `animate-spartan-glow` | Pulsing gold box-shadow | 2.5s loop | `box-shadow` |
+| `animate-spartan-fade-in` | Opacidad 0 → 1 | 240ms | `opacity` |
+| `animate-spartan-modal` | Escala 0.93 → 1 + Y 18px → 0 | 280ms | `transform, opacity` |
+| `animate-spartan-drawer-right` | Desplazamiento X 100% → 0 | 300ms | `transform` |
+| `animate-spartan-drawer-left` | Desplazamiento X -100% → 0 | 300ms | `transform` |
+| `animate-spartan-chat` | Escala 0.84 → 1 + Y 28px → 0 | 280ms | `transform, opacity` |
+| `animate-spartan-message` | Desplazamiento Y 10px → 0 | 220ms | `transform, opacity` |
+| `animate-spartan-glow` | Pulso tenue de sombra dorada | Ciclo 2.5s | `box-shadow` |
 
-Every entrance animation has a corresponding exit (`*-exit`) with symmetric timing to prevent flash-on-unmount.
+Cada animación de entrada cuenta con su contraparte de salida simétrica (`*-exit`), asegurando que ningún elemento desaparezca con cortes bruscos al desmontarse del DOM.
 
-### Rules
+### Reglas Técnicas
 
-- Animations only touch `transform` and `opacity`. Animating `width`, `height`, `top`, `left`, or `margin` is forbidden — these trigger layout recalculation and destroy 60fps performance.
-- The `useModalTransition` hook must coordinate all mount/unmount cycles. Direct conditional rendering (`{isOpen && <Modal/>}`) without the hook is forbidden because it skips exit animations.
-
----
-
-## 7. Payment Icons
-
-All payment method icons are hand-crafted SVG vectors centralized in the `Icons` component. Raster images (PNG/JPG) of payment logos are forbidden because they degrade at non-standard DPI and violate brand guidelines.
-
-| Provider | Primary Color | Secondary Color |
-|:---|:---:|:---:|
-| Yape (BCP) | `#742284` | `#00D9C0` |
-| Plin (Interbank/BBVA/Scotiabank) | `#00DFB6` | `#FF2E93` |
-| Culqi | `#FF7800` | — |
-| Visa | `#1434CB` | — |
+- Las animaciones se ejecutan exclusivamente sobre `transform` y `opacity`. Queda prohibido animar `width`, `height`, `top`, `left` o `margin`, ya que provocan recálculo de layout del navegador y degradan el rendimiento por debajo de 60 FPS.
+- Todo modal o cajón lateral debe coordinar su ciclo de vida mediante el hook `useModalTransition`. Queda prohibido el renderizado condicional directo sin retención de nodo (`{isOpen && <Modal/>}`) porque elimina la animación de salida.
 
 ---
 
-## 8. Component Constraints
+## 7. Iconografía y Medios de Pago Peruanos
 
-These rules apply to every component in the system. They exist to prevent the most common visual regressions:
+Para proteger la nitidez en pantallas de alta densidad (Retina / 4K) y mantener el rendimiento sin solicitudes de imagen adicionales, todos los sellos de medios de pago peruanos son vectores SVG puros centralizados en el componente `Icons`:
 
-### Dark Mode Borders
+| Medio de Pago | Color Primario | Color Secundario | Ubicación |
+|:---|:---:|:---:|:---|
+| Yape (BCP) | `#742284` | `#00D9C0` | Footer, Carrito de Compras y Modal de Reserva |
+| Plin (Interbank/BBVA/Scotiabank) | `#00DFB6` | `#FF2E93` | Footer, Carrito de Compras y Modal de Reserva |
+| Culqi | `#FF7800` | — | Footer y bloque informativo de pasarelas |
+| Visa | `#1434CB` | — | Footer y bloque informativo de pasarelas |
 
-In dark mode, containers use `border-gray-800/80` or `border-0` paired with deep shadows. **`border-white` and `border-slate-200` are forbidden in dark mode** — they create a harsh, out-of-place glow that breaks the surface elevation hierarchy.
-
-### Touch Targets
-
-All interactive elements on mobile must have a minimum touch area of **44 × 44px** (WCAG 2.5.5). This applies to buttons, links, and icon toggles, even if the visible element is smaller than 44px.
-
-### Mobile Overlays
-
-Drawers and the chat interface occupy **100% of the viewport** on screens below `640px`. This prevents half-visible modals and ensures ergonomic one-handed use. The close button (`X`) and minimize controls must remain accessible above the mobile keyboard at all times.
-
-### Icon Usage
-
-All icons are imported from the centralized `Icons` component. Inline SVG strings and external icon libraries (FontAwesome, Material Icons) are forbidden. Lucide React is the base icon set; custom vectors are only added for Peruvian payment providers.
-
-### Emoji Policy
-
-**Zero decorative emojis in the UI.** No rocket, fire, sparkle, or computer emojis in headings, buttons, badges, or product cards. All visual indicators use Lucide SVG icons. This is a brand constraint, not a suggestion.
+Queda prohibido utilizar imágenes rasterizadas (PNG, JPG, WebP) para logotipos de pasarelas o marcas de pago.
 
 ---
 
-## 9. Accessibility Checklist (WCAG 2.1 AA)
+## 8. Restricciones y Guardrails de Componentes
 
-- [x] All text passes 4.5:1 contrast ratio against its background
-- [x] Gold accent on dark canvas exceeds 14:1 (AAA)
-- [x] All modals and drawers close on `Escape` keypress
-- [x] Carousels support left/right arrow key navigation
-- [x] Focus rings use `focus-visible:ring-2 focus-visible:ring-[#FFDE17]`
-- [x] Breadcrumbs include `aria-label="Ruta de navegación"` and `aria-current="page"`
-- [x] Modals include `role="dialog"` and `aria-modal="true"`
-- [x] Decorative marquees include `aria-hidden="true"`
-- [x] Minimum touch target size: 44 × 44px on mobile
+Estas directrices son de cumplimiento estricto para evitar regresiones visuales:
+
+### Bordes en Modo Oscuro
+
+En modo oscuro, los contenedores utilizan bordes sutiles `border-gray-800/80` o `border-0` combinados con sombras profundas. **Quedan prohibidos los bordes blancos (`border-white`) o grises claros (`border-slate-200`) en modo oscuro**, ya que rompen la jerarquía de elevación con líneas estridentes.
+
+### Tamaño Mínimo de Área Táctil
+
+Todo control interactivo en dispositivos móviles debe cumplir con un área táctil mínima de **44 × 44px** (pauta WCAG 2.5.5). Esto aplica a botones de acción, enlaces de navegación e iconos de cierre, incluso si su representación visual gráfica es más compacta.
+
+### Superposiciones en Móvil
+
+Los cajones laterales (*drawers*) y la ventana del asistente virtual ocupan el **100% de la pantalla (`fixed inset-0`) en resoluciones menores a 640px**. Los botones de cierre (`X`) y minimizado deben permanecer fijos y accesibles en la parte superior sin ser ocultados por el teclado virtual del dispositivo.
+
+### Hub Centralizado de Iconos
+
+Todos los iconos deben importarse desde el archivo común `Icons`. No se permite la inclusión de SVGs en línea dentro de vistas ni la adición de librerías externas de iconos. La librería base es Lucide React.
+
+### Política de Emojis
+
+**Cero emojis decorativos en la interfaz.** No se admiten emojis (🚀, 🔥, ✨, 💻, etc.) en títulos, botones, tarjetas de producto ni fichas técnicas. Toda señalización visual se realiza mediante vectores SVG de Lucide.
 
 ---
 
-## 10. Governance
+## 9. Lista de Verificación de Accesibilidad (WCAG 2.1 AA)
 
-### Modifying Tokens
+- [x] Todo texto principal cumple un ratio de contraste mínimo de 4.5:1 frente a su fondo
+- [x] El acento dorado (`#FFDE17`) sobre fondo oscuro supera un ratio de 14:1 (clasificación AAA)
+- [x] Todos los modales y cajones laterales se cierran al pulsar la tecla `Escape`
+- [x] Los carruseles de productos permiten navegación por teclado con flechas izquierda y derecha
+- [x] Los estados de foco visual activo utilizan `focus-visible:ring-2 focus-visible:ring-[#FFDE17]`
+- [x] Las migas de pan incluyen `aria-label="Ruta de navegación"` y `aria-current="page"`
+- [x] Los modales declaran atributos semánticos `role="dialog"` y `aria-modal="true"`
+- [x] Las cintas de texto continuo decorativo (*marquees*) contienen `aria-hidden="true"`
+- [x] Área táctil interactiva mínima garantizada de 44 × 44px en entornos táctiles
 
-Any change to colors, typography, spacing, or radii must be updated simultaneously in:
-1. The YAML front-matter of this document
-2. The `:root` / `.dark` variables in `index.css`
-3. `tailwind.config.js` (if the token is extended there)
+---
 
-Changing a token in only one location creates visual drift that is difficult to debug.
+## 10. Gobernanza y Mantenimiento
 
-### Adding Components
+### Modificación de Tokens
 
-New components must:
-1. Be placed in the correct subdirectory (`layout/`, `modals/`, `home/`, `feedback/`, `common/`)
-2. Import all icons exclusively from `Icons`
-3. Support both dark and light themes via the `isDarkMode` prop
-4. Use `useModalTransition` if the component mounts/unmounts with animation
-5. Include unit tests in `tests/production.test.js` if the component performs calculations (prices, filters, parsing)
+Cualquier ajuste a colores, fuentes, escalas de espaciado o radios debe aplicarse simultáneamente en tres puntos:
+1. El encabezado YAML de este documento (`DESIGN.md`).
+2. Las variables CSS `:root` y `.dark` en `src/index.css`.
+3. La configuración de `tailwind.config.js` (si el token está mapeado en la utilidad de Tailwind).
+
+### Reglas para Nuevos Componentes
+
+Todo nuevo componente introducido al proyecto debe:
+1. Ubicarse en el subdirectorio de dominio correspondiente (`layout/`, `modals/`, `home/`, `feedback/`, `common/`).
+2. Importar iconos exclusivamente desde `src/components/common/Icons.jsx`.
+3. Soportar temas oscuro y claro mediante la prop `isDarkMode`.
+4. Utilizar `useModalTransition` si el componente cuenta con animaciones de entrada y salida.
+5. Incorporar pruebas unitarias en `tests/production.test.js` si ejecuta cálculos de precios, filtros o transformaciones de datos.
