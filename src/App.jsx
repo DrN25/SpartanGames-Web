@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Topbar from "./components/Topbar";
 import Navbar from "./components/Navbar";
 import MarqueeTicker from "./components/MarqueeTicker";
@@ -245,6 +245,7 @@ export default function App() {
         isSyncing={isSyncing}
         onSync={() => handleSyncCatalog(true)}
         lastSyncTime={lastSyncTime}
+        storeInfo={storeInfo}
       />
 
       {/* 2. Navbar */}
@@ -259,10 +260,11 @@ export default function App() {
         onSearchChange={setSearchQuery}
         isDarkMode={isDarkMode}
         onToggleTheme={toggleTheme}
+        storeInfo={storeInfo}
       />
 
       {/* 3. Marquee Ticker */}
-      <MarqueeTicker />
+      <MarqueeTicker storeInfo={storeInfo} />
 
       {/* 4. Main Views Router */}
       <div className="flex-1">
@@ -676,6 +678,7 @@ export default function App() {
             onSelectProduct={handleSelectProduct}
             onAddToCart={handleAddToCart}
             onNavigate={handleNavigate}
+            storeInfo={storeInfo}
           />
         )}
 
@@ -690,6 +693,7 @@ export default function App() {
               onSelectProduct={handleSelectProduct}
               onSelectCategory={handleSelectCategory}
               onNavigate={handleNavigate}
+              storeInfo={storeInfo}
             />
           </div>
         )}

@@ -322,7 +322,7 @@ function MarkdownRenderer({ content, className = "" }) {
 export default function ChatIABubble({
   isDarkMode,
   products = [],
-  categories = [],
+  _categories = [],
   storeInfo = {},
   onOpenPCBuilder,
   onOpenLocation,
@@ -573,7 +573,7 @@ export default function ChatIABubble({
         const confirmMsg = {
           id: Date.now() + 1,
           sender: "spartan",
-          text: `⚔️ ¡Listo para la batalla! He añadido los **${lastWithProducts.productCards.length} componentes** de tu cotización directamente al carrito de compras (Total: **S/. ${totalQuote.toFixed(2)}**). 🛒\n\nEl carrito de compras se ha abierto a la derecha para que puedas verificar cada pieza, apartarlas con el 10% de seña o exportar la orden oficial hacia WhatsApp para coordinar tu armado o recojo en Calle Octavio Muñoz Najar 223 Int 211 Compuplaza. 🛡️⚡`,
+          text: `⚔️ ¡Listo para la batalla! He añadido los **${lastWithProducts.productCards.length} componentes** de tu cotización directamente al carrito de compras (Total: **S/. ${totalQuote.toFixed(2)}**). 🛒\n\nEl carrito de compras se ha abierto a la derecha para que puedas verificar cada pieza, apartarlas con el 10% de seña o exportar la orden oficial hacia WhatsApp para coordinar tu armado o recojo en ${storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza"}. 🛡️⚡`,
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           productCards: lastWithProducts.productCards,
           actions: [

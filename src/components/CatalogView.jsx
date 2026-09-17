@@ -8,12 +8,8 @@ import {
   Check,
   X,
   ArrowUpDown,
-  Tag,
-  ShieldCheck,
   ShoppingCart,
-  Layers,
-  Sparkles,
-  Filter
+  Sparkles
 } from "./Icons";
 
 export default function CatalogView({
@@ -26,7 +22,8 @@ export default function CatalogView({
   onSearchChange,
   onSelectProduct,
   onAddToCart,
-  onNavigate
+  onNavigate,
+  storeInfo
 }) {
   const [viewMode, setViewMode] = useState("grid");
   const [selectedBrands, setSelectedBrands] = useState([]);
@@ -146,7 +143,7 @@ export default function CatalogView({
             </h1>
             <p className={`text-sm mt-1 max-w-2xl ${isDarkMode ? "text-gray-400" : "text-slate-600"}`}>
               {currentCategoryObj
-                ? `Stock físico garantizado de ${currentCategoryObj.name.toLowerCase()} con respaldo local de 1 a 3 años en C.C. Compuplaza Tienda 204.`
+                ? `Stock físico garantizado de ${currentCategoryObj.name.toLowerCase()} con respaldo local de 1 a 3 años en ${storeInfo?.address || "C.C. Compuplaza Int 211"}.`
                 : "Componentes nuevos, ensambles testeados y entrega rápida garantizada en Arequipa y todo el Sur del Perú."}
             </p>
           </div>
@@ -191,7 +188,7 @@ export default function CatalogView({
             {/* Categorías */}
             <div className="mb-6">
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-3">
-                Categorias
+                CategoriasP
               </h3>
               <div className="space-y-1">
                 <button

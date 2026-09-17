@@ -2,7 +2,7 @@ import {
   productsCatalog as defaultProducts,
   categoriesTree as defaultCategories,
   storeInfo as defaultStoreInfo
-} from "../data/storeData";
+} from "../data/storeData.js";
 
 export const GOOGLE_SHEET_ID = "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno";
 export const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit?usp=sharing`;
@@ -127,8 +127,28 @@ export function parseProductRow(headers, row) {
 
   const parseNumber = (val, fallback = 0) => {
     if (val === null || val === undefined || val === "") return fallback;
-    const clean = String(val).replace(/[^0-9.,]/g, "").replace(",", ".");
-    const n = parseFloat(clean);
+    let s = String(val).trim().replace(/^[^\d-]+/, "");
+    s = s.replace(/[^0-9.,-]/g, "");
+    if (!s) return fallback;
+
+    const lastComma = s.lastIndexOf(",");
+    const lastDot = s.lastIndexOf(".");
+    if (lastComma !== -1 && lastDot !== -1) {
+      if (lastDot > lastComma) {
+        s = s.replace(/,/g, "");
+      } else {
+        s = s.replace(/\./g, "").replace(",", ".");
+      }
+    } else if (lastComma !== -1) {
+      const parts = s.split(",");
+      if (parts.length === 2 && parts[1].length <= 2) {
+        s = parts[0] + "." + parts[1];
+      } else {
+        s = s.replace(/,/g, "");
+      }
+    }
+
+    const n = parseFloat(s);
     return isNaN(n) ? fallback : n;
   };
 
@@ -362,6 +382,8 @@ export async function fetchLiveCatalog(force = false) {
           if (key && val) {
             if (key === "nombre_tienda") cfgObj.name = val;
             if (key === "slogan") cfgObj.tagline = val;
+            if (key === "logo_url") cfgObj.logoUrl = normalizeImageUrl(val);
+            if (key === "isotipo_url") cfgObj.isotipoUrl = normalizeImageUrl(val);
             if (key === "direccion") cfgObj.address = val;
             if (key === "whatsapp") cfgObj.whatsappMain = val;
             if (key === "telefono_1") cfgObj.phones = [val, cfgObj.phones[1] || ""];

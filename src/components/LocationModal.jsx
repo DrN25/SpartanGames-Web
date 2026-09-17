@@ -8,8 +8,7 @@ import {
   Navigation,
   Clock,
   ShieldCheck,
-  Wrench,
-  Phone
+  Wrench
 } from "./Icons";
 import { WhatsAppIcon } from "./Icons";
 import { useModalTransition } from "../hooks/useModalTransition";
@@ -121,7 +120,7 @@ export default function LocationModal({
             <div className="absolute top-3 left-3 z-10 pointer-events-none">
               <div className="px-3 py-1.5 rounded-xl bg-slate-950/90 text-white border border-slate-800 shadow-xl backdrop-blur-md flex items-center gap-2 text-xs font-bold">
                 <MapPin className="w-3.5 h-3.5 text-[#FFDE17]" />
-                <span>Compuplaza Tienda 204</span>
+                <span>Compuplaza Int 211</span>
               </div>
             </div>
 
@@ -290,7 +289,7 @@ export default function LocationModal({
 
               {/* Contact by WhatsApp */}
               <a
-                href={`https://wa.me/${phoneMain}?text=Hola%20Spartan%20Games%20Arequipa,%20estoy%20yendo%20a%20su%20tienda%20en%20Compuplaza%20Tienda%20204.`}
+                href={`https://wa.me/${phoneMain}?text=Hola%20Spartan%20Games%20Arequipa,%20estoy%20yendo%20a%20su%20tienda%20en%20Compuplaza%20Int%20211.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"

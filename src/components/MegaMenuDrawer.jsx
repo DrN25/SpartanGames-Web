@@ -23,7 +23,7 @@ export default function MegaMenuDrawer({
     onClose();
   };
 
-  const handleSubCategoryClick = (catId, subCat) => {
+  const handleSubCategoryClick = (catId, _subCat) => {
     onSelectCategory(catId);
     onNavigate("catalog");
     onClose();

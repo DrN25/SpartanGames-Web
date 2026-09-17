@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es" class="dark">
   <head>
     <meta charset="UTF-8" />
@@ -10,6 +10,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem("spartan_theme");
+          if (theme === "light") {
+            document.documentElement.classList.remove("dark");
+          } else if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (_) {}
+      })();
+    </script>
   </head>
   <body class="bg-[#060608] text-slate-100 antialiased">
     <div id="root"></div>

@@ -3,7 +3,7 @@
  * Model: openai/gpt-5.6-luna via OpenRouter
  */
 
-function isGibberish(text = "") {
+export function isGibberish(text = "") {
   const trimmed = text.trim().toLowerCase();
   if (trimmed.length < 3) return false;
 
@@ -35,7 +35,7 @@ function isGibberish(text = "") {
   return false;
 }
 
-function checkGuardrails(messages = []) {
+export function checkGuardrails(messages = []) {
   const lastUserMessage = (messages[messages.length - 1]?.content || "").toLowerCase();
 
   // 1. Gibberish check first
@@ -102,6 +102,22 @@ export async function handler(event) {
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY || "";
+    if (!apiKey) {
+      console.error("OPENROUTER_API_KEY is not configured in Netlify environment.");
+      return {
+        statusCode: 500,
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({ error: "Missing server OPENROUTER_API_KEY configuration." })
+      };
+    }
+
+    const timeCtx = {
+      fullDate: storeContext?.fullDate || new Date().toLocaleDateString("es-PE", { timeZone: "America/Lima", weekday: "long", year: "numeric", month: "long", day: "numeric" }),
+      time: storeContext?.time || new Date().toLocaleTimeString("es-PE", { timeZone: "America/Lima", hour: "2-digit", minute: "2-digit", hour12: true }),
+      schedule: storeContext?.schedule || "Lunes a Sábado: 11:00 am a 8:00 pm (Domingos cerrado)",
+      storeStatus: storeContext?.storeStatus || "la tienda física en Compuplaza Int 211 está atendiendo consultas.",
+      address: storeContext?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza, Arequipa"
+    };
 
     const systemPrompt = `Eres SPARTAN, el asesor oficial y estratega de hardware gamer de Spartan Games en Compuplaza Arequipa, Perú.
 

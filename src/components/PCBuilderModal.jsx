@@ -75,12 +75,47 @@ export default function PCBuilderModal({
             pName.includes("nvme")
           );
         }
+        if (stepCatId === "fuentes") {
+          return (
+            pCatId.includes("fuente") ||
+            pCatName.includes("fuente") ||
+            pName.includes("fuente") ||
+            pName.includes("psu") ||
+            pName.includes("80 plus")
+          );
+        }
+        if (stepCatId === "cases") {
+          return (
+            pCatId.includes("case") ||
+            pCatName.includes("case") ||
+            pName.includes("case") ||
+            pName.includes("gabinete")
+          );
+        }
+        if (stepCatId === "coolers") {
+          return (
+            pCatId.includes("cooler") ||
+            pCatName.includes("cooler") ||
+            pName.includes("cooler") ||
+            pName.includes("refrigeracion") ||
+            pName.includes("disipador")
+          );
+        }
         if (stepCatId === "monitores") {
           return (
             pCatId.includes("monitor") ||
             pCatName.includes("monitor") ||
             pName.includes("monitor") ||
             pName.includes("hz")
+          );
+        }
+        if (stepCatId === "audio") {
+          return (
+            pCatId.includes("audio") ||
+            pCatName.includes("audio") ||
+            pName.includes("auricular") ||
+            pName.includes("audifono") ||
+            pName.includes("headset")
           );
         }
         return false;

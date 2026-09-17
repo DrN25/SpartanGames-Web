@@ -1,9 +1,13 @@
 import React from "react";
 import { Sparkles, Truck, ShieldCheck, Cpu, MapPin, CreditCard } from "./Icons";
 
-export default function MarqueeTicker() {
+export default function MarqueeTicker({ storeInfo = {} }) {
+  const addressText = storeInfo?.address
+    ? `${storeInfo.address} • ${storeInfo?.schedule || "Lunes a Sábado 11:00 am - 8:00 pm"}`
+    : "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza • Lunes a Sábado 11:00 am - 8:00 pm";
+
   const items = [
-    { text: "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza • Lunes a Sábado 11:00 am - 8:00 pm", icon: "pin" },
+    { text: addressText, icon: "pin" },
     { text: "Delivery express en Arequipa Metropolitana y envíos asegurados a provincias", icon: "truck" },
     { text: "Garantía local directa de 1 a 3 años con boleta o factura", icon: "shield" },
     { text: "Ensambles con Windows 11 activado y pruebas de estrés térmico gratis", icon: "cpu" },

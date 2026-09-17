@@ -96,7 +96,7 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium">
-                Atención y soporte directo en Calle Octavio Muñoz Najar 223 Int 211 Compuplaza, Arequipa
+                Atención y soporte directo en {storeInfo.address}
               </p>
             </div>
           </div>

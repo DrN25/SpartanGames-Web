@@ -11,14 +11,17 @@ export default function Navbar({
   searchQuery,
   onSearchChange,
   isDarkMode,
-  onToggleTheme
+  onToggleTheme,
+  storeInfo
 }) {
   const [localSearch, setLocalSearch] = useState(searchQuery || "");
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     onSearchChange(localSearch);
     onNavigate("catalog");
+    setIsMobileSearchOpen(false);
   };
 
   const handleClearSearch = () => {
@@ -43,9 +46,12 @@ export default function Navbar({
           >
             <div className="w-11 h-11 rounded-xl bg-[#FFDE17] p-0.5 shadow-sm group-hover:scale-105 transition-transform flex-shrink-0">
               <img
-                src="/assets/images/spartan_games_logo_base.png"
+                src={storeInfo?.logoUrl || "/assets/images/spartan_games_logo_base.png"}
                 alt="Spartan Games Logo"
                 className="w-full h-full object-cover rounded-[10px] bg-black"
+                onError={(e) => {
+                  e.currentTarget.src = "/assets/images/spartan_games_logo_base.png";
+                }}
               />
             </div>
             <div>
@@ -151,6 +157,20 @@ export default function Navbar({
             </button>
           </nav>
 
+          {/* Mobile Search Toggle */}
+          <button
+            onClick={() => setIsMobileSearchOpen((prev) => !prev)}
+            className={`md:hidden p-2.5 rounded-xl border transition-colors flex items-center justify-center ${
+              isDarkMode
+                ? "border-gray-800 bg-[#111620] text-gray-300 hover:text-white"
+                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100 shadow-xs"
+            }`}
+            title="Buscar productos"
+            aria-label="Abrir barra de búsqueda"
+          >
+            <Search className="w-4 h-4 text-amber-600 dark:text-[#FFDE17]" />
+          </button>
+
           {/* Theme Toggle Button */}
           <button
             onClick={onToggleTheme}
@@ -192,6 +212,45 @@ export default function Navbar({
           </button>
         </div>
       </div>
+
+      {/* Mobile Search Expandable Bar */}
+      {isMobileSearchOpen && (
+        <div className="md:hidden border-t border-slate-200 dark:border-gray-800 px-4 py-3 bg-slate-50 dark:bg-[#0E121A]">
+          <form onSubmit={handleSearchSubmit} className="flex items-center relative gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                autoFocus
+                placeholder="Buscar tarjetas, procesadores, laptops..."
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                className={`w-full py-2 pl-9 pr-8 rounded-xl text-xs font-medium border transition-all outline-none ${
+                  isDarkMode
+                    ? "bg-[#111620] border-gray-700 text-white placeholder-gray-500 focus:border-[#FFDE17]"
+                    : "bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-slate-400"
+                }`}
+              />
+              <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              {localSearch && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  aria-label="Limpiar búsqueda"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 transition-colors shadow-xs"
+            >
+              Buscar
+            </button>
+          </form>
+        </div>
+      )}
     </header>
   );
 }

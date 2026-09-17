@@ -1,5 +1,5 @@
 import React from "react";
-import { X, ShoppingCart, ArrowRight, ShieldCheck, Plus, Minus } from "./Icons";
+import { X, ShoppingCart, ShieldCheck, Plus, Minus } from "./Icons";
 import { WhatsAppIcon, YapeIcon, PlinIcon, CulqiIcon, VisaIcon } from "./Icons";
 import { storeInfo as defaultStoreInfo } from "../data/storeData";
 import { useModalTransition } from "../hooks/useModalTransition";
@@ -25,7 +25,8 @@ export default function CartDrawer({
     .join("\n");
 
   const whatsappPhone = storeInfo?.whatsappMain || "51912930004";
-  const whatsappMessage = `Hola Spartan Games Arequipa, deseo procesar el siguiente pedido desde su tienda virtual:\n\n${itemsText}\n\n*TOTAL:* S/. ${subtotal.toFixed(2)}\n*Opción Reserva 10%:* S/. ${reservaMonto}\n\nPor favor confirmar disponibilidad en Calle Octavio Muñoz Najar 223 Int 211 Compuplaza y datos para Yape/Transferencia.`;
+  const addressStr = storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza";
+  const whatsappMessage = `Hola Spartan Games Arequipa, deseo procesar el siguiente pedido desde su tienda virtual:\n\n${itemsText}\n\n*TOTAL:* S/. ${subtotal.toFixed(2)}\n*Opción Reserva 10%:* S/. ${reservaMonto}\n\nPor favor confirmar disponibilidad en ${addressStr} y datos para Yape/Transferencia.`;
   const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
@@ -193,7 +194,7 @@ export default function CartDrawer({
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
                 Garantía física en tienda
               </span>
-              <span>Calle Octavio Muñoz Najar 223 Int 211 Compuplaza</span>
+              <span className="truncate max-w-[200px] text-right">{storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza"}</span>
             </div>
 
             {/* Totales */}

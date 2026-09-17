@@ -8,7 +8,9 @@ export const storeInfo = {
   schedule: "Lunes a Sábado: 11:00 am a 8:00 pm (Domingos cerrado)",
   deliveryNote: "Envíos directos en Arequipa Metropolitana y despacho a provincias del Sur del Perú por Olva Courier y Shalom.",
   warrantyPolicy: "Garantía física directa en tienda de 1 a 3 años según componente.",
-  legalBookUrl: "/libro-reclamaciones"
+  legalBookUrl: "/libro-reclamaciones",
+  logoUrl: "/assets/images/spartan_games_logo_base.png",
+  isotipoUrl: "/assets/images/spartan_games_logo_base_solo.png"
 };
 
 export const categoriesTree = [

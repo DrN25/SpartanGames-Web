@@ -26,7 +26,8 @@ export default function ProductDetail({
   onAddToCart,
   onSelectProduct,
   onSelectCategory,
-  onNavigate
+  onNavigate,
+  storeInfo
 }) {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
@@ -92,8 +93,9 @@ export default function ProductDetail({
 
   const savings = product.oldPrice ? (product.oldPrice - product.price).toFixed(2) : 0;
 
+  const phoneMain = storeInfo?.whatsappMain || "51912930004";
   const whatsappMsg = `Hola Spartan Games Arequipa, deseo consultar stock del producto: *${product.name}* (SKU: ${product.sku}) por S/. ${product.price.toFixed(2)}`;
-  const whatsappUrl = `https://wa.me/51912930004?text=${encodeURIComponent(whatsappMsg)}`;
+  const whatsappUrl = `https://wa.me/${phoneMain}?text=${encodeURIComponent(whatsappMsg)}`;
 
   const relatedProducts = allProducts
     ? allProducts
@@ -579,7 +581,7 @@ export default function ProductDetail({
                       Garantía física directa de 12 a 36 meses con boleta o factura con RUC.
                     </li>
                     <li>
-                      Soporte técnico y diagnóstico en tienda física Calle Octavio Muñoz Najar 223 Int 211 Compuplaza.
+                      Soporte técnico y diagnóstico en tienda física {storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza"}.
                     </li>
                     <li>
                       Cambio inmediato ante fallas de fábrica durante los primeros 7 días.
