@@ -284,7 +284,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
+      className={`min-h-screen flex flex-col font-sans overflow-x-hidden transition-colors duration-200 ${
         isDarkMode ? "bg-[#07090D] text-gray-100" : "bg-[#F8FAFC] text-slate-900"
       }`}
     >

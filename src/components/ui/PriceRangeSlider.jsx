@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import * as Slider from "@radix-ui/react-slider";
 
 /**
@@ -90,8 +90,12 @@ export default function PriceRangeSlider({
     [max, onValueChange]
   );
 
+  // ponytail: track active thumb for tooltip visibility on touch/pointer
+  const [activeThumb, setActiveThumb] = useState(null);
+
   const handleSliderCommit = useCallback(
     (finalPos) => {
+      setActiveThumb(null);
       const finalPrices = [
         sliderPosToPrice(finalPos[0], max),
         sliderPosToPrice(finalPos[1], max),
@@ -128,10 +132,17 @@ export default function PriceRangeSlider({
           <Slider.Thumb
             className="group relative block w-5 h-5 bg-white dark:bg-[#FFDE17] border-[2.5px] border-amber-500 dark:border-black shadow-md rounded-full hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 dark:focus-visible:ring-[#FFDE17] cursor-grab active:cursor-grabbing transition-transform z-10"
             aria-label="Precio mínimo"
+            onPointerDown={() => setActiveThumb(0)}
+            onPointerUp={() => setActiveThumb(null)}
+            onPointerCancel={() => setActiveThumb(null)}
           >
-            {/* Floating Value Badge — ponytail: pure CSS hover/active, zero sticky state */}
+            {/* Floating Value Badge — state-driven for reliable touch lifecycle */}
             <div
-              className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] font-mono font-bold pointer-events-none z-20 opacity-0 scale-90 translate-y-1 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-active:opacity-100 group-active:scale-100 group-active:translate-y-0 transition-all duration-150 ${
+              className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] font-mono font-bold pointer-events-none z-20 transition-all duration-150 ${
+                activeThumb === 0
+                  ? "opacity-100 scale-100 translate-y-0"
+                  : "opacity-0 scale-90 translate-y-1"
+              } ${
                 isDarkMode
                   ? "bg-[#18202F] text-[#FFDE17] border border-gray-700 shadow-lg shadow-black/60"
                   : "bg-slate-900 text-[#FFDE17] shadow-lg"
@@ -151,10 +162,17 @@ export default function PriceRangeSlider({
           <Slider.Thumb
             className="group relative block w-5 h-5 bg-white dark:bg-[#FFDE17] border-[2.5px] border-amber-500 dark:border-black shadow-md rounded-full hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 dark:focus-visible:ring-[#FFDE17] cursor-grab active:cursor-grabbing transition-transform z-10"
             aria-label="Precio máximo"
+            onPointerDown={() => setActiveThumb(1)}
+            onPointerUp={() => setActiveThumb(null)}
+            onPointerCancel={() => setActiveThumb(null)}
           >
-            {/* Floating Value Badge — ponytail: pure CSS hover/active, zero sticky state */}
+            {/* Floating Value Badge — state-driven for reliable touch lifecycle */}
             <div
-              className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] font-mono font-bold pointer-events-none z-20 opacity-0 scale-90 translate-y-1 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-active:opacity-100 group-active:scale-100 group-active:translate-y-0 transition-all duration-150 ${
+              className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] font-mono font-bold pointer-events-none z-20 transition-all duration-150 ${
+                activeThumb === 1
+                  ? "opacity-100 scale-100 translate-y-0"
+                  : "opacity-0 scale-90 translate-y-1"
+              } ${
                 isDarkMode
                   ? "bg-[#18202F] text-[#FFDE17] border border-gray-700 shadow-lg shadow-black/60"
                   : "bg-slate-900 text-[#FFDE17] shadow-lg"
