@@ -425,27 +425,6 @@ export default function CatalogPage({
                 </div>
               </div>
 
-              {/* Barra de Espectro / Rango Activo Visual */}
-              <div className="p-2.5 rounded-xl border mb-3.5 bg-gradient-to-b from-transparent to-slate-500/5 border-slate-200 dark:border-gray-800/80">
-                <div className="flex items-center justify-between text-[11px] mb-2 font-medium text-slate-500 dark:text-gray-400">
-                  <span>Rango seleccionado:</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17] text-xs">
-                    S/. {priceRange[0]} — S/. {priceRange[1]}
-                  </span>
-                </div>
-                
-                {/* Track con Rango Coloreado Dinámico */}
-                <div className="relative h-2 rounded-full bg-slate-200 dark:bg-gray-800 overflow-hidden">
-                  <div
-                    className="absolute top-0 bottom-0 rounded-full bg-gradient-to-r from-amber-400 via-[#FFDE17] to-amber-300 shadow-[0_0_8px_rgba(255,222,23,0.35)] transition-all duration-75"
-                    style={{
-                      left: `${minPricePercent}%`,
-                      width: `${Math.max(1, maxPricePercent - minPricePercent)}%`
-                    }}
-                  />
-                </div>
-              </div>
-
               {/* Desplazables Individuales con Colores Dinámicos */}
               <div className="space-y-3 mb-4">
                 {/* Desplazable Mínimo */}
@@ -466,8 +445,8 @@ export default function CatalogPage({
                     onChange={handleMinSliderChange}
                     style={{
                       background: isDarkMode
-                        ? `linear-gradient(to right, #FFDE17 ${minPricePercent}%, #1f2937 ${minPricePercent}%)`
-                        : `linear-gradient(to right, #f59e0b ${minPricePercent}%, #e2e8f0 ${minPricePercent}%)`
+                        ? `linear-gradient(to right, #1f2937 ${minPricePercent}%, #FFDE17 ${minPricePercent}%)`
+                        : `linear-gradient(to right, #e2e8f0 ${minPricePercent}%, #f59e0b ${minPricePercent}%)`
                     }}
                     className="w-full cursor-pointer h-2 rounded-lg appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FFDE17] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 dark:[&::-webkit-slider-thumb]:border-gray-900 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:hover:scale-115 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FFDE17] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900 dark:[&::-moz-range-thumb]:border-gray-900 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:hover:scale-115 [&::-moz-range-thumb]:transition-transform"
                   />
