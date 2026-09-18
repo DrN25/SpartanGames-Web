@@ -200,6 +200,13 @@ export function parseBotResponse(rawText = "", products = []) {
     cleanText = cleanText.replace(catalogRegex, "");
   }
 
+  // 3.5. Extract [ACTION:CART] / [ACTION:OPEN_CART] / [ACTION:VER_CARRITO]
+  const cartRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:CART|OPEN_?CART|VER_?CARRITO)\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (cartRegex.test(cleanText)) {
+    rawActions.push({ type: "cart", label: "Ver carrito" });
+    cleanText = cleanText.replace(cartRegex, "");
+  }
+
   // 4. Extract [ACTION:MAPS] / [ACTION:MAP] / [ACTION:UBICACION] / [ACTION:LOCATION]
   const mapsRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:MAPS?|UBICACI[OÓ]N|LOCATION|MAPA|GOOGLE_?MAPS?)\s*\]\s*(?:\*{0,2}|`?)/gi;
   if (mapsRegex.test(cleanText)) {

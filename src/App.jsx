@@ -406,10 +406,12 @@ export default function App() {
         storeInfo={storeInfo}
         onOpenPCBuilder={() => setIsPCBuilderOpen(true)}
         onOpenLocation={() => setIsLocationOpen(true)}
+        onOpenCart={() => setIsCartOpen(true)}
         onSelectProduct={handleSelectProduct}
         onAddToCart={handleAddToCart}
         onAddBatchToCart={handleAddBatchToCart}
         onNavigate={handleNavigate}
+        isAnyModalOpen={isCartOpen || isLocationOpen || isPCBuilderOpen || isFaqOpen || isMegaMenuOpen}
       />
 
       {/* 5. Footer */}

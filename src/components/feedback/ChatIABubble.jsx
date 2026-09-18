@@ -326,10 +326,12 @@ export default function ChatIABubble({
   storeInfo = {},
   onOpenPCBuilder,
   onOpenLocation,
+  onOpenCart,
   onSelectProduct,
   onAddToCart,
   onAddBatchToCart,
-  onNavigate
+  onNavigate,
+  isAnyModalOpen = false
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { shouldRender: shouldRenderChat, isClosing: isClosingChat } = useModalTransition(isOpen, 220);
@@ -340,6 +342,13 @@ export default function ChatIABubble({
   const [addedBatchMap, setAddedBatchMap] = useState({});
   const messagesEndRef = useRef(null);
   const isResizingRef = useRef(false);
+
+  // Automatically minimize chatbot when any modal or drawer is opened
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      setIsOpen(false);
+    }
+  }, [isAnyModalOpen]);
 
   const handleBatchAddToCart = (cards = [], messageId = null) => {
     if (!cards || cards.length === 0) return;
@@ -572,9 +581,13 @@ export default function ChatIABubble({
       if (matching.length > 0) {
         handleBatchAddToCart(matching);
       }
+    } else if (action.type === "cart") {
+      if (onOpenCart) onOpenCart();
+      setIsOpen(false);
     } else if (action.type === "maps") {
       if (onOpenLocation) {
         onOpenLocation();
+        setIsOpen(false);
       } else {
         window.open(
           "https://maps.app.goo.gl/gVknznGWkkmZHsgL9",
@@ -879,7 +892,7 @@ export default function ChatIABubble({
                             className={`px-3 py-1.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
                               act.type === "whatsapp"
                                 ? "bg-[#25D366] text-white hover:bg-emerald-600"
-                                : act.type === "builder"
+                                : act.type === "builder" || act.type === "cart"
                                 ? "bg-[#FFDE17] text-slate-950 hover:bg-yellow-400"
                                 : act.type === "facebook"
                                 ? "bg-[#1877F2] text-white hover:bg-blue-700"
@@ -897,6 +910,9 @@ export default function ChatIABubble({
                             )}
                             {act.type === "builder" && (
                               <Wrench className="w-3.5 h-3.5 text-slate-950" />
+                            )}
+                            {act.type === "cart" && (
+                              <ShoppingCart className="w-3.5 h-3.5 text-slate-950" />
                             )}
                             {act.type === "catalog" && (
                               <Sparkles className="w-3.5 h-3.5" />
