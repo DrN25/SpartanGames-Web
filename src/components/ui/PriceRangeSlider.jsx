@@ -1,50 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import * as Slider from "@radix-ui/react-slider";
+import {
+  priceToSliderPos,
+  sliderPosToPrice,
+  getActiveThumbIndex,
+} from "../../utils/priceSliderUtils.js";
 
-/**
- * Mapeo No Lineal / Escala Segmentada (Piecewise Scale)
- *
- * Divide la barra física de 0 a 1000 en 4 cuadrantes correspondientes
- * a los 4 rangos de presupuesto más comunes en hardware:
- * - 0% a 25%   (pos 0 - 250):    S/. 0 a S/. 100     (pasos finos de S/. 5)
- * - 25% a 50%  (pos 250 - 500):  S/. 100 a S/. 500   (pasos de S/. 10)
- * - 50% a 75%  (pos 500 - 750):  S/. 500 a S/. 2,000 (pasos de S/. 50)
- * - 75% a 100% (pos 750 - 1000): S/. 2,000 a maxPrice (pasos de S/. 100)
- */
+export { priceToSliderPos, sliderPosToPrice, getActiveThumbIndex };
 
-export function priceToSliderPos(price, maxPrice = 8000) {
-  const p = Math.max(0, Math.min(price, maxPrice));
-  if (p <= 100) {
-    return (p / 100) * 250;
-  }
-  if (p <= 500) {
-    return 250 + ((p - 100) / 400) * 250;
-  }
-  if (p <= 2000) {
-    return 500 + ((p - 500) / 1500) * 250;
-  }
-  const topSpan = Math.max(1, maxPrice - 2000);
-  return 750 + ((p - 2000) / topSpan) * 250;
-}
-
-export function sliderPosToPrice(pos, maxPrice = 8000) {
-  const p = Math.max(0, Math.min(pos, 1000));
-  if (p <= 250) {
-    const raw = (p / 250) * 100;
-    return Math.round(raw / 5) * 5;
-  }
-  if (p <= 500) {
-    const raw = 100 + ((p - 250) / 250) * 400;
-    return Math.round(raw / 10) * 10;
-  }
-  if (p <= 750) {
-    const raw = 500 + ((p - 500) / 250) * 1500;
-    return Math.round(raw / 50) * 50;
-  }
-  const topSpan = Math.max(1, maxPrice - 2000);
-  const raw = 2000 + ((p - 750) / 250) * topSpan;
-  return Math.min(maxPrice, Math.round(raw / 100) * 100);
-}
 
 export default function PriceRangeSlider({
   value = [0, 8000],
@@ -62,11 +25,14 @@ export default function PriceRangeSlider({
   }, [value, min, max]);
 
   const [sliderPos, setSliderPos] = useState(initialPos);
+  const prevSliderPosRef = useRef(initialPos);
 
-  // Sincronizar si cambian las props externas (botones rápidos o inputs numéricos)
-  useEffect(() => {
-    setSliderPos(initialPos);
-  }, [initialPos]);
+  // ponytail: track active thumb for tooltip visibility (0, 1, 'both', or null)
+  const [activeThumb, setActiveThumb] = useState(null);
+  const activeThumbRef = useRef(null);
+  const isDraggingRef = useRef(false);
+  const hideTimerRef = useRef(null);
+  const isFirstRender = useRef(true);
 
   // Precios calculados para display en tiempo real
   const currentPrices = useMemo(() => {
@@ -76,9 +42,85 @@ export default function PriceRangeSlider({
     ];
   }, [sliderPos, max]);
 
+  // Programar ocultamiento suave con 1000ms de gracia (permite leer el tooltip en toques rápidos y al soltar)
+  const scheduleHide = useCallback(() => {
+    isDraggingRef.current = false;
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+    }
+    hideTimerRef.current = setTimeout(() => {
+      activeThumbRef.current = null;
+      setActiveThumb(null);
+    }, 1000);
+  }, []);
+
+  const handleThumbPointerDown = useCallback((index) => {
+    isDraggingRef.current = true;
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+    }
+    activeThumbRef.current = index;
+    setActiveThumb(index);
+  }, []);
+
+  // Sincronizar si cambian las props externas (botones rápidos o inputs numéricos)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setSliderPos(initialPos);
+    prevSliderPosRef.current = initialPos;
+
+    // Si el cambio viene de un botón externo de presupuesto o input manual
+    if (!isDraggingRef.current) {
+      activeThumbRef.current = "both";
+      setActiveThumb("both");
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+      hideTimerRef.current = setTimeout(() => {
+        activeThumbRef.current = null;
+        setActiveThumb(null);
+      }, 1000);
+    }
+  }, [initialPos]);
+
+  // Listener global pointerup / pointercancel para asegurar que al soltar fuera del thumb se active el temporizador
+  useEffect(() => {
+    const handleGlobalPointerUp = () => {
+      if (isDraggingRef.current) {
+        scheduleHide();
+      }
+    };
+
+    window.addEventListener("pointerup", handleGlobalPointerUp);
+    window.addEventListener("pointercancel", handleGlobalPointerUp);
+
+    return () => {
+      window.removeEventListener("pointerup", handleGlobalPointerUp);
+      window.removeEventListener("pointercancel", handleGlobalPointerUp);
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+    };
+  }, [scheduleHide]);
+
   const handleSliderChange = useCallback(
     (newPos) => {
+      const prevPos = prevSliderPosRef.current;
+      prevSliderPosRef.current = newPos;
       setSliderPos(newPos);
+
+      // Detectar con precisión qué thumb se movió o si cruzó al otro
+      const nextActive = getActiveThumbIndex(prevPos, newPos, activeThumbRef.current ?? 0);
+      activeThumbRef.current = nextActive;
+      setActiveThumb(nextActive);
+
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+
       const newPrices = [
         sliderPosToPrice(newPos[0], max),
         sliderPosToPrice(newPos[1], max),
@@ -90,12 +132,9 @@ export default function PriceRangeSlider({
     [max, onValueChange]
   );
 
-  // ponytail: track active thumb for tooltip visibility on touch/pointer
-  const [activeThumb, setActiveThumb] = useState(null);
-
   const handleSliderCommit = useCallback(
     (finalPos) => {
-      setActiveThumb(null);
+      scheduleHide();
       const finalPrices = [
         sliderPosToPrice(finalPos[0], max),
         sliderPosToPrice(finalPos[1], max),
@@ -104,8 +143,11 @@ export default function PriceRangeSlider({
         onValueCommit(finalPrices);
       }
     },
-    [max, onValueCommit]
+    [max, onValueCommit, scheduleHide]
   );
+
+  const isThumb0Active = activeThumb === 0 || activeThumb === "both";
+  const isThumb1Active = activeThumb === 1 || activeThumb === "both";
 
   return (
     <div className="w-full select-none pt-2">
@@ -130,16 +172,18 @@ export default function PriceRangeSlider({
 
           {/* Desplazable Mínimo con Tooltip Flotante Táctico */}
           <Slider.Thumb
-            className="group relative block w-5 h-5 bg-white dark:bg-[#FFDE17] border-[2.5px] border-amber-500 dark:border-black shadow-md rounded-full hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 dark:focus-visible:ring-[#FFDE17] cursor-grab active:cursor-grabbing transition-transform z-10"
+            className={`group relative block w-5 h-5 bg-white dark:bg-[#FFDE17] border-[2.5px] border-amber-500 dark:border-black shadow-md rounded-full hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 dark:focus-visible:ring-[#FFDE17] cursor-grab active:cursor-grabbing transition-transform touch-none ${
+              activeThumb === 0 ? "z-20" : "z-10"
+            }`}
             aria-label="Precio mínimo"
-            onPointerDown={() => setActiveThumb(0)}
-            onPointerUp={() => setActiveThumb(null)}
-            onPointerCancel={() => setActiveThumb(null)}
+            onPointerDown={() => handleThumbPointerDown(0)}
+            onPointerUp={scheduleHide}
+            onPointerCancel={scheduleHide}
           >
             {/* Floating Value Badge — state-driven for reliable touch lifecycle */}
             <div
-              className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] font-mono font-bold pointer-events-none z-20 transition-all duration-150 ${
-                activeThumb === 0
+              className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] font-mono font-bold pointer-events-none z-30 transition-all duration-150 ${
+                isThumb0Active
                   ? "opacity-100 scale-100 translate-y-0"
                   : "opacity-0 scale-90 translate-y-1"
               } ${
@@ -160,16 +204,18 @@ export default function PriceRangeSlider({
 
           {/* Desplazable Máximo con Tooltip Flotante Táctico */}
           <Slider.Thumb
-            className="group relative block w-5 h-5 bg-white dark:bg-[#FFDE17] border-[2.5px] border-amber-500 dark:border-black shadow-md rounded-full hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 dark:focus-visible:ring-[#FFDE17] cursor-grab active:cursor-grabbing transition-transform z-10"
+            className={`group relative block w-5 h-5 bg-white dark:bg-[#FFDE17] border-[2.5px] border-amber-500 dark:border-black shadow-md rounded-full hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 dark:focus-visible:ring-[#FFDE17] cursor-grab active:cursor-grabbing transition-transform touch-none ${
+              activeThumb === 1 ? "z-20" : "z-10"
+            }`}
             aria-label="Precio máximo"
-            onPointerDown={() => setActiveThumb(1)}
-            onPointerUp={() => setActiveThumb(null)}
-            onPointerCancel={() => setActiveThumb(null)}
+            onPointerDown={() => handleThumbPointerDown(1)}
+            onPointerUp={scheduleHide}
+            onPointerCancel={scheduleHide}
           >
             {/* Floating Value Badge — state-driven for reliable touch lifecycle */}
             <div
-              className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] font-mono font-bold pointer-events-none z-20 transition-all duration-150 ${
-                activeThumb === 1
+              className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md text-[10px] font-mono font-bold pointer-events-none z-30 transition-all duration-150 ${
+                isThumb1Active
                   ? "opacity-100 scale-100 translate-y-0"
                   : "opacity-0 scale-90 translate-y-1"
               } ${

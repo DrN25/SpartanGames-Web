@@ -4,6 +4,7 @@ import { parseCSV, normalizeImageUrl, parseProductRow, getCachedBanners, getCach
 import { isGibberish, checkGuardrails, handler, validateGvizQuery } from "../netlify/functions/chat.js";
 import { storeInfo, defaultBanners, categoriesTree } from "../src/data/storeData.js";
 import { parseBotResponse } from "../src/services/aiService.js";
+import { priceToSliderPos, sliderPosToPrice, getActiveThumbIndex } from "../src/utils/priceSliderUtils.js";
 
 // ==========================================
 // 1. GOOGLE SHEETS CSV & DATA INTEGRITY
@@ -396,6 +397,46 @@ test("deduplicateProducts guarantees unique IDs and collision-free slugs against
   // Missing ID got filled
   assert.equal(sanitized[3].id, 4);
   assert.equal(sanitized[3].slug, "cable-hdmi-21");
+});
+
+// ==========================================
+// 9. PRICE RANGE SLIDER & CROSSOVER LOGIC
+// ==========================================
+test("priceSliderUtils correctly converts between price and piecewise slider position", () => {
+  // Boundary tests
+  assert.equal(priceToSliderPos(0), 0);
+  assert.equal(sliderPosToPrice(0), 0);
+
+  assert.equal(priceToSliderPos(100), 250);
+  assert.equal(sliderPosToPrice(250), 100);
+
+  assert.equal(priceToSliderPos(500), 500);
+  assert.equal(sliderPosToPrice(500), 500);
+
+  assert.equal(priceToSliderPos(2000), 750);
+  assert.equal(sliderPosToPrice(750), 2000);
+
+  assert.equal(priceToSliderPos(8000), 1000);
+  assert.equal(sliderPosToPrice(1000), 8000);
+});
+
+test("getActiveThumbIndex correctly detects moving thumb and handles crossover smoothly", () => {
+  // Regular movement: thumb 0 moved
+  assert.equal(getActiveThumbIndex([200, 800], [250, 800], 0), 0);
+
+  // Regular movement: thumb 1 moved
+  assert.equal(getActiveThumbIndex([200, 800], [200, 750], 1), 1);
+
+  // Crossover: thumb 0 dragged to the right past thumb 1 (e.g. from 490 to 520, where thumb 1 was at 500)
+  // Radix sorts values to [500, 520], so index 1 is now the moving thumb under the finger
+  assert.equal(getActiveThumbIndex([490, 500], [500, 520], 0), 1);
+
+  // Crossover: thumb 1 dragged to the left past thumb 0 (e.g. from 510 to 480, where thumb 0 was at 500)
+  // Radix sorts values to [480, 500], so index 0 is now the moving thumb under the finger
+  assert.equal(getActiveThumbIndex([500, 510], [480, 500], 1), 0);
+
+  // Fast reverse crossover: user drags back across
+  assert.equal(getActiveThumbIndex([500, 520], [480, 500], 1), 0);
 });
 
 
