@@ -88,32 +88,34 @@ export default function Navbar({
           onSubmit={handleSearchSubmit}
           className="flex-1 max-w-xl hidden md:flex items-center relative"
         >
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-10" />
           <input
             type="text"
             placeholder="Buscar tarjetas RTX, procesadores Ryzen/Intel, laptops, monitores..."
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
-            className="w-full py-2.5 pl-11 pr-24 rounded-xl text-xs font-medium border border-gray-700/80 bg-[#121824] text-white placeholder-gray-400 focus:border-[#FFDE17] focus:ring-2 focus:ring-[#FFDE17]/20 transition-all outline-none shadow-inner"
+            className="w-full py-2.5 pl-11 pr-28 rounded-xl text-xs font-medium border border-gray-700/80 bg-[#121824] text-white placeholder-gray-400 focus:border-[#FFDE17] focus:ring-2 focus:ring-[#FFDE17]/20 transition-all outline-none shadow-inner"
           />
-          <Search className="absolute left-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
 
-          {localSearch && (
+          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
+            {localSearch && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="p-1 rounded-full text-gray-400 hover:text-white hover:bg-gray-800 transition-colors cursor-pointer"
+                aria-label="Limpiar búsqueda"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
             <button
-              type="button"
-              onClick={handleClearSearch}
-              className="absolute right-22 text-gray-400 hover:text-white transition-colors cursor-pointer"
-              aria-label="Limpiar búsqueda"
+              type="submit"
+              className="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 transition-all shadow-md active:scale-95 cursor-pointer"
             >
-              <X className="w-3.5 h-3.5" />
+              Buscar
             </button>
-          )}
-
-          <button
-            type="submit"
-            className="absolute right-1.5 px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider bg-[#FFDE17] text-slate-950 hover:bg-yellow-400 transition-all shadow-md active:scale-95 cursor-pointer"
-          >
-            Buscar
-          </button>
+          </div>
         </form>
 
         {/* Right: Nav Links + PC Builder Tool + Theme Toggle + Retail Cart */}
@@ -203,12 +205,12 @@ export default function Navbar({
                 onChange={(e) => setLocalSearch(e.target.value)}
                 className="w-full py-2 pl-9 pr-8 rounded-xl text-xs font-medium border border-gray-700/80 bg-[#121824] text-white placeholder-gray-400 focus:border-[#FFDE17] focus:ring-2 focus:ring-[#FFDE17]/20 transition-all outline-none"
               />
-              <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
               {localSearch && (
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="absolute right-2.5 top-2.5 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-white transition-colors cursor-pointer"
                   aria-label="Limpiar búsqueda"
                 >
                   <X className="w-3.5 h-3.5" />
