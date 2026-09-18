@@ -79,7 +79,7 @@ Para la arquitectura de software (módulos, flujo de datos, invariantes), consul
 
 ### Tono y Voz
 
-Spartan Games opera como tienda física de hardware en Compuplaza (Arequipa, Perú). La marca se comunica con un **tono táctico y directo**: especificaciones técnicas precisas, precios definitivos en Soles (S/.) y cero contenido de relleno decorativo. Cada elemento de la pantalla existe para ayudar al usuario a evaluar componentes y tomar decisiones de compra.
+Spartan Games opera como tienda física de hardware. La información de ubicación, horarios y canales de contacto se carga dinámicamente desde la pestaña `Configuracion` del Google Sheet. La marca se comunica con un **tono táctico y directo**: especificaciones técnicas precisas, precios definitivos en Soles (S/.) y cero contenido de relleno decorativo. Cada elemento de la pantalla existe para ayudar al usuario a evaluar componentes y tomar decisiones de compra.
 
 ### Identidad Visual
 

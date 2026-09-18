@@ -2,7 +2,7 @@
 
 ## 1. Visión General y Propósito
 
-**Spartan AI** es el asistente virtual inteligente y estratega de hardware de **Spartan Games** (ubicado en Calle Octavio Muñoz Najar 223, Int. 211, Compuplaza, Arequipa, Perú).
+**Spartan AI** es el asistente virtual inteligente y estratega de hardware integrado en la aplicación web. Todos los datos de la tienda (nombre, dirección, teléfonos, redes sociales, horarios) se cargan dinámicamente desde la pestaña **Configuracion** de Google Sheets, lo que permite reutilizar el sistema con cualquier cliente sin modificar código.
 
 El chatbot opera en tiempo real dentro de la aplicación web, diseñado para:
 1. **Asesorar técnicamente:** Guiar al cliente en selección de CPUs, GPUs, placas madre, fuentes de poder, memoria RAM y ensamblajes completos sin cuellos de botella.
@@ -26,12 +26,13 @@ sequenceDiagram
 
     Usuario->>UI: Escribe mensaje o consulta
     UI->>Service: sendChatMessage({ messages, products, storeInfo })
-    Service->>Serverless: POST /api/chat (JSON payload)
+    Service->>Serverless: POST /api/chat (JSON payload con storeContext dinámico)
     Serverless->>Serverless: checkGuardrails (Gibberish / Jailbreak / Off-topic)
     
     alt Guardrail activado
         Serverless-->>Service: Respuesta preventiva predefinida
     else Mensaje legítimo
+        Serverless->>Serverless: Construir systemPrompt dinámico con storeContext
         Serverless->>OpenRouter: Chat Completions con Tool "consultar_catalogo_sheets"
         alt Modelo invoca consulta SQL (GViz)
             OpenRouter-->>Serverless: tool_call(query)
@@ -62,7 +63,7 @@ sequenceDiagram
 ### El Problema Resuelto
 Previamente, el componente frontend realizaba comparaciones de cadenas estrictas (ej. `text.includes("[ACTION:MAPS]")`). Cuando el modelo generaba variaciones tipográficas, espacios, negritas o minúsculas (por ejemplo `[ACTION: MAPS]`, `**[action:ubicacion]**` o `[Action:Maps]`), la condición fallaba y la etiqueta quedaba expuesta al usuario en texto plano entre corchetes:
 ```
-🛡️ Dirección: Calle Octavio Muñoz Najar 223, interior 211, Compuplaza...
+🛡️ Dirección: [dirección de la tienda cargada desde Sheets]...
 [ACTION:MAPS]  <-- Error: texto visible no deseado
 ```
 
@@ -78,11 +79,17 @@ Se centralizó la lógica en la función `parseBotResponse(rawText, products)`, 
 
 | Etiqueta en Prompt | Variantes Aceptadas | Acción en UI |
 | :--- | :--- | :--- |
-| `[ACTION:MAPS]` | `[ACTION: MAPS]`, `[action:ubicacion]`, `[ACTION:LOCATION]`, `[ACTION:GOOGLE_MAPS]` | Botón que abre el modal interactivo de Google Maps de Spartan Games en Compuplaza. |
+| `[ACTION:MAPS]` | `[ACTION: MAPS]`, `[action:ubicacion]`, `[ACTION:LOCATION]`, `[ACTION:GOOGLE_MAPS]` | Botón que abre el modal interactivo de Google Maps (URL dinámica desde `storeInfo.mapsUrl`). |
+| `[ACTION:WAZE]` | `[action:waze]`, `[ACTION: WAZE]` | Botón que abre Waze con la ruta a la tienda (URL dinámica desde `storeInfo.wazeUrl`). |
 | `[ACTION:BUILDER]` | `[ACTION: PC_BUILDER]`, `[action:armar]`, `[ACTION:CONFIGURADOR]` | Botón que abre el configurador de armado de PC paso a paso. |
 | `[ACTION:CATALOG]` | `[ACTION: CATALOGO]`, `[action:tienda]`, `[ACTION:PRODUCTOS]` | Botón que redirige la vista al catálogo general de productos. |
-| `[ACTION:WHATSAPP:msg]` | `[ACTION:WSP:msg]`, `[action:wa]` | Botón que abre WhatsApp Web o App con mensaje predefinido para atención inmediata. |
+| `[ACTION:WHATSAPP:msg]` | `[ACTION:WSP:msg]`, `[action:wa]` | Botón que abre WhatsApp Web o App con mensaje predefinido (número dinámico desde `storeInfo.whatsappMain`). |
 | `[ACTION:ADDTOCART:id1,id2]` | `[ACTION:CARRITO:id1,id2]`, `[action:add_to_cart:...]` | Botón que añade todos los IDs especificados de la cotización directamente al carrito de compras. |
+| `[ACTION:FACEBOOK]` | `[action:facebook]`, `[ACTION:FB]` | Botón que abre la página de Facebook de la tienda (URL dinámica desde `storeInfo.facebookUrl`). |
+| `[ACTION:INSTAGRAM]` | `[action:instagram]`, `[ACTION:IG]` | Botón que abre el perfil de Instagram de la tienda (URL dinámica desde `storeInfo.instagramUrl`). |
+| `[ACTION:TIKTOK]` | `[action:tiktok]` | Botón que abre el perfil de TikTok de la tienda (URL dinámica desde `storeInfo.tiktokUrl`). |
+| `[ACTION:FAQ]` | `[action:faq]`, `[ACTION:PREGUNTAS]` | Botón que abre el modal de preguntas frecuentes. |
+| `[ACTION:CATEGORIES]` | `[action:categories]`, `[ACTION:CATEGORIAS]` | Botón que abre el menú de todas las categorías de productos. |
 | `[PRODUCT:id]` | `[PRODUCT: id1, id2]`, `[product:101]` | Extrae el ID y renderiza una tarjeta interactiva con imagen, precio, stock y botón de compra rápida. |
 
 ### Optimizaciones de Experiencia de Usuario (UI/UX)
@@ -91,6 +98,44 @@ Se centralizó la lógica en la función `parseBotResponse(rawText, products)`, 
   - Se oculta el botón de maximizar en smartphones (`hidden sm:inline-flex`), evitando que la ventana se deforme o sobrepase el viewport vertical.
   - Se desactivan las zonas de redimensionamiento invisible en pantallas táctiles (`hidden sm:block`) para evitar captura errática de toques.
   - La ventana utiliza `100dvh` y márgenes dinámicos para que el botón de cierre (`X`) siempre esté visible, cómodo y despejado.
+
+---
+
+## 3.1. Prompt Dinámico y storeContext
+
+El system prompt del chatbot ya no contiene datos de negocio hardcodeados. Toda la información de la tienda se inyecta dinámicamente desde el frontend mediante el objeto `storeContext` incluido en el payload POST:
+
+```javascript
+// aiService.js envía al backend:
+{
+  messages: [...],
+  catalogContext: "...",
+  storeContext: {
+    name: storeInfo.name,
+    city: storeInfo.city,
+    address: storeInfo.address,
+    whatsapp: storeInfo.whatsappMain,
+    phones: storeInfo.phones,
+    schedule: storeInfo.schedule,
+    facebookUrl: storeInfo.facebookUrl,
+    instagramUrl: storeInfo.instagramUrl,
+    tiktokUrl: storeInfo.tiktokUrl,
+    fullDate: "...",
+    time: "...",
+    storeStatus: "..."
+  }
+}
+```
+
+En `chat.js`, el handler extrae `storeContext` del body y construye el prompt sustituyendo `${storeName}`, `${timeCtx.address}`, `${storeContext?.whatsapp}`, etc. Si `storeContext` es nulo, se usan valores genéricos seguros.
+
+El mensaje de fallback también es dinámico:
+```javascript
+const whatsappNotice = storeContext?.whatsapp
+  ? ` WhatsApp oficial (+${storeContext.whatsapp})`
+  : " WhatsApp oficial";
+const reply = assistantMsg?.content || `En este momento no pude consultar el inventario. Escríbenos directamente a nuestro${whatsappNotice}.`;
+```
 
 ---
 
@@ -154,8 +199,10 @@ El chatbot procesa tres capas de protección antes de llamar a la API de inferen
 
 Para mantener los precios y stock sincronizados con Google Sheets sin interrumpir la navegación del cliente:
 - **Proxy Serverless (`netlify/functions/catalog.js`):** Descarga el catálogo en el servidor, filtra columnas y mantiene una caché en memoria (60s TTL).
+- **Lectura directa con fallback:** Si el proxy no responde, `catalogService.js` descarga las 4 pestañas del Sheet en paralelo (`Productos`, `Categorias`, `Configuracion`, `Banners`) via la API GViz CSV.
+- **Pestaña `Configuracion`:** Contiene pares clave-valor (nombre_tienda, direccion, whatsapp, maps_url, facebook_url, etc.) que se parsean a un objeto `storeInfo` en `catalogService.js`. Este objeto alimenta toda la UI (Footer, Topbar, ChatIABubble, LocationModal) y el prompt del chatbot.
 - **Detección de Diferencias (`detectPriceChanges`):** Compara el inventario actual con el recién obtenido.
-- **Notificación Flotante (`PriceUpdateToast.jsx`):** Diseñada con estética cockpit dark glassmorphism (inspirada en interfaces de vanguardia como PixAI):
+- **Notificación Flotante (`PriceUpdateToast.jsx`):** Diseñada con estética cockpit dark glassmorphism:
   - Fondo translúcido con desenfoque de fondo (`backdrop-blur-2xl bg-[#0b0f17]/90`).
   - Indicador pulsante en tonos ámbar y esmeralda.
   - Contador de cambios detectados.
@@ -171,8 +218,11 @@ Configuradas en `.env` (desarrollo local) y en Netlify Site Configuration (produ
 | :--- | :--- | :--- |
 | `OPENROUTER_API_KEY` | Clave secreta para la API de OpenRouter | `sk-or-v1-...` |
 | `OPENROUTER_MODEL` | Modelo de lenguaje de alta precisión | `openai/gpt-5.6-luna` |
-| `GOOGLE_SHEET_ID` | Identificador privado del Google Sheet | `1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno` |
-| `REVALIDATE_SECRET` | Token para purga instantánea de caché vía webhook | `spartan_secret_2026` |
+| `GOOGLE_SHEET_ID` | Identificador del Google Sheet (CMS) | *(configurado en `.env` y Netlify)* |
+| `VITE_GOOGLE_SHEET_ID` | Mismo Sheet ID expuesto al frontend vía Vite | *(igual a `GOOGLE_SHEET_ID`)* |
+| `REVALIDATE_SECRET` | Token para purga instantánea de caché vía webhook | *(configurado en Netlify)* |
+
+> **Nota:** Ningún dato personal de negocio (teléfonos, direcciones, URLs de redes sociales) se almacena en el código fuente. Todos provienen de la pestaña `Configuracion` del Google Sheet.
 
 ---
 
