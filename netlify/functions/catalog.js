@@ -43,16 +43,10 @@ async function fetchSheetCsv(tabName) {
 }
 
 async function buildCatalogPayload() {
-  const [prodCsv, catCsv, cfgCsv, banCsv] = await Promise.allSettled([
-    fetchSheetCsv("Productos"),
-    fetchSheetCsv("Categorias"),
-    fetchSheetCsv("Configuracion"),
-    fetchSheetCsv("Banners")
-  ]);
-
   let products = [];
-  if (prodCsv.status === "fulfilled") {
-    const rows = parseCSV(prodCsv.value);
+  try {
+    const prodCsv = await fetchSheetCsv("Productos");
+    const rows = parseCSV(prodCsv);
     if (rows.length > 1) {
       const headers = rows[0].map(normalizeHeader);
       const findCol = (row, aliases) => {
@@ -91,6 +85,8 @@ async function buildCatalogPayload() {
         };
       }).filter(p => p.name && p.price > 0);
     }
+  } catch (err) {
+    console.error("Error fetching catalog products sheet:", err);
   }
 
   if (products.length === 0 && defaultProducts && defaultProducts.length > 0) {
