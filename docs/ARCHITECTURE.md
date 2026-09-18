@@ -27,21 +27,21 @@ Este es el mapa de los módulos principales. Usa la búsqueda de símbolos de tu
 
 ### `src/App.jsx`
 
-Punto de entrada de la aplicación React. Coordina el estado global de la sesión: productos, categorías, configuración de tienda, carrito de compras, tema visual (dark/light) y la vista activa (`home`, `catalog`, `product`). No contiene lógica de presentación propia; delega el renderizado a las páginas y componentes que importa.
+Punto de entrada de la aplicación React. Coordina el enrutamiento con `react-router-dom` y el estado global de la sesión: productos, categorías, configuración de tienda, carrito de compras y tema visual (dark/light). Define las rutas (`/`, `/catalog`, `/product/:idOrSlug`) y delega el renderizado a cada página mientras mantiene modales y asistentes como capas superpuestas.
 
 ### `src/pages/`
 
 Vistas completas e independientes. Cada archivo es una pantalla autónoma con su propia lógica de filtrado y estado local:
 
-- **`HomePage`** — Vitrina de entrada. Compone el Hero Banner, el slider de categorías, las ofertas relámpago con autoplay horizontal y la sección de testimonios de clientes.
-- **`CatalogPage`** — Catálogo con filtrado multifactorial: búsqueda textual, selección de marcas, rango de precio dual con inputs manuales, toggle de stock disponible, ordenamiento y alternancia de vista grilla/lista. Paginación para catálogos de 500+ productos.
-- **`ProductDetailPage`** — Ficha técnica completa. Galería de 1-N imágenes con lightbox fullscreen navegable por teclado, pestañas de especificaciones, selector de cantidad y modal de confirmación de stock.
+- **`HomePage`** — Vitrina de entrada. Compone el Hero Banner, el carrusel de categorías, las ofertas relámpago con scroll continuo y los testimonios de clientes.
+- **`CatalogPage`** — Catálogo con filtrado sincronizado en la URL mediante `useSearchParams` (`category`, `q`, `min`, `max`). Soporta búsqueda de texto, marcas, rango de precios con slider continuo e inputs manuales, filtro de stock, ordenamiento y alternancia grilla/lista.
+- **`ProductDetailPage`** — Ficha técnica con URL amigable basada en slug (`/product/:idOrSlug`). Resuelve productos por ID numérico, slug exacto o prefijo de ID si el nombre cambió en Google Sheets. Incluye galería con lightbox, pestañas de especificaciones técnicas, selector de unidades y botón de consulta directa por WhatsApp.
 
 ### `src/components/`
 
 Componentes organizados por dominio funcional. Las subcarpetas agrupan por responsabilidad:
 
-- **`layout/`** — Estructura permanente visible en toda la app: `Topbar` (horarios, ubicación, sync manual), `Navbar` (buscador predictivo, categorías, toggle de tema), `Footer` (pasarelas de pago, datos legales), `MegaMenuDrawer` (navegación lateral por familias de hardware).
+- **`layout/`** — Estructura permanente visible en toda la app: `Topbar` (horarios, ubicación, sync manual), `Navbar` (buscador predictivo sincronizado con la URL, categorías, toggle de tema), `Footer` (pasarelas de pago, datos legales), `MegaMenuDrawer` (navegación lateral por familias de hardware).
 - **`modals/`** — Diálogos emergentes aislados: `CartDrawer` (carrito, cálculo de reserva 10%, proforma WhatsApp), `PCBuilderModal` (configurador paso a paso de PC), `LocationModal` (mapa de la tienda física en Compuplaza, ruta Waze), `FaqModal` (preguntas frecuentes con búsqueda en vivo).
 - **`home/`** — Secciones exclusivas de la portada: `HeroBannerCarousel`, `CategorySlider`, `CustomerReviewsSection`.
 - **`feedback/`** — Componentes reactivos de notificación: `ChatIABubble` (asistente IA flotante con tres modos de tamaño), `PriceUpdateToast` (alerta glassmorphic de precios actualizados).
@@ -51,7 +51,7 @@ Componentes organizados por dominio funcional. Las subcarpetas agrupan por respo
 
 Capa de integración con servicios externos. Ningún componente de UI accede directamente a la red; siempre pasa por esta capa.
 
-- **`catalogService`** — Descarga y cachea los datos de Google Sheets. Transforma URLs de Google Drive a CDN directa (`lh3.googleusercontent.com`). Implementa `detectPriceChanges`, que compara el catálogo en memoria contra datos frescos para detectar variaciones de precio o stock.
+- **`catalogService`** — Descarga y cachea los datos de Google Sheets. Normaliza URLs de Google Drive a CDN directa (`lh3.googleusercontent.com`). Genera slugs limpios con `slugify`, desduplica IDs y slugs en memoria con `deduplicateProducts` para prevenir errores de edición humana en la hoja, y detecta cambios de precio o stock con `detectPriceChanges`.
 - **`aiService`** — Cliente del asistente IA. Envía mensajes al endpoint serverless y parsea la respuesta, extrayendo etiquetas de acción (`[ACTION:MAPS]`, `[ACTION:OPEN_CART]`, `[PRODUCT:sku]`) para convertirlas en botones y tarjetas interactivas.
 
 ### `src/utils/`
@@ -77,7 +77,7 @@ Backend serverless ejecutado en el edge de Netlify. Existen dos funciones:
 
 ### `tests/`
 
-- **`production.test.js`** — 14 pruebas unitarias con `node:test`. Cubren parseo CSV, normalización de URLs de imagen, cálculos de carrito y reserva, paginación, guardrails de IA, validación de queries GViz y detección de cambios de precio.
+- **`production.test.js`** — 16 pruebas unitarias con `node:test`. Cubren parseo CSV, normalización de URLs de imagen, cálculos de carrito y reserva, paginación, guardrails de IA, validación de queries GViz, detección de cambios de precio, normalización de slugs y desduplicación de inventario en memoria.
 
 ## Invariantes Arquitectónicos
 
@@ -98,6 +98,14 @@ Estas son propiedades del sistema que deben mantenerse verdaderas. Violarlas int
 7. **Cero emojis decorativos en la UI.** Toda la iconografía usa vectores SVG de Lucide React o vectores oficiales de pasarelas de pago (Yape, Plin, Culqi, Visa) centralizados en `Icons`.
 
 ## Cross-Cutting Concerns
+
+### Enrutamiento y Deep Linking
+
+La navegación usa `react-router-dom` con `BrowserRouter`. En Netlify, la regla `/* -> /index.html 200` en `netlify.toml` asegura que cualquier ruta directa o recarga con F5 entregue la SPA sin errores 404.
+
+Las rutas de producto usan el patrón `/product/:idOrSlug` (por ejemplo, `/product/115-corsair-vengeance-rgb-16gb-ddr5-6400mhz`). El resolver busca por ID numérico, slug exacto o prefijo de ID; si el título cambia en Google Sheets, los enlaces compartidos previamente no se rompen.
+
+El catálogo sincroniza sus filtros principales (`category`, `q`, `min`, `max`) en la URL vía `useSearchParams` con reemplazo de historial. Al compartir un enlace o recargar la página, el catálogo y el slider de precios restauran exactamente el estado configurado.
 
 ### Temas (Dark / Light)
 

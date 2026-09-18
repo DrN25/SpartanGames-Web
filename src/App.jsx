@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 // Layout Components
 import Topbar from "./components/layout/Topbar";
 import Navbar from "./components/layout/Navbar";
@@ -31,10 +32,13 @@ import {
   getCachedConfig,
   getCachedBanners,
   countCategories,
-  detectPriceChanges
+  detectPriceChanges,
+  slugify
 } from "./services/catalogService";
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
   // Live Products, Categories, and Store Settings synced with Google Sheets tabs
   const [products, setProducts] = useState(() => getCachedCatalog());
   const [categories, setCategories] = useState(() => countCategories(getCachedCategories(), getCachedCatalog()));
@@ -43,8 +47,6 @@ export default function App() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState("");
 
-  // Navigation View State: 'home' | 'catalog' | 'product'
-  const [view, setView] = useState("home");
   const [selectedProduct, setSelectedProduct] = useState(() => {
     const cached = getCachedCatalog();
     return cached && cached.length > 0 ? cached[0] : null;
@@ -241,21 +243,42 @@ export default function App() {
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const currentView = location.pathname.startsWith("/catalog")
+    ? "catalog"
+    : location.pathname.startsWith("/product")
+    ? "product"
+    : "home";
+
   // Navigation handlers
-  const handleNavigate = (newView) => {
-    setView(newView);
+  const handleNavigate = (target) => {
+    if (target === "home" || target === "/") {
+      navigate("/");
+    } else if (target === "catalog") {
+      navigate("/catalog");
+    } else if (typeof target === "string" && target.startsWith("/")) {
+      navigate(target);
+    } else {
+      navigate("/");
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSelectProduct = (product) => {
+    if (!product) return;
     setSelectedProduct(product);
-    setView("product");
+    const slug = product.slug || slugify(product.name || "");
+    const targetUrl = slug ? `/product/${product.id}-${slug}` : `/product/${product.id}`;
+    navigate(targetUrl);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSelectCategory = (catId) => {
     setSelectedCategory(catId);
-    setView("catalog");
+    if (catId) {
+      navigate(`/catalog?category=${encodeURIComponent(catId)}`);
+    } else {
+      navigate("/catalog");
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -283,7 +306,7 @@ export default function App() {
         onOpenMegaMenu={() => setIsMegaMenuOpen(true)}
         onOpenPCBuilder={() => setIsPCBuilderOpen(true)}
         onNavigate={handleNavigate}
-        currentView={view}
+        currentView={currentView}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         isDarkMode={isDarkMode}
@@ -296,55 +319,68 @@ export default function App() {
 
       {/* 4. Main Views Router */}
       <div className="flex-1">
-        {view === "home" && (
-          <HomePage
-            products={products}
-            categories={categories}
-            banners={banners}
-            isDarkMode={isDarkMode}
-            storeInfo={storeInfo}
-            onNavigate={handleNavigate}
-            onSelectProduct={handleSelectProduct}
-            onSelectCategory={handleSelectCategory}
-            onAddToCart={handleAddToCart}
-            onOpenPCBuilder={() => setIsPCBuilderOpen(true)}
-            onOpenLocation={() => setIsLocationOpen(true)}
-            onOpenFaq={() => setIsFaqOpen(true)}
-            onOpenMegaMenu={() => setIsMegaMenuOpen(true)}
-            onSearchChange={setSearchQuery}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <HomePage
+                products={products}
+                categories={categories}
+                banners={banners}
+                isDarkMode={isDarkMode}
+                storeInfo={storeInfo}
+                onNavigate={handleNavigate}
+                onSelectProduct={handleSelectProduct}
+                onSelectCategory={handleSelectCategory}
+                onAddToCart={handleAddToCart}
+                onOpenPCBuilder={() => setIsPCBuilderOpen(true)}
+                onOpenLocation={() => setIsLocationOpen(true)}
+                onOpenFaq={() => setIsFaqOpen(true)}
+                onOpenMegaMenu={() => setIsMegaMenuOpen(true)}
+                onSearchChange={setSearchQuery}
+              />
+            }
           />
-        )}
 
-        {view === "catalog" && (
-          <CatalogPage
-            products={products}
-            categories={categories}
-            isDarkMode={isDarkMode}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onSelectProduct={handleSelectProduct}
-            onAddToCart={handleAddToCart}
-            onNavigate={handleNavigate}
-            storeInfo={storeInfo}
+          <Route
+            path="/catalog"
+            element={
+              <CatalogPage
+                products={products}
+                categories={categories}
+                isDarkMode={isDarkMode}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onSelectProduct={handleSelectProduct}
+                onAddToCart={handleAddToCart}
+                onNavigate={handleNavigate}
+                storeInfo={storeInfo}
+              />
+            }
           />
-        )}
 
-        {view === "product" && (
-          <div className="py-6">
-            <ProductDetailPage
-              product={selectedProduct}
-              allProducts={products}
-              isDarkMode={isDarkMode}
-              onAddToCart={handleAddToCart}
-              onSelectProduct={handleSelectProduct}
-              onSelectCategory={handleSelectCategory}
-              onNavigate={handleNavigate}
-              storeInfo={storeInfo}
-            />
-          </div>
-        )}
+          <Route
+            path="/product/:idOrSlug"
+            element={
+              <div className="py-6">
+                <ProductDetailPage
+                  product={selectedProduct}
+                  allProducts={products}
+                  isDarkMode={isDarkMode}
+                  onAddToCart={handleAddToCart}
+                  onSelectProduct={handleSelectProduct}
+                  onSelectCategory={handleSelectCategory}
+                  onNavigate={handleNavigate}
+                  storeInfo={storeInfo}
+                />
+              </div>
+            }
+          />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
 
       {/* Drawers & Modals */}

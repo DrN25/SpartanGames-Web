@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, ShoppingCart, Layers, Sun, Moon, Sparkles, X, ChevronDown } from "../common/Icons";
 
 export default function Navbar({
@@ -16,16 +16,24 @@ export default function Navbar({
   const [localSearch, setLocalSearch] = useState(searchQuery || "");
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
+  useEffect(() => {
+    setLocalSearch(searchQuery || "");
+  }, [searchQuery]);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    onSearchChange(localSearch);
-    onNavigate("catalog");
+    if (onSearchChange) onSearchChange(localSearch);
+    if (localSearch.trim()) {
+      onNavigate(`/catalog?q=${encodeURIComponent(localSearch.trim())}`);
+    } else {
+      onNavigate("catalog");
+    }
     setIsMobileSearchOpen(false);
   };
 
   const handleClearSearch = () => {
     setLocalSearch("");
-    onSearchChange("");
+    if (onSearchChange) onSearchChange("");
   };
 
   return (

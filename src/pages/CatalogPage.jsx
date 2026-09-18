@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import PriceRangeSlider from "../components/ui/PriceRangeSlider";
 import Breadcrumbs from "../components/common/Breadcrumbs";
+import { slugify } from "../services/catalogService";
 import {
   Search,
   SlidersHorizontal,
@@ -16,18 +18,30 @@ import {
 } from "../components/common/Icons";
 
 export default function CatalogPage({
-  products,
-  categories,
+  products = [],
+  categories = [],
   isDarkMode,
-  selectedCategory,
-  onSelectCategory,
-  searchQuery,
-  onSearchChange,
+  selectedCategory: initialCategory,
+  onSelectCategory: onSelectCategoryProp,
+  searchQuery: initialSearchQuery,
+  onSearchChange: onSearchChangeProp,
   onSelectProduct,
   onAddToCart,
   onNavigate,
   storeInfo
 }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const urlCategory = searchParams.get("category");
+  const urlQuery = searchParams.get("q");
+  const urlMin = searchParams.get("min");
+  const urlMax = searchParams.get("max");
+
+  // ponytail: prioritize URL search params for bookmarkable / shareable state
+  const selectedCategory = urlCategory !== null ? (urlCategory || null) : (initialCategory || null);
+  const searchQuery = urlQuery !== null ? urlQuery : (initialSearchQuery || "");
+
   const [viewMode, setViewMode] = useState("grid");
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [onlyInStock, setOnlyInStock] = useState(false);
@@ -39,17 +53,36 @@ export default function CatalogPage({
     return Math.max(8000, Math.ceil(highest / 500) * 500);
   }, [products]);
 
-  const [priceRange, setPriceRange] = useState([0, 8000]);
+  const initialMinPrice = urlMin ? Math.max(0, Number(urlMin)) : 0;
+  const initialMaxPrice = urlMax ? Number(urlMax) : 8000;
+  const [priceRange, setPriceRange] = useState([initialMinPrice, initialMaxPrice]);
   const deferredPriceRange = useDeferredValue(priceRange);
-  const [minInput, setMinInput] = useState("0");
-  const [maxInput, setMaxInput] = useState("8000");
+  const [minInput, setMinInput] = useState(initialMinPrice.toString());
+  const [maxInput, setMaxInput] = useState(initialMaxPrice.toString());
 
   useEffect(() => {
     if (maxCatalogPrice > 0) {
-      setPriceRange((prev) => [prev[0], Math.min(prev[1], maxCatalogPrice)]);
-      setMaxInput((prev) => (Number(prev) > maxCatalogPrice ? maxCatalogPrice.toString() : prev));
+      const minVal = urlMin ? Math.max(0, Number(urlMin)) : priceRange[0];
+      const maxVal = urlMax ? Math.min(Number(urlMax), maxCatalogPrice) : Math.min(priceRange[1], maxCatalogPrice);
+      setPriceRange([minVal, maxVal]);
+      setMinInput(minVal.toString());
+      setMaxInput(maxVal.toString());
     }
-  }, [maxCatalogPrice]);
+  }, [maxCatalogPrice, urlMin, urlMax]);
+
+  const handlePriceCommit = (val) => {
+    setPriceRange(val);
+    setMinInput(val[0].toString());
+    setMaxInput(val[1].toString());
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (val[0] > 0) next.set("min", String(val[0]));
+      else next.delete("min");
+      if (val[1] < maxCatalogPrice) next.set("max", String(val[1]));
+      else next.delete("max");
+      return next;
+    }, { replace: true });
+  };
 
   const handleMinInputChange = (e) => {
     const raw = e.target.value;
@@ -70,8 +103,7 @@ export default function CatalogPage({
     if (num > newMax) {
       newMax = Math.min(maxCatalogPrice, num);
     }
-    setMinInput(num.toString());
-    setPriceRange([num, newMax]);
+    handlePriceCommit([num, newMax]);
   };
 
   const handleMaxInputChange = (e) => {
@@ -96,11 +128,35 @@ export default function CatalogPage({
     if (num > maxCatalogPrice) {
       num = maxCatalogPrice;
     }
-    setMaxInput(num.toString());
-    setPriceRange([newMin, num]);
+    handlePriceCommit([newMin, num]);
   };
 
+  const onSelectCategory = (catId) => {
+    if (onSelectCategoryProp) onSelectCategoryProp(catId);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (catId) next.set("category", catId);
+      else next.delete("category");
+      return next;
+    }, { replace: true });
+  };
 
+  const onSearchChange = (q) => {
+    if (onSearchChangeProp) onSearchChangeProp(q);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (q) next.set("q", q);
+      else next.delete("q");
+      return next;
+    }, { replace: true });
+  };
+
+  const handleProductSelect = (prod) => {
+    if (onSelectProduct) onSelectProduct(prod);
+    const slug = prod.slug || slugify(prod.name || "");
+    const targetUrl = slug ? `/product/${prod.id}-${slug}` : `/product/${prod.id}`;
+    navigate(targetUrl);
+  };
 
   const availableBrands = useMemo(() => {
     const brandsMap = {};
@@ -120,20 +176,19 @@ export default function CatalogPage({
 
   const handleQuickPrice = (min, max) => {
     const boundMax = Math.min(max, maxCatalogPrice);
-    setMinInput(min.toString());
-    setMaxInput(boundMax.toString());
-    setPriceRange([min, boundMax]);
+    handlePriceCommit([min, boundMax]);
   };
 
   const resetFilters = () => {
-    onSelectCategory(null);
-    onSearchChange("");
+    if (onSelectCategoryProp) onSelectCategoryProp(null);
+    if (onSearchChangeProp) onSearchChangeProp("");
     setSelectedBrands([]);
     setMinInput("0");
     setMaxInput(maxCatalogPrice.toString());
     setPriceRange([0, maxCatalogPrice]);
     setOnlyInStock(false);
     setSortBy("featured");
+    setSearchParams({}, { replace: true });
   };
 
   const hasActiveFilters =
@@ -423,11 +478,7 @@ export default function CatalogPage({
                   max={maxCatalogPrice}
                   step={10}
                   isDarkMode={isDarkMode}
-                  onValueCommit={(val) => {
-                    setPriceRange(val);
-                    setMinInput(val[0].toString());
-                    setMaxInput(val[1].toString());
-                  }}
+                  onValueCommit={handlePriceCommit}
                 />
               </div>
 
@@ -701,7 +752,7 @@ export default function CatalogPage({
                 return (
                   <div
                     key={product.id}
-                    onClick={() => onSelectProduct(product)}
+                    onClick={() => handleProductSelect(product)}
                     className={`group rounded-2xl border overflow-hidden transition-all duration-200 flex flex-col justify-between cursor-pointer hover:-translate-y-1 ${
                       isDarkMode
                         ? "bg-[#111620] border-gray-800 hover:border-amber-400/50 hover:shadow-lg hover:shadow-black/40"
@@ -852,7 +903,7 @@ export default function CatalogPage({
                         )}
                       </div>
                       <h3
-                        onClick={() => onSelectProduct(product)}
+                        onClick={() => handleProductSelect(product)}
                         className="font-bold text-base text-slate-950 dark:text-white hover:text-amber-800 dark:hover:text-[#FFDE17] cursor-pointer transition-colors"
                       >
                         {product.name}

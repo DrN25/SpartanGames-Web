@@ -41,6 +41,53 @@ const HEADER_ALIASES = {
 };
 export { parseCSV } from "../utils/csvParser.js";
 
+// ponytail: standard unicode normalize + regex, no external slugify package needed
+export function slugify(text) {
+  if (!text) return "";
+  return String(text)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// ponytail: in-memory Set deduplication for IDs and Slugs
+export function deduplicateProducts(productList = []) {
+  if (!Array.isArray(productList)) return [];
+  const seenIds = new Set();
+  const seenSlugs = new Set();
+
+  return productList.map((product, idx) => {
+    let id = product.id;
+    if (id === undefined || id === null || id === "") {
+      id = idx + 1;
+    }
+    let idStr = String(id);
+    if (seenIds.has(idStr)) {
+      id = `${idStr}-row${idx + 1}`;
+    }
+    seenIds.add(String(id));
+
+    let baseSlug = product.slug || slugify(product.name) || `producto-${id}`;
+    let finalSlug = baseSlug;
+    let counter = 2;
+    while (seenSlugs.has(finalSlug)) {
+      finalSlug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    seenSlugs.add(finalSlug);
+
+    return {
+      ...product,
+      id,
+      slug: finalSlug
+    };
+  });
+}
+
 function normalizeHeader(str) {
   return String(str || "")
     .toLowerCase()
@@ -184,10 +231,12 @@ export function parseProductRow(headers, row) {
   };
 
   const parsedImages = extractImages();
+  const parsedName = getColVal(HEADER_ALIASES.name) || "Componente Hardware";
 
   return {
     id: isNaN(Number(rawId)) ? rawId : Number(rawId),
-    name: getColVal(HEADER_ALIASES.name) || "Componente Hardware",
+    name: parsedName,
+    slug: slugify(parsedName),
     brand: getColVal(HEADER_ALIASES.brand) || "Spartan",
     category: rawCategory,
     categoryId: rawCategoryId,
@@ -221,7 +270,7 @@ async function fetchTabRaw(tabName, timestamp) {
 }
 
 export function getCachedCatalog() {
-  if (typeof localStorage === "undefined") return defaultProducts;
+  if (typeof localStorage === "undefined") return deduplicateProducts(defaultProducts);
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (raw) {
@@ -235,13 +284,13 @@ export function getCachedCatalog() {
             if (fallbackProd) parsed.push(fallbackProd);
           }
         });
-        return parsed;
+        return deduplicateProducts(parsed);
       }
     }
   } catch (e) {
     console.warn("Could not read catalog cache", e);
   }
-  return defaultProducts;
+  return deduplicateProducts(defaultProducts);
 }
 
 export function getCachedCategories() {
@@ -363,12 +412,13 @@ export async function fetchLiveCatalog(force = false) {
                 }
               });
 
-              localStorage.setItem(CACHE_KEY, JSON.stringify(proxyData.products));
+              const safeProxyProducts = deduplicateProducts(proxyData.products);
+              localStorage.setItem(CACHE_KEY, JSON.stringify(safeProxyProducts));
               localStorage.setItem(CACHE_TIME_KEY, String(now));
 
               return {
-                products: proxyData.products,
-                categories: countCategories(getCachedCategories(), proxyData.products),
+                products: safeProxyProducts,
+                categories: countCategories(getCachedCategories(), safeProxyProducts),
                 storeInfo: getCachedConfig(),
                 banners: getCachedBanners()
               };
@@ -403,7 +453,7 @@ export async function fetchLiveCatalog(force = false) {
               if (fallbackProd) parsed.push(fallbackProd);
             }
           });
-          products = parsed;
+          products = deduplicateProducts(parsed);
           localStorage.setItem(CACHE_KEY, JSON.stringify(products));
         }
       }

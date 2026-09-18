@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseCSV, normalizeImageUrl, parseProductRow, getCachedBanners, getCachedCatalog, detectPriceChanges } from "../src/services/catalogService.js";
+import { parseCSV, normalizeImageUrl, parseProductRow, getCachedBanners, getCachedCatalog, detectPriceChanges, slugify, deduplicateProducts } from "../src/services/catalogService.js";
 import { isGibberish, checkGuardrails, handler, validateGvizQuery } from "../netlify/functions/chat.js";
 import { storeInfo, defaultBanners, categoriesTree } from "../src/data/storeData.js";
 import { parseBotResponse } from "../src/services/aiService.js";
@@ -343,6 +343,50 @@ test("detectPriceChanges correctly identifies price differences and inventory ch
   assert.equal(cpuDiff.type, "stock");
   assert.equal(cpuDiff.oldStock, 8);
   assert.equal(cpuDiff.newStock, 4);
+});
+
+// ==========================================
+// 8. CLIENT-SIDE ROUTING & SLUG INTEGRITY
+// ==========================================
+test("slugify normalizes accents, spaces, and punctuation into clean URLs", () => {
+  assert.equal(
+    slugify("Memoria RAM Corsair Vengeance RGB 16GB DDR5 6000MHz!"),
+    "memoria-ram-corsair-vengeance-rgb-16gb-ddr5-6000mhz"
+  );
+  assert.equal(
+    slugify("Laptop Gamer HP Victus 15.6\" FHD (144Hz) - Core i5 13va"),
+    "laptop-gamer-hp-victus-156-fhd-144hz-core-i5-13va"
+  );
+  assert.equal(slugify("¿Tarjeta Gráfica ASUS TUF / RTX 4070 SUPER?"), "tarjeta-grafica-asus-tuf-rtx-4070-super");
+  assert.equal(slugify(""), "");
+  assert.equal(slugify(null), "");
+});
+
+test("deduplicateProducts guarantees unique IDs and collision-free slugs against Google Sheets human errors", () => {
+  const messyProducts = [
+    { id: 101, name: "Monitor Gamer 165Hz" },
+    { id: 101, name: "Monitor Gamer 165Hz" }, // Duplicate ID & duplicate name
+    { id: 102, name: "Monitor Gamer 165Hz" }, // Distinct ID, duplicate name
+    { id: "", name: "Cable HDMI 2.1" } // Missing ID
+  ];
+
+  const sanitized = deduplicateProducts(messyProducts);
+
+  assert.equal(sanitized.length, 4);
+  assert.equal(sanitized[0].id, 101);
+  assert.equal(sanitized[0].slug, "monitor-gamer-165hz");
+
+  // Duplicate ID got disambiguated with row number
+  assert.equal(sanitized[1].id, "101-row2");
+  assert.equal(sanitized[1].slug, "monitor-gamer-165hz-2");
+
+  // Third product with same name got unique sequential slug
+  assert.equal(sanitized[2].id, 102);
+  assert.equal(sanitized[2].slug, "monitor-gamer-165hz-3");
+
+  // Missing ID got filled
+  assert.equal(sanitized[3].id, 4);
+  assert.equal(sanitized[3].slug, "cable-hdmi-21");
 });
 
 

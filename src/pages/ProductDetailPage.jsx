@@ -18,10 +18,12 @@ import {
   WhatsAppIcon
 } from "../components/common/Icons";
 import { useModalTransition } from "../hooks/useModalTransition";
+import { useParams, useNavigate } from "react-router-dom";
+import { slugify } from "../services/catalogService";
 
 export default function ProductDetailPage({
-  product,
-  allProducts,
+  product: initialProduct,
+  allProducts = [],
   isDarkMode,
   onAddToCart,
   onSelectProduct,
@@ -29,6 +31,30 @@ export default function ProductDetailPage({
   onNavigate,
   storeInfo
 }) {
+  const { idOrSlug } = useParams();
+  const navigate = useNavigate();
+
+  // ponytail: resolve product by ID, Slug, or ID-prefix (resilient to renaming in Google Sheets)
+  const product = React.useMemo(() => {
+    if (!idOrSlug) return initialProduct;
+    if (!allProducts || allProducts.length === 0) return initialProduct;
+
+    // 1. Direct ID match
+    const byId = allProducts.find((p) => String(p.id) === idOrSlug);
+    if (byId) return byId;
+
+    // 2. Direct Slug match
+    const bySlug = allProducts.find((p) => p.slug === idOrSlug);
+    if (bySlug) return bySlug;
+
+    // 3. ID prefix match (e.g. "115-corsair-vengeance-rgb" -> "115")
+    const prefixId = idOrSlug.split("-")[0];
+    const byPrefix = allProducts.find((p) => String(p.id) === prefixId);
+    if (byPrefix) return byPrefix;
+
+    return initialProduct || null;
+  }, [idOrSlug, initialProduct, allProducts]);
+
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
   const [showStockModal, setShowStockModal] = useState(false);
@@ -66,7 +92,31 @@ export default function ProductDetailPage({
     }
   }, [isLightboxOpen, images.length]);
 
-  if (!product) return null;
+  if (!product) {
+    return (
+      <div className="max-w-[1720px] mx-auto px-4 py-16 text-center">
+        <div className={`p-12 rounded-3xl border max-w-lg mx-auto ${
+          isDarkMode ? "bg-[#111620] border-gray-800" : "bg-white border-slate-200 shadow-sm"
+        }`}>
+          <div className="w-16 h-16 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto mb-4 font-black text-2xl">
+            !
+          </div>
+          <h2 className="text-xl font-black uppercase mb-2 text-slate-900 dark:text-white">
+            Producto no encontrado
+          </h2>
+          <p className="text-sm text-slate-600 dark:text-gray-400 mb-6">
+            El componente que buscas ya no está disponible o el enlace ha cambiado.
+          </p>
+          <button
+            onClick={() => onNavigate ? onNavigate("catalog") : navigate("/catalog")}
+            className="px-6 py-2.5 rounded-xl bg-[#FFDE17] text-slate-950 font-bold uppercase text-xs tracking-wider transition-colors shadow-sm cursor-pointer"
+          >
+            Ver Todo el Catálogo
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleDecrease = () => {
     if (quantity > 1) setQuantity(quantity - 1);
