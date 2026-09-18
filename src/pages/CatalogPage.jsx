@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
+import PriceRangeSlider from "../components/ui/PriceRangeSlider";
 import Breadcrumbs from "../components/common/Breadcrumbs";
 import {
   Search,
@@ -99,17 +100,7 @@ export default function CatalogPage({
     setPriceRange([newMin, num]);
   };
 
-  const handleMinSliderChange = (e) => {
-    const val = Math.min(Number(e.target.value), priceRange[1]);
-    setMinInput(val.toString());
-    setPriceRange([val, priceRange[1]]);
-  };
 
-  const handleMaxSliderChange = (e) => {
-    const val = Math.max(Number(e.target.value), priceRange[0]);
-    setMaxInput(val.toString());
-    setPriceRange([priceRange[0], val]);
-  };
 
   const availableBrands = useMemo(() => {
     const brandsMap = {};
@@ -227,8 +218,7 @@ export default function CatalogPage({
     breadcrumbsList.push({ label: currentCategoryObj.name });
   }
 
-  const minPricePercent = maxCatalogPrice > 0 ? Math.min(100, Math.max(0, (priceRange[0] / maxCatalogPrice) * 100)) : 0;
-  const maxPricePercent = maxCatalogPrice > 0 ? Math.min(100, Math.max(0, (priceRange[1] / maxCatalogPrice) * 100)) : 100;
+
 
   return (
     <div className={`min-h-screen py-6 px-4 sm:px-6 lg:px-8 xl:px-12 max-w-[1720px] mx-auto transition-colors ${
@@ -425,57 +415,20 @@ export default function CatalogPage({
                 </div>
               </div>
 
-              {/* Desplazables Individuales con Colores Dinámicos */}
-              <div className="space-y-3 mb-4">
-                {/* Desplazable Mínimo */}
-                <div>
-                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-1">
-                    <span>Desde (mínimo):</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17]">
-                      S/. {priceRange[0]}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    aria-label="Precio mínimo"
-                    min="0"
-                    max={maxCatalogPrice}
-                    step="10"
-                    value={priceRange[0]}
-                    onChange={handleMinSliderChange}
-                    style={{
-                      background: isDarkMode
-                        ? `linear-gradient(to right, #1f2937 ${minPricePercent}%, #FFDE17 ${minPricePercent}%)`
-                        : `linear-gradient(to right, #e2e8f0 ${minPricePercent}%, #f59e0b ${minPricePercent}%)`
-                    }}
-                    className="w-full cursor-pointer h-2 rounded-lg appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FFDE17] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 dark:[&::-webkit-slider-thumb]:border-gray-900 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:hover:scale-115 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FFDE17] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900 dark:[&::-moz-range-thumb]:border-gray-900 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:hover:scale-115 [&::-moz-range-thumb]:transition-transform"
-                  />
-                </div>
-
-                {/* Desplazable Máximo */}
-                <div>
-                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-1">
-                    <span>Hasta (máximo):</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17]">
-                      S/. {priceRange[1]}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    aria-label="Precio máximo"
-                    min="0"
-                    max={maxCatalogPrice}
-                    step="10"
-                    value={priceRange[1]}
-                    onChange={handleMaxSliderChange}
-                    style={{
-                      background: isDarkMode
-                        ? `linear-gradient(to right, #FFDE17 ${maxPricePercent}%, #1f2937 ${maxPricePercent}%)`
-                        : `linear-gradient(to right, #f59e0b ${maxPricePercent}%, #e2e8f0 ${maxPricePercent}%)`
-                    }}
-                    className="w-full cursor-pointer h-2 rounded-lg appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FFDE17] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 dark:[&::-webkit-slider-thumb]:border-gray-900 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:hover:scale-115 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FFDE17] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900 dark:[&::-moz-range-thumb]:border-gray-900 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:hover:scale-115 [&::-moz-range-thumb]:transition-transform"
-                  />
-                </div>
+              {/* Slider Radix UI de rango de precios (1 barra, 2 desplazables, 60fps) */}
+              <div className="mb-4">
+                <PriceRangeSlider
+                  value={priceRange}
+                  min={0}
+                  max={maxCatalogPrice}
+                  step={10}
+                  isDarkMode={isDarkMode}
+                  onValueCommit={(val) => {
+                    setPriceRange(val);
+                    setMinInput(val[0].toString());
+                    setMaxInput(val[1].toString());
+                  }}
+                />
               </div>
 
               {/* Botones Rápidos de Presupuesto */}
