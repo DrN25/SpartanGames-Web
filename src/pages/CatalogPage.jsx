@@ -97,21 +97,13 @@ export default function CatalogPage({
   };
 
   const handleMinSliderChange = (e) => {
-    const val = Number(e.target.value);
-    if (val > priceRange[1]) {
-      setPriceRange([val, val]);
-    } else {
-      setPriceRange([val, priceRange[1]]);
-    }
+    const val = Math.min(Number(e.target.value), priceRange[1]);
+    setPriceRange([val, priceRange[1]]);
   };
 
   const handleMaxSliderChange = (e) => {
-    const val = Number(e.target.value);
-    if (val < priceRange[0]) {
-      setPriceRange([val, val]);
-    } else {
-      setPriceRange([priceRange[0], val]);
-    }
+    const val = Math.max(Number(e.target.value), priceRange[0]);
+    setPriceRange([priceRange[0], val]);
   };
 
   const availableBrands = useMemo(() => {
@@ -225,6 +217,9 @@ export default function CatalogPage({
   if (currentCategoryObj) {
     breadcrumbsList.push({ label: currentCategoryObj.name });
   }
+
+  const minPricePercent = maxCatalogPrice > 0 ? Math.min(100, Math.max(0, (priceRange[0] / maxCatalogPrice) * 100)) : 0;
+  const maxPricePercent = maxCatalogPrice > 0 ? Math.min(100, Math.max(0, (priceRange[1] / maxCatalogPrice) * 100)) : 100;
 
   return (
     <div className={`min-h-screen py-6 px-4 sm:px-6 lg:px-8 xl:px-12 max-w-[1720px] mx-auto transition-colors ${
@@ -417,43 +412,54 @@ export default function CatalogPage({
                 </div>
               </div>
 
-              {/* Sliders: Límite Inferior y Límite Superior */}
-              <div className="space-y-3 mb-4">
-                <div>
-                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-1">
-                    <span>Desde (mínimo):</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17] whitespace-nowrap shrink-0">
-                      S/. {priceRange[0]}
-                    </span>
-                  </div>
+              {/* Slider Dual con Rango Coloreado entre ambos círculos */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-2">
+                  <span>
+                    Desde: <strong className="font-mono text-slate-900 dark:text-[#FFDE17]">S/. {priceRange[0]}</strong>
+                  </span>
+                  <span>
+                    Hasta: <strong className="font-mono text-slate-900 dark:text-[#FFDE17]">S/. {priceRange[1]}</strong>
+                  </span>
+                </div>
+
+                <div className="relative flex items-center h-6 select-none touch-none">
+                  {/* Barra Base Inactiva */}
+                  <div className="absolute left-0 right-0 h-2 rounded-full bg-slate-200 dark:bg-gray-800" />
+
+                  {/* Barra Activa Coloreada entre ambos círculos desplazables */}
+                  <div
+                    className="absolute h-2 rounded-full bg-gradient-to-r from-amber-400 via-[#FFDE17] to-amber-400 shadow-xs transition-all"
+                    style={{
+                      left: `${minPricePercent}%`,
+                      width: `${Math.max(0, maxPricePercent - minPricePercent)}%`
+                    }}
+                  />
+
+                  {/* Desplazable Círculo Mínimo */}
                   <input
                     type="range"
                     aria-label="Precio mínimo"
                     min="0"
                     max={maxCatalogPrice}
-                    step="50"
+                    step="10"
                     value={priceRange[0]}
                     onChange={handleMinSliderChange}
-                    className="w-full accent-[#FFDE17] cursor-pointer h-1.5 bg-slate-200 dark:bg-gray-800 rounded-lg appearance-none"
+                    className={`absolute inset-0 w-full h-2 appearance-none bg-transparent pointer-events-none cursor-pointer ${
+                      priceRange[0] > maxCatalogPrice * 0.7 ? "z-30" : "z-20"
+                    } [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FFDE17] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 dark:[&::-webkit-slider-thumb]:border-gray-900 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:hover:scale-115 [&::-webkit-slider-thumb]:active:scale-105 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FFDE17] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900 dark:[&::-moz-range-thumb]:border-gray-900 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:hover:scale-115 [&::-moz-range-thumb]:active:scale-105 [&::-moz-range-thumb]:transition-transform`}
                   />
-                </div>
 
-                <div>
-                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-1">
-                    <span>Hasta (máximo):</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17] whitespace-nowrap shrink-0">
-                      S/. {priceRange[1]}
-                    </span>
-                  </div>
+                  {/* Desplazable Círculo Máximo */}
                   <input
                     type="range"
                     aria-label="Precio máximo"
                     min="0"
                     max={maxCatalogPrice}
-                    step="50"
+                    step="10"
                     value={priceRange[1]}
                     onChange={handleMaxSliderChange}
-                    className="w-full accent-[#FFDE17] cursor-pointer h-1.5 bg-slate-200 dark:bg-gray-800 rounded-lg appearance-none"
+                    className="absolute inset-0 w-full h-2 appearance-none bg-transparent pointer-events-none cursor-pointer z-20 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FFDE17] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 dark:[&::-webkit-slider-thumb]:border-gray-900 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:hover:scale-115 [&::-webkit-slider-thumb]:active:scale-105 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FFDE17] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900 dark:[&::-moz-range-thumb]:border-gray-900 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:hover:scale-115 [&::-moz-range-thumb]:active:scale-105 [&::-moz-range-thumb]:transition-transform"
                   />
                 </div>
               </div>
@@ -462,47 +468,47 @@ export default function CatalogPage({
               <div className="grid grid-cols-2 gap-1.5">
                 <button
                   type="button"
-                  onClick={() => handleQuickPrice(0, 500)}
+                  onClick={() => handleQuickPrice(0, 100)}
                   className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
-                    priceRange[0] === 0 && priceRange[1] === 500
+                    priceRange[0] === 0 && priceRange[1] === 100
                       ? isDarkMode ? "bg-[#FFDE17] text-black border-[#FFDE17]" : "bg-slate-900 text-white border-slate-900"
                       : isDarkMode ? "border-gray-800 hover:border-gray-700 text-gray-300" : "border-slate-200 hover:border-slate-300 text-slate-700"
                   }`}
                 >
-                  Hasta S/. 500
+                  Hasta S/. 100
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickPrice(500, 1500)}
+                  onClick={() => handleQuickPrice(100, 500)}
                   className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
-                    priceRange[0] === 500 && priceRange[1] === 1500
+                    priceRange[0] === 100 && priceRange[1] === 500
                       ? isDarkMode ? "bg-[#FFDE17] text-black border-[#FFDE17]" : "bg-slate-900 text-white border-slate-900"
                       : isDarkMode ? "border-gray-800 hover:border-gray-700 text-gray-300" : "border-slate-200 hover:border-slate-300 text-slate-700"
                   }`}
                 >
-                  S/. 500 - 1500
+                  S/. 100 - 500
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickPrice(1500, 3000)}
+                  onClick={() => handleQuickPrice(500, 2000)}
                   className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
-                    priceRange[0] === 1500 && priceRange[1] === 3000
+                    priceRange[0] === 500 && priceRange[1] === 2000
                       ? isDarkMode ? "bg-[#FFDE17] text-black border-[#FFDE17]" : "bg-slate-900 text-white border-slate-900"
                       : isDarkMode ? "border-gray-800 hover:border-gray-700 text-gray-300" : "border-slate-200 hover:border-slate-300 text-slate-700"
                   }`}
                 >
-                  S/. 1500 - 3000
+                  S/. 500 - 2000
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickPrice(3000, maxCatalogPrice)}
+                  onClick={() => handleQuickPrice(2000, maxCatalogPrice)}
                   className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-colors ${
-                    priceRange[0] === 3000 && priceRange[1] === maxCatalogPrice
+                    priceRange[0] === 2000 && priceRange[1] === maxCatalogPrice
                       ? isDarkMode ? "bg-[#FFDE17] text-black border-[#FFDE17]" : "bg-slate-900 text-white border-slate-900"
                       : isDarkMode ? "border-gray-800 hover:border-gray-700 text-gray-300" : "border-slate-200 hover:border-slate-300 text-slate-700"
                   }`}
                 >
-                  Gama Alta
+                  Más de S/. 2000
                 </button>
               </div>
             </div>
