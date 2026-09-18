@@ -365,6 +365,7 @@ export default function App() {
         onRemoveItem={handleRemoveItem}
         isDarkMode={isDarkMode}
         storeInfo={storeInfo}
+        onSelectProduct={handleSelectProduct}
       />
 
       <PCBuilderModal

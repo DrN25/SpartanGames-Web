@@ -21,10 +21,18 @@ export default function CartDrawer({
   onUpdateQuantity,
   onRemoveItem,
   isDarkMode,
-  storeInfo = defaultStoreInfo
+  storeInfo = defaultStoreInfo,
+  onSelectProduct
 }) {
   const { shouldRender, isClosing } = useModalTransition(isOpen, 240);
   if (!shouldRender) return null;
+
+  const handleItemClick = (item) => {
+    if (onSelectProduct) {
+      onSelectProduct(item);
+      onClose();
+    }
+  };
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const reservaMonto = (subtotal * 0.1).toFixed(2);
@@ -121,22 +129,26 @@ export default function CartDrawer({
                     : "bg-white border-slate-200 shadow-xs"
                 }`}
               >
-                <div
-                  className={`w-18 h-18 rounded-xl p-2 flex items-center justify-center flex-shrink-0 ${
-                    isDarkMode ? "bg-black/40" : "bg-slate-50"
+                <button
+                  type="button"
+                  onClick={() => handleItemClick(item)}
+                  className={`w-18 h-18 rounded-xl p-2 flex items-center justify-center flex-shrink-0 cursor-pointer group/thumb transition-all active:scale-95 ${
+                    isDarkMode ? "bg-black/40 hover:bg-black/60" : "bg-slate-50 hover:bg-slate-100"
                   }`}
+                  title={`Ver detalle de ${item.name}`}
+                  aria-label={`Ver detalle de ${item.name}`}
                 >
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="max-h-14 max-w-14 object-contain"
+                    className="max-h-14 max-w-14 object-contain group-hover/thumb:scale-105 transition-transform"
                     referrerPolicy="no-referrer"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = "/assets/images/spartan_games_banner.jpg";
                     }}
                   />
-                </div>
+                </button>
 
                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                   <div>
@@ -151,7 +163,11 @@ export default function CartDrawer({
                         Quitar
                       </button>
                     </div>
-                    <h4 className="text-xs font-bold line-clamp-1 text-slate-900 dark:text-white">
+                    <h4
+                      onClick={() => handleItemClick(item)}
+                      className="text-xs font-bold line-clamp-1 text-slate-900 dark:text-white hover:text-amber-600 dark:hover:text-[#FFDE17] cursor-pointer transition-colors"
+                      title={`Ver detalle de ${item.name}`}
+                    >
                       {item.name}
                     </h4>
                   </div>
