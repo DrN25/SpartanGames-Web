@@ -11,8 +11,7 @@ export default function Navbar({
   searchQuery,
   onSearchChange,
   isDarkMode,
-  onToggleTheme,
-  storeInfo
+  onToggleTheme
 }) {
   const [localSearch, setLocalSearch] = useState(searchQuery || "");
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);

@@ -39,51 +39,7 @@ const HEADER_ALIASES = {
   detailedSpecs: ["especificaciones_detalladas", "detailedspecs", "ficha_tecnica", "especificaciones"],
   warranty: ["garantia", "warranty", "garantia_meses"]
 };
-
-export function parseCSV(text) {
-  const lines = [];
-  let row = [];
-  let inQuotes = false;
-  let currentToken = "";
-
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    const next = text[i + 1];
-
-    if (c === '"') {
-      if (inQuotes && next === '"') {
-        currentToken += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (c === "," && !inQuotes) {
-      row.push(currentToken.trim());
-      currentToken = "";
-    } else if ((c === "\r" || c === "\n") && !inQuotes) {
-      if (c === "\r" && next === "\n") {
-        i++;
-      }
-      row.push(currentToken.trim());
-      currentToken = "";
-      if (row.length > 1 || (row.length === 1 && row[0] !== "")) {
-        lines.push(row);
-      }
-      row = [];
-    } else {
-      currentToken += c;
-    }
-  }
-
-  if (currentToken || row.length > 0) {
-    row.push(currentToken.trim());
-    if (row.length > 1 || (row.length === 1 && row[0] !== "")) {
-      lines.push(row);
-    }
-  }
-
-  return lines;
-}
+export { parseCSV } from "../utils/csvParser.js";
 
 function normalizeHeader(str) {
   return String(str || "")

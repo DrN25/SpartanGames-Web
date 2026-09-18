@@ -13,6 +13,7 @@ export default function HeroBannerCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const autoPlayTimerRef = useRef(null);
+  const touchStartXRef = useRef(null);
 
   const activeBanners = banners && banners.length > 0 ? banners.filter((b) => b.active !== false) : [];
 
@@ -39,8 +40,6 @@ export default function HeroBannerCarousel({
   }, [isPaused, activeBanners.length, handleNext]);
 
   if (activeBanners.length === 0) return null;
-
-  const current = activeBanners[currentIndex] || activeBanners[0];
 
   const handleActionClick = (banner) => {
     if (!banner) return;
@@ -77,8 +76,6 @@ export default function HeroBannerCarousel({
         break;
     }
   };
-
-  const touchStartXRef = useRef(null);
 
   const handleTouchStart = (e) => {
     touchStartXRef.current = e.touches[0].clientX;

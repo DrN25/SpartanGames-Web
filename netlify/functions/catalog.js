@@ -5,49 +5,15 @@
  */
 
 import { productsCatalog as defaultProducts } from "../../src/data/storeData.js";
+import { parseCSV } from "../../src/utils/csvParser.js";
+
+export { parseCSV };
 
 const GOOGLE_SHEET_ID = (process.env.GOOGLE_SHEET_ID || "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno").trim();
 const CACHE_TTL_MS = 60 * 1000; // 60 segundos de caché en memoria
 
 let memoryCache = null;
 let lastFetchTime = 0;
-
-export function parseCSV(text) {
-  const lines = [];
-  let row = [];
-  let inQuotes = false;
-  let currentToken = "";
-
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    const next = text[i + 1];
-
-    if (c === '"') {
-      if (inQuotes && next === '"') {
-        currentToken += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (c === "," && !inQuotes) {
-      row.push(currentToken.trim());
-      currentToken = "";
-    } else if ((c === "\r" || c === "\n") && !inQuotes) {
-      if (c === "\r" && next === "\n") i++;
-      row.push(currentToken.trim());
-      currentToken = "";
-      if (row.length > 1 || (row.length === 1 && row[0] !== "")) lines.push(row);
-      row = [];
-    } else {
-      currentToken += c;
-    }
-  }
-  if (currentToken || row.length > 0) {
-    row.push(currentToken.trim());
-    if (row.length > 1 || (row.length === 1 && row[0] !== "")) lines.push(row);
-  }
-  return lines;
-}
 
 function normalizeHeader(str) {
   return String(str || "")

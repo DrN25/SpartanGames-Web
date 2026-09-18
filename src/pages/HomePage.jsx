@@ -5,7 +5,6 @@ import CustomerReviewsSection from "../components/home/CustomerReviewsSection";
 import {
   Sparkles,
   ArrowRight,
-  ShieldCheck,
   ShoppingCart,
   Flame,
   MapPin,
