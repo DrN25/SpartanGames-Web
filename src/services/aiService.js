@@ -134,7 +134,7 @@ function checkClientSideGuardrails(text = "", storeInfo = {}) {
 
   if (dateTriggers.some((t) => lower.includes(t))) {
     const timeCtx = getStoreTimeContext(storeInfo);
-    return `Hoy es **${timeCtx.fullDate}**, son las **${timeCtx.time}** en Arequipa y ${timeCtx.storeStatus}\n\nEl horario de atención en tienda física es **${timeCtx.schedule}** en **${timeCtx.address}**.\n\n¿En qué componente, proforma o armado de PC te puedo asesorar hoy?`;
+    return `¡Todo firme y listo para la batalla! Hoy es **${timeCtx.fullDate}**, son las **${timeCtx.time}** en Arequipa y ${timeCtx.storeStatus}\n\nEl horario oficial de atención en tienda física es **${timeCtx.schedule}** en **${timeCtx.address}**.\n\n¿En qué componente, proforma o armado de PC gamer te puedo asesorar hoy?`;
   }
 
 
@@ -226,21 +226,21 @@ export function parseBotResponse(rawText = "", products = []) {
   // 6. Extract [ACTION:FACEBOOK]
   const fbRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*FACEBOOK\s*\]\s*(?:\*{0,2}|`?)/gi;
   if (fbRegex.test(cleanText)) {
-    rawActions.push({ type: "facebook", label: "Facebook" });
+    rawActions.push({ type: "facebook", label: "Facebook oficial" });
     cleanText = cleanText.replace(fbRegex, "");
   }
 
   // 7. Extract [ACTION:INSTAGRAM]
   const igRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*INSTAGRAM\s*\]\s*(?:\*{0,2}|`?)/gi;
   if (igRegex.test(cleanText)) {
-    rawActions.push({ type: "instagram", label: "Instagram" });
+    rawActions.push({ type: "instagram", label: "Instagram oficial" });
     cleanText = cleanText.replace(igRegex, "");
   }
 
   // 8. Extract [ACTION:TIKTOK]
   const ttRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*TIKTOK\s*\]\s*(?:\*{0,2}|`?)/gi;
   if (ttRegex.test(cleanText)) {
-    rawActions.push({ type: "tiktok", label: "TikTok" });
+    rawActions.push({ type: "tiktok", label: "TikTok oficial" });
     cleanText = cleanText.replace(ttRegex, "");
   }
 
@@ -373,6 +373,6 @@ export async function sendChatMessage({
   }
 
   console.error("[SpartanAI] All chat endpoints failed. Last error:", lastError);
-  return "En este momento no pude consultar el inventario en vivo. Escríbenos directamente a nuestro WhatsApp (+51 912 930 004) para atenderte al instante en Spartan Games Compuplaza.";
+  return "🛡️ En este momento no pude consultar el inventario en vivo. Escríbenos directamente a nuestro WhatsApp oficial (+51 912 930 004) para atenderte al instante en Spartan Games Compuplaza. ⚡";
 }
 
