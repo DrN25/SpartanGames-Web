@@ -11,9 +11,9 @@ export default function Topbar({
   lastSyncTime,
   storeInfo = defaultStoreInfo
 }) {
-  const phoneFormatted = storeInfo?.phones?.[0] || "912 930 004";
-  const whatsappNum = storeInfo?.whatsappMain || "51912930004";
-  const displayAddress = storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza • Arequipa";
+  const phoneFormatted = storeInfo?.phones?.[0] || storeInfo?.whatsappMain || "";
+  const whatsappNum = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
+  const displayAddress = storeInfo?.address || (storeInfo?.city ? `Tienda Física • ${storeInfo.city}` : "Tienda Física");
 
   return (
     <div
@@ -29,7 +29,7 @@ export default function Topbar({
           <button
             onClick={onOpenLocation}
             className="flex min-w-0 truncate items-center gap-1.5 hover:text-amber-400 transition-colors group cursor-pointer text-left"
-            title={`Ver ubicación en Google Maps (${displayAddress})`}
+            title={`Ver ubicación (${displayAddress})`}
           >
             <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-amber-400/80 group-hover:text-amber-400" />
             <span className="truncate underline decoration-dotted decoration-slate-600 group-hover:decoration-amber-400">
@@ -39,7 +39,7 @@ export default function Topbar({
           <span className="hidden sm:inline text-gray-500 flex-shrink-0">•</span>
           <div className="hidden sm:flex items-center gap-1.5 text-amber-400 font-bold text-[11px] sm:text-xs flex-shrink-0">
             <Truck className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>Delivery Arequipa Express</span>
+            <span>{storeInfo?.city ? `Delivery ${storeInfo.city} & Envíos` : "Envíos a Domicilio"}</span>
           </div>
         </div>
 
@@ -63,15 +63,17 @@ export default function Topbar({
             <span className="hidden xl:inline">Preguntas Frecuentes</span>
           </button>
 
-          <a
-            href={`https://wa.me/${whatsappNum}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-bold"
-          >
-            <WhatsAppIcon className="w-3.5 h-3.5" colored={true} />
-            <span className="font-mono">{phoneFormatted}</span>
-          </a>
+          {whatsappNum && (
+            <a
+              href={`https://wa.me/${whatsappNum}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-bold"
+            >
+              <WhatsAppIcon className="w-3.5 h-3.5" colored={true} />
+              <span className="font-mono">{phoneFormatted || whatsappNum}</span>
+            </a>
+          )}
         </div>
       </div>
     </div>

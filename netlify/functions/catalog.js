@@ -81,7 +81,7 @@ async function buildCatalogPayload() {
           image: normalizeImageUrl(rawImg),
           specs: (findCol(r, ["specs", "caracteristicas"]) || "").split(",").map(s => s.trim()).filter(Boolean),
           description: findCol(r, ["descripcion", "detalle"]) || "",
-          warranty: findCol(r, ["garantia"]) || "Garantía local en Spartan Games Compuplaza."
+          warranty: findCol(r, ["garantia"]) || "Garantía física directa en tienda con comprobante oficial."
         };
       }).filter(p => p.name && p.price > 0);
     }

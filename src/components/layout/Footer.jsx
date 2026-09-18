@@ -85,63 +85,72 @@ export default function Footer({ onNavigate, onOpenLocation, storeInfo: propStor
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#FFDE17] p-0.5 shadow-md shadow-amber-500/10 flex items-center justify-center flex-shrink-0">
                 <img
-                  src="/assets/images/spartan_games_logo_base_solo.png"
-                  alt="Spartan Games Logo"
+                  src={storeInfo?.isotipoUrl || "/assets/images/spartan_games_logo_base_solo.png"}
+                  alt={`${storeInfo?.name || "Tienda"} Logo`}
                   className="w-full h-full object-contain"
                 />
               </div>
               <div>
                 <div className="font-black text-lg text-[#FFDE17] leading-none tracking-wider">
-                  SPARTAN GAMES
+                  {(storeInfo?.name || "SPARTAN GAMES").toUpperCase()}
                 </div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                  Arequipa • Perú
-                </div>
+                {storeInfo?.city && (
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                    {storeInfo.city}
+                  </div>
+                )}
               </div>
             </div>
 
             <p className="text-xs leading-relaxed text-slate-400">
-              {storeInfo.tagline}. Tienda física especializada en hardware de alto nivel para gaming,
-              creación de contenido y ensamble profesional.
+              {storeInfo?.tagline || "Tienda especializada en hardware gamer y cómputo de alto rendimiento."}
             </p>
 
             <div className="flex items-center gap-3 pt-2">
-              <a
-                href="https://facebook.com/spartangamesaqp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
-                aria-label="Facebook Spartan Games"
-              >
-                <FacebookIcon className="w-4 h-4" />
-              </a>
-              <a
-                href="https://instagram.com/spartangamesaqp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
-                aria-label="Instagram Spartan Games"
-              >
-                <InstagramIcon className="w-4 h-4" />
-              </a>
-              <a
-                href="https://tiktok.com/@spartangamesaqp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
-                aria-label="TikTok Spartan Games"
-              >
-                <TikTokIcon className="w-4 h-4" />
-              </a>
-              <a
-                href={`https://wa.me/${storeInfo.whatsappMain}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-[#25D366] hover:border-[#25D366] transition-all"
-                aria-label="WhatsApp Spartan Games"
-              >
-                <WhatsAppIcon className="w-4 h-4" />
-              </a>
+              {storeInfo?.facebookUrl && (
+                <a
+                  href={storeInfo.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
+                  aria-label={`Facebook ${storeInfo.name || "Tienda"}`}
+                >
+                  <FacebookIcon className="w-4 h-4" />
+                </a>
+              )}
+              {storeInfo?.instagramUrl && (
+                <a
+                  href={storeInfo.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
+                  aria-label={`Instagram ${storeInfo.name || "Tienda"}`}
+                >
+                  <InstagramIcon className="w-4 h-4" />
+                </a>
+              )}
+              {storeInfo?.tiktokUrl && (
+                <a
+                  href={storeInfo.tiktokUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
+                  aria-label={`TikTok ${storeInfo.name || "Tienda"}`}
+                >
+                  <TikTokIcon className="w-4 h-4" />
+                </a>
+              )}
+              {storeInfo?.whatsappMain && (
+                <a
+                  href={`https://wa.me/${String(storeInfo.whatsappMain).replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-[#25D366] hover:border-[#25D366] transition-all"
+                  aria-label={`WhatsApp ${storeInfo.name || "Tienda"}`}
+                >
+                  <WhatsAppIcon className="w-4 h-4" />
+                </a>
+              )}
             </div>
           </div>
 
@@ -256,11 +265,13 @@ export default function Footer({ onNavigate, onOpenLocation, storeInfo: propStor
         {/* Bottom Rights */}
         <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            © {new Date().getFullYear()} Spartan Games Arequipa. Todos los derechos reservados.
+            © {new Date().getFullYear()} {storeInfo?.name || "Tienda"}. Todos los derechos reservados.
           </div>
-          <div className="text-[11px]">
-            Calle Octavio Muñoz Najar 223 Int 211, Compuplaza • Arequipa, Perú
-          </div>
+          {storeInfo?.address && (
+            <div className="text-[11px]">
+              {storeInfo.address}
+            </div>
+          )}
         </div>
       </div>
     </footer>

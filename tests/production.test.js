@@ -274,12 +274,21 @@ test("parseBotResponse extracts [ACTION:MAPS] and its variants without leaking t
   assert.ok(!res5.text.includes("[PRODUCT:"));
   assert.ok(!res5.text.includes("[ACTION:"));
 
-  // 5. Safety scrub: any unrecognized action or product tag is cleanly removed
-  const rawMsg6 = "Mensaje con tag desconocido:\n[ACTION:UNKNOWN_FEATURE_99]\n[PRODUCT:INVALID]";
+  // 5. Waze, FAQ, Categories actions
+  const rawMsg6 = "Ruta directa y dudas:\n[ACTION:WAZE]\n[ACTION:FAQ]\n[ACTION:CATEGORIES]";
   const res6 = parseBotResponse(rawMsg6, mockCatalog);
+  assert.equal(res6.actions.length, 3);
+  assert.equal(res6.actions[0].type, "waze");
+  assert.equal(res6.actions[1].type, "faq");
+  assert.equal(res6.actions[2].type, "categories");
   assert.ok(!res6.text.includes("[ACTION:"));
-  assert.ok(!res6.text.includes("[PRODUCT:"));
-  assert.ok(!res6.text.includes("UNKNOWN_FEATURE"));
+
+  // 6. Safety scrub: any unrecognized action or product tag is cleanly removed
+  const rawMsg7 = "Mensaje con tag desconocido:\n[ACTION:UNKNOWN_FEATURE_99]\n[PRODUCT:INVALID]";
+  const res7 = parseBotResponse(rawMsg7, mockCatalog);
+  assert.ok(!res7.text.includes("[ACTION:"));
+  assert.ok(!res7.text.includes("[PRODUCT:"));
+  assert.ok(!res7.text.includes("UNKNOWN_FEATURE"));
 });
 
 // ==========================================

@@ -3,12 +3,14 @@ import { Sparkles, Truck, ShieldCheck, Cpu, MapPin, CreditCard } from "./Icons";
 
 export default function MarqueeTicker({ storeInfo = {} }) {
   const addressText = storeInfo?.address
-    ? `${storeInfo.address} • ${storeInfo?.schedule || "Lunes a Sábado 11:00 am - 8:00 pm"}`
-    : "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza • Lunes a Sábado 11:00 am - 8:00 pm";
+    ? `${storeInfo.address}${storeInfo?.schedule ? ` • ${storeInfo.schedule}` : ""}`
+    : (storeInfo?.schedule ? `Atención en tienda • ${storeInfo.schedule}` : "Atención presencial y asesoría técnica garantizada");
+
+  const deliveryText = storeInfo?.deliveryNote || (storeInfo?.city ? `Delivery express en ${storeInfo.city} y envíos a provincias` : "Delivery express local y envíos a provincias");
 
   const items = [
     { text: addressText, icon: "pin" },
-    { text: "Delivery express en Arequipa Metropolitana y envíos asegurados a provincias", icon: "truck" },
+    { text: deliveryText, icon: "truck" },
     { text: "Garantía local directa de 1 a 3 años con boleta o factura", icon: "shield" },
     { text: "Ensambles con Windows 11 activado y pruebas de estrés térmico gratis", icon: "cpu" },
     { text: "Aceptamos Yape, Plin, transferencias directas y pago por reserva del 10%", icon: "wallet" }

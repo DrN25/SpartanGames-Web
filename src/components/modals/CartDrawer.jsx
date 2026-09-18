@@ -42,10 +42,11 @@ export default function CartDrawer({
     .map((item) => `• ${item.quantity}x ${item.name} - S/. ${(item.price * item.quantity).toFixed(2)}`)
     .join("\n");
 
-  const whatsappPhone = storeInfo?.whatsappMain || "51912930004";
-  const addressStr = storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza";
-  const whatsappMessage = `Hola Spartan Games Arequipa, deseo procesar el siguiente pedido desde su tienda virtual:\n\n${itemsText}\n\n*TOTAL:* S/. ${subtotal.toFixed(2)}\n*Opción Reserva 10%:* S/. ${reservaMonto}\n\nPor favor confirmar disponibilidad en ${addressStr} y datos para Yape/Transferencia.`;
-  const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappPhone = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
+  const addressStr = storeInfo?.address || (storeInfo?.city ? `tienda física (${storeInfo.city})` : "tienda física");
+  const storeName = storeInfo?.name || "Tienda";
+  const whatsappMessage = `Hola ${storeName}, deseo procesar el siguiente pedido desde su tienda virtual:\n\n${itemsText}\n\n*TOTAL:* S/. ${subtotal.toFixed(2)}\n*Opción Reserva 10%:* S/. ${reservaMonto}\n\nPor favor confirmar disponibilidad en ${addressStr} y datos para Yape/Transferencia.`;
+  const whatsappUrl = whatsappPhone ? `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}` : "";
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -220,7 +221,7 @@ export default function CartDrawer({
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
                 Garantía física en tienda
               </span>
-              <span className="truncate max-w-[200px] text-right">{storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza"}</span>
+              <span className="truncate max-w-[200px] text-right">{storeInfo?.address || storeInfo?.name || "Tienda oficial"}</span>
             </div>
 
             {/* Totales */}

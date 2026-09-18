@@ -12,9 +12,13 @@ import {
   FacebookIcon,
   InstagramIcon,
   TikTokIcon,
-  WhatsAppIcon
+  WhatsAppIcon,
+  Navigation,
+  HelpCircle,
+  Layers
 } from "../common/Icons";
 import { sendChatMessage, parseBotResponse } from "../../services/aiService";
+import { getStoreMapsUrl, getStoreWazeUrl } from "../../services/catalogService";
 import { useModalTransition } from "../../hooks/useModalTransition";
 
 /**
@@ -331,6 +335,8 @@ export default function ChatIABubble({
   onAddToCart,
   onAddBatchToCart,
   onNavigate,
+  onOpenFaq,
+  onOpenMegaMenu,
   isAnyModalOpen = false
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -472,16 +478,17 @@ export default function ChatIABubble({
           (sum, p) => sum + Number(p.price || 0),
           0
         );
+        const storeAddressSuffix = storeInfo?.address ? ` en ${storeInfo.address}` : " en nuestra tienda física";
         const confirmMsg = {
           id: Date.now() + 1,
           sender: "spartan",
-          text: `⚔️ ¡Listo para la batalla! He añadido los **${lastWithProducts.productCards.length} componentes** de tu cotización directamente al carrito de compras (Total: **S/. ${totalQuote.toFixed(2)}**). 🛒\n\nEl carrito de compras se ha abierto a la derecha para que puedas verificar cada pieza, apartarlas con el 10% de seña o exportar la orden oficial hacia WhatsApp para coordinar tu armado o recojo en ${storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza"}. 🛡️⚡`,
+          text: `⚔️ ¡Listo para la batalla! He añadido los **${lastWithProducts.productCards.length} componentes** de tu cotización directamente al carrito de compras (Total: **S/. ${totalQuote.toFixed(2)}**). 🛒\n\nEl carrito de compras se ha abierto a la derecha para que puedas verificar cada pieza, apartarlas con el 10% de seña o exportar la orden oficial hacia WhatsApp para coordinar tu armado o recojo${storeAddressSuffix}. 🛡️⚡`,
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           productCards: lastWithProducts.productCards,
           actions: [
             {
               type: "whatsapp",
-              text: `Hola Spartan Games, tengo cotizados estos componentes en mi carrito: ${lastWithProducts.productCards.map((p) => p.name).join(", ")} por un total de S/. ${totalQuote.toFixed(2)}`,
+              text: `Hola ${storeInfo?.name || "Tienda"}, tengo cotizados estos componentes en mi carrito: ${lastWithProducts.productCards.map((p) => p.name).join(", ")} por un total de S/. ${totalQuote.toFixed(2)}`,
               label: "Coordinar Reserva por WhatsApp"
             }
           ]
@@ -563,17 +570,25 @@ export default function ChatIABubble({
       onNavigate("catalog");
       setIsOpen(false);
     } else if (action.type === "whatsapp") {
-      const phone = storeInfo?.whatsappMain || "51912930004";
+      const phone = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
       const text = encodeURIComponent(
-        action.text || "Hola Spartan Games, tengo una consulta sobre sus productos"
+        action.text || `Hola ${storeInfo?.name || "Tienda"}, tengo una consulta sobre sus productos`
       );
-      window.open(`https://api.whatsapp.com/send/?phone=${phone}&text=${text}`, "_blank");
+      if (phone) {
+        window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+      }
     } else if (action.type === "facebook") {
-      window.open("https://facebook.com/spartangamesaqp", "_blank");
+      if (storeInfo?.facebookUrl) {
+        window.open(storeInfo.facebookUrl, "_blank");
+      }
     } else if (action.type === "instagram") {
-      window.open("https://instagram.com/spartangamesaqp", "_blank");
+      if (storeInfo?.instagramUrl) {
+        window.open(storeInfo.instagramUrl, "_blank");
+      }
     } else if (action.type === "tiktok") {
-      window.open("https://tiktok.com/@spartangamesaqp", "_blank");
+      if (storeInfo?.tiktokUrl) {
+        window.open(storeInfo.tiktokUrl, "_blank");
+      }
     } else if (action.type === "add_to_cart_batch") {
       const matching = (action.productIds || [])
         .map((id) => products.find((p) => String(p.id) === String(id)))
@@ -589,34 +604,49 @@ export default function ChatIABubble({
         onOpenLocation();
         setIsOpen(false);
       } else {
-        window.open(
-          "https://maps.app.goo.gl/gVknznGWkkmZHsgL9",
-          "_blank"
-        );
+        const mapsUrl = getStoreMapsUrl(storeInfo);
+        if (mapsUrl) window.open(mapsUrl, "_blank");
+      }
+    } else if (action.type === "waze") {
+      const wazeUrl = getStoreWazeUrl(storeInfo);
+      if (wazeUrl) window.open(wazeUrl, "_blank");
+    } else if (action.type === "faq") {
+      if (onOpenFaq) {
+        onOpenFaq();
+        setIsOpen(false);
+      }
+    } else if (action.type === "categories") {
+      if (onOpenMegaMenu) {
+        onOpenMegaMenu();
+        setIsOpen(false);
       }
     }
   };
 
-  const whatsappDirectPhone = storeInfo?.whatsappMain || "51912930004";
-  const whatsappDirectUrl = `https://wa.me/${whatsappDirectPhone}?text=Hola%20Spartan%20Games%20Arequipa,%20deseo%20consultar%20disponibilidad%20de%20stock%20y%20proformas.`;
+  const whatsappDirectPhone = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
+  const whatsappDirectUrl = whatsappDirectPhone
+    ? `https://wa.me/${whatsappDirectPhone}?text=${encodeURIComponent(`Hola ${storeInfo?.name || "Tienda"}, deseo consultar disponibilidad de stock y proformas.`)}`
+    : "";
 
   return (
     <>
       {/* 1. Primary WhatsApp Floating Button */}
-      <a
-        href={whatsappDirectUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-4 sm:right-6 z-40 w-14 h-14 rounded-full bg-[#25D366] text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer group"
-        aria-label="Contactar por WhatsApp Oficial de Spartan Games"
-      >
-        <WhatsAppIcon className="w-7 h-7" colored={false} />
-        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white dark:border-slate-900 animate-ping" />
-        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white dark:border-slate-900" />
-        <span className="absolute right-16 px-3.5 py-1.5 rounded-xl bg-slate-950 text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-800 shadow-xl">
-          WhatsApp Oficial Spartan
-        </span>
-      </a>
+      {whatsappDirectUrl && (
+        <a
+          href={whatsappDirectUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-6 right-4 sm:right-6 z-40 w-14 h-14 rounded-full bg-[#25D366] text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+          aria-label={`Contactar por WhatsApp Oficial de ${storeInfo?.name || "Tienda"}`}
+        >
+          <WhatsAppIcon className="w-7 h-7" colored={false} />
+          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white dark:border-slate-900 animate-ping" />
+          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white dark:border-slate-900" />
+          <span className="absolute right-16 px-3.5 py-1.5 rounded-xl bg-slate-950 text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-800 shadow-xl">
+            WhatsApp Oficial {storeInfo?.name || ""}
+          </span>
+        </a>
+      )}
 
       {/* 2. SPARTAN Button */}
       <div className="fixed bottom-24 right-4 sm:right-6 z-40">
@@ -894,14 +924,16 @@ export default function ChatIABubble({
                                 ? "bg-[#25D366] text-white hover:bg-emerald-600"
                                 : act.type === "builder" || act.type === "cart"
                                 ? "bg-[#FFDE17] text-slate-950 hover:bg-yellow-400"
+                                : act.type === "waze"
+                                ? "bg-[#33CCFF] text-slate-950 hover:bg-[#2BB8E6]"
+                                : act.type === "maps"
+                                ? "bg-emerald-600 text-white hover:bg-emerald-700"
                                 : act.type === "facebook"
                                 ? "bg-[#1877F2] text-white hover:bg-blue-700"
                                 : act.type === "instagram"
                                 ? "bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] text-white hover:opacity-90"
                                 : act.type === "tiktok"
                                 ? "bg-black text-white border border-gray-700 hover:border-gray-500"
-                                : act.type === "maps"
-                                ? "bg-emerald-600 text-white hover:bg-emerald-700"
                                 : "bg-slate-900 text-white dark:bg-gray-800 hover:bg-slate-800"
                             }`}
                           >
@@ -928,6 +960,15 @@ export default function ChatIABubble({
                             )}
                             {act.type === "maps" && (
                               <MapPin className="w-3.5 h-3.5" />
+                            )}
+                            {act.type === "waze" && (
+                              <Navigation className="w-3.5 h-3.5" />
+                            )}
+                            {act.type === "faq" && (
+                              <HelpCircle className="w-3.5 h-3.5" />
+                            )}
+                            {act.type === "categories" && (
+                              <Layers className="w-3.5 h-3.5" />
                             )}
                             <span>{act.label}</span>
                           </button>

@@ -217,15 +217,17 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
                 Escríbenos directamente por WhatsApp y te asesoramos al instante en tienda.
               </div>
             </div>
-            <a
-              href={`https://wa.me/${storeInfo.whatsappMain || "51912930004"}?text=Hola%20Spartan%20Games,%20tengo%20una%20consulta%20técnica.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-2.5 px-4 rounded-xl font-bold uppercase text-[11px] bg-[#25D366] hover:bg-emerald-600 text-white transition-colors flex items-center gap-1.5 flex-shrink-0 shadow-sm"
-            >
-              <WhatsAppIcon className="w-4 h-4" colored={false} />
-              <span>Chatear</span>
-            </a>
+            {storeInfo?.whatsappMain && (
+              <a
+                href={`https://wa.me/${String(storeInfo.whatsappMain).replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hola ${storeInfo?.name || "Tienda"}, tengo una consulta técnica.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-2.5 px-4 rounded-xl font-bold uppercase text-[11px] bg-[#25D366] hover:bg-emerald-600 text-white transition-colors flex items-center gap-1.5 flex-shrink-0 shadow-sm"
+              >
+                <WhatsAppIcon className="w-4 h-4" colored={false} />
+                <span>Chatear</span>
+              </a>
+            )}
           </div>
         </div>
       </div>

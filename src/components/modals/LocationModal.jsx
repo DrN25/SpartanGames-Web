@@ -12,11 +12,12 @@ import {
   WhatsAppIcon
 } from "../common/Icons";
 import { useModalTransition } from "../../hooks/useModalTransition";
+import { getStoreMapsUrl, getStoreWazeUrl } from "../../services/catalogService";
 
 export default function LocationModal({
   isOpen,
   onClose,
-  isDarkMode,
+  isDarkMode = true,
   storeInfo = {}
 }) {
   const [copied, setCopied] = useState(false);
@@ -38,14 +39,14 @@ export default function LocationModal({
 
   if (!shouldRender) return null;
 
-  const mapsShortUrl = "https://maps.app.goo.gl/gVknznGWkkmZHsgL9";
+  const fullAddress = storeInfo?.address || "";
+  const storeName = storeInfo?.name || "Tienda";
+  const mapsShortUrl = getStoreMapsUrl(storeInfo);
   const mapsEmbedUrl =
-    "https://maps.google.com/maps?q=Calle+Octavio+Mu%C3%B1oz+Najar+223+Arequipa&hl=es&z=19&output=embed";
-  const wazeUrl = "https://waze.com/ul?ll=-16.4013312,-71.529535&navigate=yes";
-  const fullAddress =
-    storeInfo?.address ||
-    "Calle Octavio Muñoz Najar 223 Int 211, Arequipilla, Peru, 04001";
-  const phoneMain = storeInfo?.whatsappMain || "51912930004";
+    storeInfo?.mapsEmbedUrl ||
+    `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress || storeName)}&hl=es&z=19&output=embed`;
+  const wazeUrl = getStoreWazeUrl(storeInfo);
+  const phoneMain = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
 
   const handleCopyAddress = async () => {
     try {
@@ -90,7 +91,7 @@ export default function LocationModal({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-base font-black tracking-wider text-[#FFDE17]">
-                  SPARTAN GAMES
+                  {storeName.toUpperCase()}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 border border-emerald-500/40 text-emerald-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -98,7 +99,7 @@ export default function LocationModal({
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium">
-                Calle Octavio Muñoz Najar 223 Int 211 Compuplaza • Cercado, Arequipa
+                {fullAddress || storeName}
               </p>
             </div>
           </div>
@@ -120,14 +121,14 @@ export default function LocationModal({
             <div className="absolute top-3 left-3 z-10 pointer-events-none">
               <div className="px-3 py-1.5 rounded-xl bg-slate-950/90 text-white border border-slate-800 shadow-xl backdrop-blur-md flex items-center gap-2 text-xs font-bold">
                 <MapPin className="w-3.5 h-3.5 text-[#FFDE17]" />
-                <span>Compuplaza Int 211</span>
+                <span>{storeName}</span>
               </div>
             </div>
 
             {/* Google Maps Iframe */}
             <iframe
               src={mapsEmbedUrl}
-              title="Mapa de ubicación Spartan Games en Compuplaza Arequipa"
+              title={`Mapa de ubicación ${storeName}`}
               width="100%"
               height="100%"
               style={{ border: 0, minHeight: "340px", flex: 1 }}
@@ -140,7 +141,7 @@ export default function LocationModal({
             {/* Bottom Quick Action Bar over Map */}
             <div className="p-2.5 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
               <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
-                Arequipa • C.C. Compuplaza (2do Nivel)
+                {storeInfo?.city || fullAddress}
               </span>
               <a
                 href={mapsShortUrl}
@@ -288,15 +289,17 @@ export default function LocationModal({
               </div>
 
               {/* Contact by WhatsApp */}
-              <a
-                href={`https://wa.me/${phoneMain}?text=Hola%20Spartan%20Games%20Arequipa,%20estoy%20yendo%20a%20su%20tienda%20en%20Compuplaza%20Int%20211.`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
-              >
-                <WhatsAppIcon className="w-4 h-4" colored={false} />
-                <span>Avisar llegada por WhatsApp</span>
-              </a>
+              {phoneMain && (
+                <a
+                  href={`https://wa.me/${phoneMain}?text=${encodeURIComponent(`Hola ${storeName}, estoy yendo a su local en ${fullAddress || "tienda física"}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
+                >
+                  <WhatsAppIcon className="w-4 h-4" colored={false} />
+                  <span>Avisar llegada por WhatsApp</span>
+                </a>
+              )}
             </div>
           </div>
         </div>

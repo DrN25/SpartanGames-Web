@@ -71,6 +71,7 @@ export default function HomePage({
           <div className="flex flex-col min-w-0">
             <HeroBannerCarousel
               banners={banners}
+              storeInfo={storeInfo}
               isDarkMode={isDarkMode}
               onNavigate={onNavigate}
               onSelectCategory={onSelectCategory}
@@ -163,9 +164,9 @@ export default function HomePage({
 
               <button
                 onClick={() => {
-                  const phone = storeInfo?.whatsappMain || "51912930004";
-                  const text = encodeURIComponent("Hola Spartan Games, deseo consultar por delivery y envíos.");
-                  window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+                  const phone = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
+                  const text = encodeURIComponent(`Hola ${storeInfo?.name || "Tienda"}, deseo consultar por delivery y envíos.`);
+                  if (phone) window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
                 }}
                 className="mt-3 w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               >
@@ -174,7 +175,7 @@ export default function HomePage({
               </button>
             </div>
 
-            {/* Highlight Card 3: Tienda Física Compuplaza */}
+            {/* Highlight Card 3: Tienda Física */}
             <div
               className={`rounded-2xl p-4 border flex-1 flex flex-col justify-between shadow-xs transition-all ${
                 isDarkMode ? "bg-[#111620] border-gray-800" : "bg-white border-slate-200"
@@ -187,13 +188,13 @@ export default function HomePage({
                   </span>
                   <MapPin className="w-4 h-4 text-blue-500" />
                 </div>
-                <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2">
-                  Calle Octavio Muñoz Najar 223
+                <h3 className="text-sm font-black uppercase text-slate-950 dark:text-white leading-tight mb-2 truncate">
+                  {storeInfo?.address || "Atención Presencial"}
                 </h3>
                 <ul className="space-y-1 text-xs text-slate-600 dark:text-gray-400">
                   <li className="flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                    <span className="line-clamp-1">Int 211 C.C. Compuplaza</span>
+                    <span className="line-clamp-1">{storeInfo?.city || storeInfo?.name || "Local Comercial"}</span>
                   </li>
                   <li className="flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0" />

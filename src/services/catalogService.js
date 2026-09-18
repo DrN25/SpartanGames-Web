@@ -5,8 +5,29 @@ import {
   defaultBanners
 } from "../data/storeData.js";
 
-export const GOOGLE_SHEET_ID = "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno";
+export const GOOGLE_SHEET_ID =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_GOOGLE_SHEET_ID) ||
+  "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno";
 export const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit?usp=sharing`;
+
+export function getStoreMapsUrl(info = {}) {
+  if (info?.mapsUrl) return info.mapsUrl;
+  if (info?.address) return `https://maps.google.com/?q=${encodeURIComponent(info.address)}`;
+  return "";
+}
+
+export function getStoreWazeUrl(info = {}) {
+  if (info?.wazeUrl) return info.wazeUrl;
+  if (info?.address) return `https://waze.com/ul?q=${encodeURIComponent(info.address)}&navigate=yes`;
+  return "";
+}
+
+export function getStoreWhatsAppUrl(info = {}, message = "") {
+  const phone = info?.whatsappMain ? String(info.whatsappMain).replace(/[^0-9]/g, "") : "";
+  if (!phone) return "";
+  const query = message ? `?text=${encodeURIComponent(message)}` : "";
+  return `https://wa.me/${phone}${query}`;
+}
 
 const CACHE_KEY = "spartan_catalog_cache_v5";
 const CACHE_CAT_KEY = "spartan_categories_cache";
@@ -255,7 +276,7 @@ export function parseProductRow(headers, row) {
     summary: getColVal(HEADER_ALIASES.summary) || "",
     description: getColVal(HEADER_ALIASES.description) || "",
     detailedSpecs: parseDetailedSpecs(getColVal(HEADER_ALIASES.detailedSpecs)),
-    warranty: getColVal(HEADER_ALIASES.warranty) || "Garantía física en Spartan Games Compuplaza Arequipa."
+    warranty: getColVal(HEADER_ALIASES.warranty) || "Garantía física directa en tienda con boleta o factura."
   };
 }
 
@@ -276,14 +297,6 @@ export function getCachedCatalog() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // Garantizar que los productos de banners promocionales siempre existan
-        const bannerIds = [5080, 801, 802, 803];
-        bannerIds.forEach((bId) => {
-          if (!parsed.some((p) => p.id === bId || String(p.id) === String(bId))) {
-            const fallbackProd = defaultProducts.find((p) => p.id === bId);
-            if (fallbackProd) parsed.push(fallbackProd);
-          }
-        });
         return deduplicateProducts(parsed);
       }
     }
@@ -404,14 +417,6 @@ export async function fetchLiveCatalog(force = false) {
           if (contentType.includes("application/json")) {
             const proxyData = await proxyRes.json();
             if (proxyData?.products && Array.isArray(proxyData.products) && proxyData.products.length > 0) {
-              const bannerIds = [5080, 801, 802, 803];
-              bannerIds.forEach((bId) => {
-                if (!proxyData.products.some((p) => p.id === bId || String(p.id) === String(bId))) {
-                  const fallbackProd = defaultProducts.find((p) => p.id === bId);
-                  if (fallbackProd) proxyData.products.push(fallbackProd);
-                }
-              });
-
               const safeProxyProducts = deduplicateProducts(proxyData.products);
               localStorage.setItem(CACHE_KEY, JSON.stringify(safeProxyProducts));
               localStorage.setItem(CACHE_TIME_KEY, String(now));
@@ -445,14 +450,6 @@ export async function fetchLiveCatalog(force = false) {
         const headers = rows[0].map((h) => h.trim());
         const parsed = rows.slice(1).map((r) => parseProductRow(headers, r)).filter((p) => p.name);
         if (parsed.length > 0) {
-          // Garantizar que los productos de banners promocionales no se pierdan si la hoja no los tiene
-          const bannerIds = [5080, 801, 802, 803];
-          bannerIds.forEach((bId) => {
-            if (!parsed.some((p) => p.id === bId || String(p.id) === String(bId))) {
-              const fallbackProd = defaultProducts.find((p) => p.id === bId);
-              if (fallbackProd) parsed.push(fallbackProd);
-            }
-          });
           products = deduplicateProducts(parsed);
           localStorage.setItem(CACHE_KEY, JSON.stringify(products));
         }
@@ -483,27 +480,37 @@ export async function fetchLiveCatalog(force = false) {
       }
     }
 
-    // 3. Process Store Config
+    // 3. Process Store Config from Google Sheets
     let config = getCachedConfig();
     if (cfgCsv.status === "fulfilled") {
       const rows = parseCSV(cfgCsv.value);
       if (rows.length > 1) {
         const cfgObj = { ...defaultStoreInfo };
         rows.slice(1).forEach((r) => {
-          const key = r[0]?.trim();
+          const rawKey = r[0]?.trim()?.toLowerCase() || "";
           const val = r[1]?.trim();
-          if (key && val) {
-            if (key === "nombre_tienda") cfgObj.name = val;
-            if (key === "slogan") cfgObj.tagline = val;
-            if (key === "logo_url") cfgObj.logoUrl = normalizeImageUrl(val);
-            if (key === "isotipo_url") cfgObj.isotipoUrl = normalizeImageUrl(val);
-            if (key === "direccion") cfgObj.address = val;
-            if (key === "whatsapp") cfgObj.whatsappMain = val;
-            if (key === "telefono_1") cfgObj.phones = [val, cfgObj.phones[1] || ""];
-            if (key === "telefono_2" && cfgObj.phones.length > 1) cfgObj.phones[1] = val;
-            if (key === "horario") cfgObj.schedule = val;
-            if (key === "nota_delivery") cfgObj.deliveryNote = val;
-            if (key === "politica_garantia") cfgObj.warrantyPolicy = val;
+          if (rawKey && val) {
+            if (rawKey === "nombre_tienda" || rawKey === "name") cfgObj.name = val;
+            if (rawKey === "slogan" || rawKey === "tagline") cfgObj.tagline = val;
+            if (rawKey === "logo_url" || rawKey === "logo") cfgObj.logoUrl = normalizeImageUrl(val);
+            if (rawKey === "isotipo_url" || rawKey === "isotipo") cfgObj.isotipoUrl = normalizeImageUrl(val);
+            if (rawKey === "direccion" || rawKey === "address") cfgObj.address = val;
+            if (rawKey === "ciudad" || rawKey === "city") cfgObj.city = val;
+            if (rawKey === "whatsapp" || rawKey === "whatsapp_main") cfgObj.whatsappMain = val.replace(/[^0-9]/g, "");
+            if (rawKey === "telefono_1" || rawKey === "phone_1") {
+              cfgObj.phones = [val.replace(/[^0-9]/g, ""), cfgObj.phones?.[1] || ""];
+            }
+            if (rawKey === "telefono_2" || rawKey === "phone_2") {
+              cfgObj.phones = [cfgObj.phones?.[0] || "", val.replace(/[^0-9]/g, "")];
+            }
+            if (rawKey === "horario" || rawKey === "schedule") cfgObj.schedule = val;
+            if (rawKey === "nota_delivery" || rawKey === "delivery_note") cfgObj.deliveryNote = val;
+            if (rawKey === "politica_garantia" || rawKey === "garantia") cfgObj.warrantyPolicy = val;
+            if (rawKey === "maps_url" || rawKey === "google_maps_url") cfgObj.mapsUrl = val;
+            if (rawKey === "waze_url") cfgObj.wazeUrl = val;
+            if (rawKey === "facebook_url" || rawKey === "facebook") cfgObj.facebookUrl = val;
+            if (rawKey === "instagram_url" || rawKey === "instagram") cfgObj.instagramUrl = val;
+            if (rawKey === "tiktok_url" || rawKey === "tiktok") cfgObj.tiktokUrl = val;
           }
         });
         config = cfgObj;

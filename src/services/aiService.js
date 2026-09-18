@@ -26,8 +26,9 @@ function buildCatalogContext(products = []) {
  */
 
 export function getStoreTimeContext(storeInfo = {}) {
-  const schedule = storeInfo?.schedule || "Lunes a Sábado: 11:00 am a 8:00 pm (Domingos cerrado)";
-  const address = storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211, Arequipilla, Peru, 04001";
+  const schedule = storeInfo?.schedule || "Lunes a Sábado según horario oficial";
+  const address = storeInfo?.address || "";
+  const storeName = storeInfo?.name || "la tienda física";
   
   const now = new Date();
   const fullDate = now.toLocaleDateString("es-PE", {
@@ -63,13 +64,13 @@ export function getStoreTimeContext(storeInfo = {}) {
   
   let storeStatus = "";
   if (isSunday) {
-    storeStatus = "la tienda física en Compuplaza Int 211 está cerrada hoy domingo (atendemos consultas y cotizaciones online 24/7 por WhatsApp).";
+    storeStatus = `${storeName} está cerrada hoy domingo (atendemos consultas y cotizaciones online por WhatsApp).`;
   } else if (hour24 >= 11 && hour24 < 20) {
-    storeStatus = "la tienda física en Compuplaza Int 211 ESTÁ ABIERTA en este momento (atención hasta las 8:00 pm).";
+    storeStatus = `${storeName} ESTÁ ABIERTA en este momento para atención presencial.`;
   } else if (hour24 < 11) {
-    storeStatus = "la tienda física en Compuplaza Int 211 abre hoy a las 11:00 am (actualmente atendiendo cotizaciones online).";
+    storeStatus = `${storeName} abre hoy a las 11:00 am (actualmente atendiendo consultas online).`;
   } else {
-    storeStatus = "la tienda física en Compuplaza Int 211 cerró por hoy a las 8:00 pm (reanudamos atención presencial mañana a las 11:00 am).";
+    storeStatus = `${storeName} cerró por hoy (reanudamos atención presencial mañana).`;
   }
 
   return { fullDate, dayOfWeek, time, schedule, address, storeStatus };
@@ -214,6 +215,27 @@ export function parseBotResponse(rawText = "", products = []) {
     cleanText = cleanText.replace(mapsRegex, "");
   }
 
+  // 4.5. Extract [ACTION:WAZE] / [ACTION:GPS]
+  const wazeRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:WAZE|GPS|RUTA_WAZE)\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (wazeRegex.test(cleanText)) {
+    rawActions.push({ type: "waze", label: "Ruta en Waze" });
+    cleanText = cleanText.replace(wazeRegex, "");
+  }
+
+  // 4.6. Extract [ACTION:FAQ] / [ACTION:PREGUNTAS] / [ACTION:GARANTIA]
+  const faqRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:FAQ|PREGUNTAS(?:_FRECUENTES)?|GARANT[IÍ]AS?|POL[IÍ]TICAS?)\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (faqRegex.test(cleanText)) {
+    rawActions.push({ type: "faq", label: "Preguntas Frecuentes y Garantías" });
+    cleanText = cleanText.replace(faqRegex, "");
+  }
+
+  // 4.7. Extract [ACTION:CATEGORIES] / [ACTION:CATEGORIAS] / [ACTION:HARDWARE]
+  const categoriesRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:CATEGORIES|CATEGOR[IÍ]AS|HARDWARE|DEPARTAMENTOS)\s*\]\s*(?:\*{0,2}|`?)/gi;
+  if (categoriesRegex.test(cleanText)) {
+    rawActions.push({ type: "categories", label: "Explorar Categorías" });
+    cleanText = cleanText.replace(categoriesRegex, "");
+  }
+
   // 5. Extract [ACTION:WHATSAPP:text] or [ACTION:WHATSAPP]
   const waRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:WHATSAPP|WSP|WA)(?:\s*:\s*([^\]]+))?\s*\]\s*(?:\*{0,2}|`?)/gi;
   let waMatch;
@@ -326,13 +348,20 @@ export async function sendChatMessage({
   const catalogContext = buildCatalogContext(products);
   const timeCtx = getStoreTimeContext(storeInfo);
   const storeContext = {
+    name: storeInfo?.name || "Spartan Games",
+    city: storeInfo?.city || "",
     address: timeCtx.address,
     whatsapp: storeInfo?.whatsappMain,
     phones: storeInfo?.phones,
     schedule: timeCtx.schedule,
     fullDate: timeCtx.fullDate,
     time: timeCtx.time,
-    storeStatus: timeCtx.storeStatus
+    storeStatus: timeCtx.storeStatus,
+    facebookUrl: storeInfo?.facebookUrl,
+    instagramUrl: storeInfo?.instagramUrl,
+    tiktokUrl: storeInfo?.tiktokUrl,
+    mapsUrl: storeInfo?.mapsUrl,
+    wazeUrl: storeInfo?.wazeUrl
   };
 
   const endpoints = ["/.netlify/functions/chat", "/api/chat"];

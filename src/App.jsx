@@ -444,6 +444,8 @@ export default function App() {
         onOpenPCBuilder={() => setIsPCBuilderOpen(true)}
         onOpenLocation={() => setIsLocationOpen(true)}
         onOpenCart={() => setIsCartOpen(true)}
+        onOpenFaq={() => setIsFaqOpen(true)}
+        onOpenMegaMenu={() => setIsMegaMenuOpen(true)}
         onSelectProduct={handleSelectProduct}
         onAddToCart={handleAddToCart}
         onAddBatchToCart={handleAddBatchToCart}

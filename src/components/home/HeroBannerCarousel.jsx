@@ -8,7 +8,8 @@ export default function HeroBannerCarousel({
   onSelectCategory,
   onSelectProduct,
   onSearchChange,
-  onOpenPCBuilder
+  onOpenPCBuilder,
+  storeInfo = {}
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -66,9 +67,9 @@ export default function HeroBannerCarousel({
         if (onOpenPCBuilder) onOpenPCBuilder();
         break;
       case "whatsapp": {
-        const phone = "51912930004";
-        const text = encodeURIComponent(`Hola Spartan Games, deseo consultar sobre la promoción: ${banner.title}`);
-        window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+        const phone = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
+        const text = encodeURIComponent(`Hola ${storeInfo?.name || "Tienda"}, deseo consultar sobre la promoción: ${banner.title}`);
+        if (phone) window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
         break;
       }
       default:

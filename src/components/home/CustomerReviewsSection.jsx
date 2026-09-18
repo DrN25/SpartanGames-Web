@@ -215,7 +215,7 @@ export default function CustomerReviewsSection({ isDarkMode, storeInfo }) {
               </p>
               <div className="text-[11px] text-gray-400 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-[#FFDE17]" />
-                <span>{storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza"}</span>
+                <span>{storeInfo?.address || storeInfo?.name || "Tienda Física Oficial"}</span>
               </div>
             </div>
           </div>

@@ -165,9 +165,11 @@ export default function PCBuilderModal({
     })
     .join("\n");
 
-  const whatsappPhone = storeInfo?.whatsappMain || "51912930004";
-  const whatsappQuoteMsg = `Hola Spartan Games Arequipa, acabo de armar la siguiente cotización en su configurador online:\n\n${quoteItems}\n\n*TOTAL ESTIMADO:* S/. ${totalPrice.toFixed(2)}\n\nPor favor confirmar compatibilidad, armado gratuito y disponibilidad en Compuplaza Arequipa.`;
-  const whatsappQuoteUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappQuoteMsg)}`;
+  const whatsappPhone = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
+  const storeName = storeInfo?.name || "Tienda";
+  const storeLoc = storeInfo?.address || (storeInfo?.city ? `tienda física (${storeInfo.city})` : "tienda física");
+  const whatsappQuoteMsg = `Hola ${storeName}, acabo de armar la siguiente cotización en su configurador online:\n\n${quoteItems}\n\n*TOTAL ESTIMADO:* S/. ${totalPrice.toFixed(2)}\n\nPor favor confirmar compatibilidad, armado y disponibilidad en ${storeLoc}.`;
+  const whatsappQuoteUrl = whatsappPhone ? `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappQuoteMsg)}` : "";
 
   return (
     <div

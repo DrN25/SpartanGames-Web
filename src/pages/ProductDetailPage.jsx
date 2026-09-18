@@ -141,11 +141,9 @@ export default function ProductDetailPage({
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
 
-  const savings = product.oldPrice ? (product.oldPrice - product.price).toFixed(2) : 0;
-
-  const phoneMain = storeInfo?.whatsappMain || "51912930004";
-  const whatsappMsg = `Hola Spartan Games Arequipa, deseo consultar stock del producto: *${product.name}* (SKU: ${product.sku}) por S/. ${product.price.toFixed(2)}`;
-  const whatsappUrl = `https://wa.me/${phoneMain}?text=${encodeURIComponent(whatsappMsg)}`;
+  const phoneMain = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
+  const whatsappMsg = `Hola ${storeInfo?.name || "Tienda"}, deseo consultar stock del producto: *${product.name}* (SKU: ${product.sku}) por S/. ${Number(product.price || 0).toFixed(2)}`;
+  const whatsappUrl = phoneMain ? `https://wa.me/${phoneMain}?text=${encodeURIComponent(whatsappMsg)}` : "";
 
   const relatedProducts = allProducts
     ? allProducts
@@ -631,7 +629,7 @@ export default function ProductDetailPage({
                       Garantía física directa de 12 a 36 meses con boleta o factura con RUC.
                     </li>
                     <li>
-                      Soporte técnico y diagnóstico en tienda física {storeInfo?.address || "Calle Octavio Muñoz Najar 223 Int 211 Compuplaza"}.
+                      Soporte técnico y diagnóstico en tienda física{storeInfo?.address ? ` (${storeInfo.address})` : ""}.
                     </li>
                     <li>
                       Cambio inmediato ante fallas de fábrica durante los primeros 7 días.
