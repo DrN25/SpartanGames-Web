@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
 import Breadcrumbs from "../components/common/Breadcrumbs";
 import {
   Search,
@@ -39,13 +39,16 @@ export default function CatalogPage({
   }, [products]);
 
   const [priceRange, setPriceRange] = useState([0, 8000]);
+  const deferredPriceRange = useDeferredValue(priceRange);
   const [minInput, setMinInput] = useState("0");
   const [maxInput, setMaxInput] = useState("8000");
 
   useEffect(() => {
-    setMinInput(priceRange[0].toString());
-    setMaxInput(priceRange[1].toString());
-  }, [priceRange]);
+    if (maxCatalogPrice > 0) {
+      setPriceRange((prev) => [prev[0], Math.min(prev[1], maxCatalogPrice)]);
+      setMaxInput((prev) => (Number(prev) > maxCatalogPrice ? maxCatalogPrice.toString() : prev));
+    }
+  }, [maxCatalogPrice]);
 
   const handleMinInputChange = (e) => {
     const raw = e.target.value;
@@ -98,11 +101,13 @@ export default function CatalogPage({
 
   const handleMinSliderChange = (e) => {
     const val = Math.min(Number(e.target.value), priceRange[1]);
+    setMinInput(val.toString());
     setPriceRange([val, priceRange[1]]);
   };
 
   const handleMaxSliderChange = (e) => {
     const val = Math.max(Number(e.target.value), priceRange[0]);
+    setMaxInput(val.toString());
     setPriceRange([priceRange[0], val]);
   };
 
@@ -124,6 +129,8 @@ export default function CatalogPage({
 
   const handleQuickPrice = (min, max) => {
     const boundMax = Math.min(max, maxCatalogPrice);
+    setMinInput(min.toString());
+    setMaxInput(boundMax.toString());
     setPriceRange([min, boundMax]);
   };
 
@@ -131,6 +138,8 @@ export default function CatalogPage({
     onSelectCategory(null);
     onSearchChange("");
     setSelectedBrands([]);
+    setMinInput("0");
+    setMaxInput(maxCatalogPrice.toString());
     setPriceRange([0, maxCatalogPrice]);
     setOnlyInStock(false);
     setSortBy("featured");
@@ -161,7 +170,7 @@ export default function CatalogPage({
         if (selectedBrands.length > 0 && !selectedBrands.includes(p.brand)) {
           return false;
         }
-        if (p.price < priceRange[0] || p.price > priceRange[1]) {
+        if (p.price < deferredPriceRange[0] || p.price > deferredPriceRange[1]) {
           return false;
         }
         if (onlyInStock && p.stock <= 0) {
@@ -180,14 +189,14 @@ export default function CatalogPage({
         if (sortBy === "name") return a.name.localeCompare(b.name);
         return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
       });
-  }, [products, selectedCategory, searchQuery, selectedBrands, priceRange, onlyInStock, sortBy]);
+  }, [products, selectedCategory, searchQuery, selectedBrands, deferredPriceRange, onlyInStock, sortBy]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(24);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCategory, searchQuery, selectedBrands, priceRange, onlyInStock, sortBy]);
+    setCurrentPage((prev) => (prev === 1 ? prev : 1));
+  }, [selectedCategory, searchQuery, selectedBrands, deferredPriceRange, onlyInStock, sortBy]);
 
   const totalItems = filteredProducts.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
@@ -349,7 +358,11 @@ export default function CatalogPage({
                 {(priceRange[0] > 0 || priceRange[1] < maxCatalogPrice) && (
                   <button
                     type="button"
-                    onClick={() => setPriceRange([0, maxCatalogPrice])}
+                    onClick={() => {
+                      setMinInput("0");
+                      setMaxInput(maxCatalogPrice.toString());
+                      setPriceRange([0, maxCatalogPrice]);
+                    }}
                     className="text-[10px] text-amber-600 dark:text-[#FFDE17] hover:underline font-bold"
                   >
                     Restablecer
@@ -412,31 +425,37 @@ export default function CatalogPage({
                 </div>
               </div>
 
-              {/* Slider Dual con Rango Coloreado entre ambos círculos */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-2">
-                  <span>
-                    Desde: <strong className="font-mono text-slate-900 dark:text-[#FFDE17]">S/. {priceRange[0]}</strong>
-                  </span>
-                  <span>
-                    Hasta: <strong className="font-mono text-slate-900 dark:text-[#FFDE17]">S/. {priceRange[1]}</strong>
+              {/* Barra de Espectro / Rango Activo Visual */}
+              <div className="p-2.5 rounded-xl border mb-3.5 bg-gradient-to-b from-transparent to-slate-500/5 border-slate-200 dark:border-gray-800/80">
+                <div className="flex items-center justify-between text-[11px] mb-2 font-medium text-slate-500 dark:text-gray-400">
+                  <span>Rango seleccionado:</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17] text-xs">
+                    S/. {priceRange[0]} — S/. {priceRange[1]}
                   </span>
                 </div>
-
-                <div className="relative flex items-center h-6 select-none touch-none">
-                  {/* Barra Base Inactiva */}
-                  <div className="absolute left-0 right-0 h-2 rounded-full bg-slate-200 dark:bg-gray-800" />
-
-                  {/* Barra Activa Coloreada entre ambos círculos desplazables */}
+                
+                {/* Track con Rango Coloreado Dinámico */}
+                <div className="relative h-2 rounded-full bg-slate-200 dark:bg-gray-800 overflow-hidden">
                   <div
-                    className="absolute h-2 rounded-full bg-gradient-to-r from-amber-400 via-[#FFDE17] to-amber-400 shadow-xs transition-all"
+                    className="absolute top-0 bottom-0 rounded-full bg-gradient-to-r from-amber-400 via-[#FFDE17] to-amber-300 shadow-[0_0_8px_rgba(255,222,23,0.35)] transition-all duration-75"
                     style={{
                       left: `${minPricePercent}%`,
-                      width: `${Math.max(0, maxPricePercent - minPricePercent)}%`
+                      width: `${Math.max(1, maxPricePercent - minPricePercent)}%`
                     }}
                   />
+                </div>
+              </div>
 
-                  {/* Desplazable Círculo Mínimo */}
+              {/* Desplazables Individuales con Colores Dinámicos */}
+              <div className="space-y-3 mb-4">
+                {/* Desplazable Mínimo */}
+                <div>
+                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-1">
+                    <span>Desde (mínimo):</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17]">
+                      S/. {priceRange[0]}
+                    </span>
+                  </div>
                   <input
                     type="range"
                     aria-label="Precio mínimo"
@@ -445,12 +464,23 @@ export default function CatalogPage({
                     step="10"
                     value={priceRange[0]}
                     onChange={handleMinSliderChange}
-                    className={`absolute inset-0 w-full h-2 appearance-none bg-transparent pointer-events-none cursor-pointer ${
-                      priceRange[0] > maxCatalogPrice * 0.7 ? "z-30" : "z-20"
-                    } [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FFDE17] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 dark:[&::-webkit-slider-thumb]:border-gray-900 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:hover:scale-115 [&::-webkit-slider-thumb]:active:scale-105 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FFDE17] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900 dark:[&::-moz-range-thumb]:border-gray-900 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:hover:scale-115 [&::-moz-range-thumb]:active:scale-105 [&::-moz-range-thumb]:transition-transform`}
+                    style={{
+                      background: isDarkMode
+                        ? `linear-gradient(to right, #FFDE17 ${minPricePercent}%, #1f2937 ${minPricePercent}%)`
+                        : `linear-gradient(to right, #f59e0b ${minPricePercent}%, #e2e8f0 ${minPricePercent}%)`
+                    }}
+                    className="w-full cursor-pointer h-2 rounded-lg appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FFDE17] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 dark:[&::-webkit-slider-thumb]:border-gray-900 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:hover:scale-115 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FFDE17] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900 dark:[&::-moz-range-thumb]:border-gray-900 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:hover:scale-115 [&::-moz-range-thumb]:transition-transform"
                   />
+                </div>
 
-                  {/* Desplazable Círculo Máximo */}
+                {/* Desplazable Máximo */}
+                <div>
+                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-gray-400 mb-1">
+                    <span>Hasta (máximo):</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-[#FFDE17]">
+                      S/. {priceRange[1]}
+                    </span>
+                  </div>
                   <input
                     type="range"
                     aria-label="Precio máximo"
@@ -459,7 +489,12 @@ export default function CatalogPage({
                     step="10"
                     value={priceRange[1]}
                     onChange={handleMaxSliderChange}
-                    className="absolute inset-0 w-full h-2 appearance-none bg-transparent pointer-events-none cursor-pointer z-20 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FFDE17] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 dark:[&::-webkit-slider-thumb]:border-gray-900 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:hover:scale-115 [&::-webkit-slider-thumb]:active:scale-105 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FFDE17] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900 dark:[&::-moz-range-thumb]:border-gray-900 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:hover:scale-115 [&::-moz-range-thumb]:active:scale-105 [&::-moz-range-thumb]:transition-transform"
+                    style={{
+                      background: isDarkMode
+                        ? `linear-gradient(to right, #FFDE17 ${maxPricePercent}%, #1f2937 ${maxPricePercent}%)`
+                        : `linear-gradient(to right, #f59e0b ${maxPricePercent}%, #e2e8f0 ${maxPricePercent}%)`
+                    }}
+                    className="w-full cursor-pointer h-2 rounded-lg appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FFDE17] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900 dark:[&::-webkit-slider-thumb]:border-gray-900 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:hover:scale-115 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#FFDE17] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-slate-900 dark:[&::-moz-range-thumb]:border-gray-900 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:hover:scale-115 [&::-moz-range-thumb]:transition-transform"
                   />
                 </div>
               </div>
@@ -681,7 +716,15 @@ export default function CatalogPage({
               {(priceRange[0] > 0 || priceRange[1] < maxCatalogPrice) && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/50 text-emerald-950 dark:text-emerald-400 font-bold">
                   S/. {priceRange[0]} - S/. {priceRange[1]}
-                  <button onClick={() => setPriceRange([0, maxCatalogPrice])} className="hover:opacity-75" aria-label="Quitar filtro de precio">
+                  <button
+                    onClick={() => {
+                      setMinInput("0");
+                      setMaxInput(maxCatalogPrice.toString());
+                      setPriceRange([0, maxCatalogPrice]);
+                    }}
+                    className="hover:opacity-75"
+                    aria-label="Quitar filtro de precio"
+                  >
                     <X className="w-3 h-3" />
                   </button>
                 </span>
