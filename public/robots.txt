@@ -1,0 +1,10 @@
+# Crawlers de búsqueda
+User-agent: *
+Allow: /
+
+# Rutas internas que no deben indexarse
+Disallow: /api/
+Disallow: /.netlify/
+
+# Sitemap
+Sitemap: https://spartangames.netlify.app/sitemap.xml
