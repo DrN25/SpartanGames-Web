@@ -2,7 +2,9 @@ import {
   productsCatalog as defaultProducts,
   categoriesTree as defaultCategories,
   storeInfo as defaultStoreInfo,
-  defaultBanners
+  defaultBanners,
+  customerReviews as defaultReviews,
+  faqData as defaultFaqs
 } from "../data/storeData.js";
 
 export const GOOGLE_SHEET_ID =
@@ -33,6 +35,8 @@ const CACHE_KEY = "spartan_catalog_cache_v5";
 const CACHE_CAT_KEY = "spartan_categories_cache";
 const CACHE_CONFIG_KEY = "spartan_config_cache_v5";
 const CACHE_BANNERS_KEY = "spartan_banners_cache_v5";
+const CACHE_REVIEWS_KEY = "spartan_reviews_cache_v5";
+const CACHE_FAQS_KEY = "spartan_faqs_cache_v5";
 const CACHE_TIME_KEY = "spartan_catalog_timestamp_v5";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos de caché
 
@@ -281,7 +285,7 @@ export function parseProductRow(headers, row) {
 }
 
 async function fetchTabRaw(tabName, timestamp) {
-  const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}&_t=${timestamp}`;
+  const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(tabName)}&_t=${timestamp}`;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 6000);
   const res = await fetch(url, { signal: controller.signal });
@@ -343,6 +347,34 @@ export function getCachedBanners() {
     console.warn("Could not read banners cache", e);
   }
   return defaultBanners;
+}
+
+export function getCachedReviews() {
+  if (typeof localStorage === "undefined") return defaultReviews;
+  try {
+    const raw = localStorage.getItem(CACHE_REVIEWS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Could not read reviews cache", e);
+  }
+  return defaultReviews;
+}
+
+export function getCachedFaqs() {
+  if (typeof localStorage === "undefined") return defaultFaqs;
+  try {
+    const raw = localStorage.getItem(CACHE_FAQS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Could not read faqs cache", e);
+  }
+  return defaultFaqs;
 }
 
 /**
@@ -421,11 +453,29 @@ export async function fetchLiveCatalog(force = false) {
               localStorage.setItem(CACHE_KEY, JSON.stringify(safeProxyProducts));
               localStorage.setItem(CACHE_TIME_KEY, String(now));
 
+              if (proxyData.storeInfo) {
+                localStorage.setItem(CACHE_CONFIG_KEY, JSON.stringify(proxyData.storeInfo));
+              }
+              if (proxyData.categories && Array.isArray(proxyData.categories)) {
+                localStorage.setItem(CACHE_CAT_KEY, JSON.stringify(proxyData.categories));
+              }
+              if (proxyData.banners && Array.isArray(proxyData.banners)) {
+                localStorage.setItem(CACHE_BANNERS_KEY, JSON.stringify(proxyData.banners));
+              }
+              if (proxyData.reviews && Array.isArray(proxyData.reviews)) {
+                localStorage.setItem(CACHE_REVIEWS_KEY, JSON.stringify(proxyData.reviews));
+              }
+              if (proxyData.faqs && Array.isArray(proxyData.faqs)) {
+                localStorage.setItem(CACHE_FAQS_KEY, JSON.stringify(proxyData.faqs));
+              }
+
               return {
                 products: safeProxyProducts,
-                categories: countCategories(getCachedCategories(), safeProxyProducts),
-                storeInfo: getCachedConfig(),
-                banners: getCachedBanners()
+                categories: countCategories(proxyData.categories || getCachedCategories(), safeProxyProducts),
+                storeInfo: proxyData.storeInfo || getCachedConfig(),
+                banners: proxyData.banners || getCachedBanners(),
+                reviews: proxyData.reviews || getCachedReviews(),
+                faqs: proxyData.faqs || getCachedFaqs()
               };
             }
           }
@@ -435,11 +485,13 @@ export async function fetchLiveCatalog(force = false) {
       // Fallback a lectura directa si el proxy no responde
     }
 
-    const [prodCsv, catCsv, cfgCsv, banCsv] = await Promise.allSettled([
+    const [prodCsv, catCsv, cfgCsv, banCsv, revCsv, faqCsv] = await Promise.allSettled([
       fetchTabRaw("Productos", now),
       fetchTabRaw("Categorias", now),
       fetchTabRaw("Configuracion", now),
-      fetchTabRaw("Banners", now)
+      fetchTabRaw("Banners", now),
+      fetchTabRaw("Resenas", now),
+      fetchTabRaw("FAQ", now)
     ]);
 
     // 1. Process Products
@@ -508,6 +560,13 @@ export async function fetchLiveCatalog(force = false) {
             if (rawKey === "politica_garantia" || rawKey === "garantia") cfgObj.warrantyPolicy = val;
             if (rawKey === "maps_url" || rawKey === "google_maps_url") cfgObj.mapsUrl = val;
             if (rawKey === "waze_url") cfgObj.wazeUrl = val;
+            if (rawKey === "maps_embed_url") cfgObj.mapsEmbedUrl = val;
+            if (rawKey === "referencia_ubicacion" || rawKey === "location_reference" || rawKey === "referencia") {
+              cfgObj.locationReference = val;
+            }
+            if (rawKey === "correo_contacto" || rawKey === "email") cfgObj.email = val;
+            if (rawKey === "ruc") cfgObj.ruc = val;
+            if (rawKey === "razon_social" || rawKey === "business_name") cfgObj.businessName = val;
             if (rawKey === "facebook_url" || rawKey === "facebook") cfgObj.facebookUrl = val;
             if (rawKey === "instagram_url" || rawKey === "instagram") cfgObj.instagramUrl = val;
             if (rawKey === "tiktok_url" || rawKey === "tiktok") cfgObj.tiktokUrl = val;
@@ -522,7 +581,8 @@ export async function fetchLiveCatalog(force = false) {
     let banners = getCachedBanners();
     if (banCsv.status === "fulfilled") {
       const rows = parseCSV(banCsv.value);
-      if (rows.length > 1) {
+      const firstRow = (rows[0] || []).map(normalizeHeader);
+      if (rows.length > 1 && (firstRow.includes("titulo") || firstRow.includes("title") || firstRow[0] === "id")) {
         const parseBoolean = (val) => {
           if (!val) return false;
           const s = String(val).trim().toUpperCase();
@@ -549,13 +609,64 @@ export async function fetchLiveCatalog(force = false) {
       }
     }
 
+    // 5. Process Reviews
+    let reviews = getCachedReviews();
+    if (revCsv.status === "fulfilled") {
+      const rows = parseCSV(revCsv.value);
+      const firstRow = (rows[0] || []).map(normalizeHeader);
+      if (rows.length > 1 && (firstRow.includes("cliente") || firstRow.includes("name") || firstRow.includes("comentario"))) {
+        const parsedReviews = rows.slice(1).map((r, idx) => ({
+          id: r[0]?.trim() || idx + 1,
+          name: r[1]?.trim() || "Cliente",
+          city: r[2]?.trim() || config.city || "Arequipa",
+          role: r[3]?.trim() || "Cliente Verificado",
+          purchase: r[4]?.trim() || "Compra Verificada",
+          rating: parseFloat(r[5]) || 5,
+          comment: r[6]?.trim() || "",
+          image: normalizeImageUrl(r[7]?.trim() || ""),
+          badge: r[8]?.trim() || "Compra Verificada"
+        })).filter(rev => rev.comment && rev.name);
+
+        if (parsedReviews.length > 0) {
+          reviews = parsedReviews;
+          localStorage.setItem(CACHE_REVIEWS_KEY, JSON.stringify(reviews));
+        }
+      }
+    }
+
+    // 6. Process FAQs
+    let faqs = getCachedFaqs();
+    if (faqCsv.status === "fulfilled") {
+      const rows = parseCSV(faqCsv.value);
+      const firstRow = (rows[0] || []).map(normalizeHeader);
+      if (rows.length > 1 && (firstRow.includes("pregunta") || firstRow.includes("question") || firstRow.includes("categoria"))) {
+        const rawItems = rows.slice(1).map((r) => ({
+          category: r[0]?.trim() || "General",
+          q: r[1]?.trim() || "",
+          a: r[2]?.trim() || ""
+        })).filter(f => f.q && f.a);
+
+        if (rawItems.length > 0) {
+          const grouped = {};
+          rawItems.forEach(item => {
+            if (!grouped[item.category]) grouped[item.category] = [];
+            grouped[item.category].push({ q: item.q, a: item.a });
+          });
+          faqs = Object.entries(grouped).map(([category, items]) => ({ category, items }));
+          localStorage.setItem(CACHE_FAQS_KEY, JSON.stringify(faqs));
+        }
+      }
+    }
+
     localStorage.setItem(CACHE_TIME_KEY, String(now));
 
     return {
       products,
       categories: countCategories(categories, products),
       storeInfo: config,
-      banners
+      banners,
+      reviews,
+      faqs
     };
   } catch (err) {
     console.warn("Using cached data due to sync exception:", err);
@@ -566,6 +677,8 @@ export async function fetchLiveCatalog(force = false) {
     products: cachedP,
     categories: countCategories(getCachedCategories(), cachedP),
     storeInfo: getCachedConfig(),
-    banners: getCachedBanners()
+    banners: getCachedBanners(),
+    reviews: getCachedReviews(),
+    faqs: getCachedFaqs()
   };
 }

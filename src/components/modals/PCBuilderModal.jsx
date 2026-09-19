@@ -421,7 +421,7 @@ export default function PCBuilderModal({
               </a>
 
               <p className="text-[10px] text-center text-slate-400 leading-tight">
-                * Incluye armado gratuito, gestión de cables y pruebas de rendimiento en Compuplaza Arequipa.
+                * Incluye armado gratuito, gestión de cables y pruebas de rendimiento en {storeInfo?.city || storeInfo?.name || "tienda física"}.
               </p>
             </div>
           </div>

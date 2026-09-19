@@ -19,6 +19,7 @@ export default function HomePage({
   products = [],
   categories = [],
   banners = [],
+  reviews = [],
   isDarkMode = false,
   storeInfo = {},
   onNavigate,
@@ -522,7 +523,7 @@ export default function HomePage({
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-400 mt-1 max-w-2xl leading-relaxed">
               Prueba nuestro configurador paso a paso con cálculo de presupuesto en Soles en
-              tiempo real y exportación directa a WhatsApp con armado gratis en Compuplaza.
+              tiempo real y exportación directa a WhatsApp con armado gratis en {storeInfo?.city || storeInfo?.name || "tienda física"}.
             </p>
           </div>
 
@@ -536,9 +537,9 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Sección de Confianza & Clientes Felices en Compuplaza */}
+      {/* Sección de Confianza & Clientes Felices */}
       <section className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-        <CustomerReviewsSection isDarkMode={isDarkMode} storeInfo={storeInfo} />
+        <CustomerReviewsSection isDarkMode={isDarkMode} storeInfo={storeInfo} reviews={reviews} />
       </section>
     </main>
   );

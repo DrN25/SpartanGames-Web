@@ -10,7 +10,8 @@ export default function PriceUpdateToast({
   onApply,
   onDismiss,
   changedCount = 0,
-  isDarkMode = true
+  isDarkMode = true,
+  storeInfo = {}
 }) {
   const [visible, setVisible] = useState(isOpen);
 
@@ -20,27 +21,26 @@ export default function PriceUpdateToast({
 
   if (!visible) return null;
 
+  const storeDisplay = storeInfo?.name ? `${storeInfo.name}${storeInfo.city ? ` ${storeInfo.city}` : ""}` : "tienda";
+
   return (
     <div
       className="fixed top-20 sm:top-24 left-1/2 -translate-x-1/2 z-50 max-w-lg w-[calc(100vw-2rem)] animate-spartan-modal"
-      role="alert"
+      role="status"
       aria-live="polite"
     >
       <div
-        className={`p-3 sm:px-4 sm:py-3 rounded-2xl border shadow-2xl backdrop-blur-2xl flex items-center justify-between gap-3 transition-all ${
+        className={`p-3.5 sm:p-4 rounded-2xl border shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 ${
           isDarkMode
-            ? "bg-[#0b0f17]/90 border-amber-500/40 text-white shadow-[0_10px_35px_rgba(0,0,0,0.8)]"
-            : "bg-white/95 border-amber-400/80 text-slate-900 shadow-xl shadow-slate-300/60"
+            ? "bg-[#0E131F]/90 border-amber-500/40 text-white shadow-black/80"
+            : "bg-white/95 border-amber-400/60 text-slate-900 shadow-slate-300"
         }`}
       >
-        {/* Left: Indicator & Message */}
+        {/* Left: Icon & Message */}
         <div className="flex items-center gap-3 min-w-0">
-          <div className="relative flex-shrink-0 w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-[0_0_12px_rgba(255,222,23,0.15)]">
-            <Sparkles className="w-4 h-4 text-[#FFDE17] animate-pulse" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0b0f17] animate-ping opacity-75" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0b0f17]" />
+          <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 flex-shrink-0">
+            <Sparkles className="w-5 h-5 animate-pulse" />
           </div>
-
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-[#FFDE17]">
@@ -53,7 +53,7 @@ export default function PriceUpdateToast({
               )}
             </div>
             <p className="text-[11px] text-slate-600 dark:text-gray-300 truncate">
-              Nuevos precios o stock en Spartan Games Compuplaza.
+              Nuevos precios o stock en {storeDisplay}.
             </p>
           </div>
         </div>

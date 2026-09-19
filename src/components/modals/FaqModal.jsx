@@ -3,8 +3,9 @@ import { X, HelpCircle, Search, WhatsAppIcon } from "../common/Icons";
 import { faqData, storeInfo as defaultStoreInfo } from "../../data/storeData";
 import { useModalTransition } from "../../hooks/useModalTransition";
 
-export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propStoreInfo }) {
+export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propStoreInfo, faqs: propFaqs }) {
   const storeInfo = propStoreInfo || defaultStoreInfo;
+  const rawFaqs = (propFaqs && propFaqs.length > 0) ? propFaqs : (faqData || []);
   const [searchTerm, setSearchTerm] = useState("");
   const { shouldRender, isClosing } = useModalTransition(isOpen, 220);
 
@@ -25,7 +26,7 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
   if (!shouldRender) return null;
 
   // Safely normalize grouped structure ({ category, items: [{ q, a }] }) or flat structure ({ q, a })
-  const normalizedGroups = faqData.map((group, gIdx) => {
+  const normalizedGroups = rawFaqs.map((group, gIdx) => {
     if (group.items && Array.isArray(group.items)) {
       return {
         id: `group-${gIdx}`,
@@ -63,7 +64,7 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Preguntas Frecuentes y Políticas Spartan Games"
+      aria-label={`Preguntas Frecuentes y Políticas ${storeInfo?.name || "Tienda"}`}
     >
       <div
         className={`relative w-full max-w-3xl border-0 rounded-3xl shadow-2xl shadow-black/90 flex flex-col max-h-[88vh] overflow-hidden ${
@@ -80,8 +81,8 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-black border border-amber-400/60 p-1 flex items-center justify-center shadow-inner flex-shrink-0">
               <img
-                src="/assets/images/spartan_games_logo_base_solo.png"
-                alt="Spartan"
+                src={storeInfo?.isotipoUrl || storeInfo?.logoUrl || "/assets/images/spartan_games_logo_base_solo.png"}
+                alt={storeInfo?.name || "Tienda"}
                 className="w-full h-full object-contain"
               />
             </div>
@@ -91,11 +92,11 @@ export default function FaqModal({ isOpen, onClose, isDarkMode, storeInfo: propS
                   Preguntas Frecuentes
                 </h2>
                 <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                  Políticas Spartan
+                  {storeInfo?.name ? `Políticas ${storeInfo.name}` : "Políticas Oficiales"}
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium">
-                Atención y soporte directo en {storeInfo.address}
+                Atención y soporte directo en {storeInfo.address || storeInfo.city || "tienda física"}
               </p>
             </div>
           </div>

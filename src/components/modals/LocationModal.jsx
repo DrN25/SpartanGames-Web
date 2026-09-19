@@ -83,8 +83,8 @@ export default function LocationModal({
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-black border border-amber-400/60 p-1 flex items-center justify-center shadow-inner flex-shrink-0">
               <img
-                src="/assets/images/spartan_games_logo_base_solo.png"
-                alt="Spartan Helmet"
+                src={storeInfo?.isotipoUrl || storeInfo?.logoUrl || "/assets/images/spartan_games_logo_base_solo.png"}
+                alt={`${storeName} Logo`}
                 className="w-full h-full object-contain"
               />
             </div>
@@ -204,7 +204,7 @@ export default function LocationModal({
                   <span className="font-semibold text-slate-800 dark:text-slate-200">
                     <Navigation className="w-3.5 h-3.5 text-amber-500 inline mr-1 -mt-0.5" /> Referencia:
                   </span>{" "}
-                  Al subir al segundo piso por las escaleras mecánicas, hacia el pasillo principal.
+                  {storeInfo?.locationReference || "Al ingresar al local o galería comercial, consultar por nuestro módulo oficial."}
                 </div>
               </div>
 

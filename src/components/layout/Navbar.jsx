@@ -11,7 +11,8 @@ export default function Navbar({
   searchQuery,
   onSearchChange,
   isDarkMode,
-  onToggleTheme
+  onToggleTheme,
+  storeInfo = {}
 }) {
   const [localSearch, setLocalSearch] = useState(searchQuery || "");
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -36,6 +37,11 @@ export default function Navbar({
     if (onSearchChange) onSearchChange("");
   };
 
+  const nameParts = (storeInfo?.name || "SPARTAN GAMES").split(" ");
+  const firstWord = nameParts[0] || "TIENDA";
+  const restWords = nameParts.slice(1).join(" ");
+  const citySub = storeInfo?.city ? `TIENDA • ${storeInfo.city.toUpperCase()}` : "TIENDA OFICIAL";
+
   return (
     <header
       className="sticky top-0 z-40 backdrop-blur-xl border-b border-gray-800/80 text-white shadow-2xl shadow-black/50 transition-all"
@@ -51,8 +57,8 @@ export default function Navbar({
             {/* Logo Badge: Premium Squircle with Yellow Brand Field & Subtle Gold Rim */}
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl overflow-hidden bg-[#FFDE17] p-1 shadow-lg shadow-amber-500/20 ring-2 ring-[#FFDE17]/70 group-hover:scale-105 group-hover:ring-[#FFDE17] group-hover:shadow-amber-500/40 transition-all flex items-center justify-center flex-shrink-0">
               <img
-                src="/assets/images/spartan_games_logo_base_solo.png"
-                alt="Spartan Games Logo"
+                src={storeInfo?.isotipoUrl || storeInfo?.logoUrl || "/assets/images/spartan_games_logo_base_solo.png"}
+                alt={`${storeInfo?.name || "Tienda"} Logo`}
                 className="w-full h-full object-contain rounded-lg sm:rounded-xl"
                 onError={(e) => {
                   e.currentTarget.src = "/assets/images/spartan_games_logo_base_solo.png";
@@ -64,15 +70,17 @@ export default function Navbar({
             <div className="flex flex-col">
               <div className="flex items-center gap-1 leading-none">
                 <span className="font-black text-lg sm:text-2xl tracking-tight text-white uppercase">
-                  SPARTAN
+                  {firstWord}
                 </span>
-                <span className="font-black text-lg sm:text-2xl tracking-tight text-[#FFDE17] uppercase">
-                  GAMES
-                </span>
+                {restWords && (
+                  <span className="font-black text-lg sm:text-2xl tracking-tight text-[#FFDE17] uppercase">
+                    {restWords}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1">
                 <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.18em] sm:tracking-[0.22em] text-gray-400 leading-none">
-                  HARDWARE AREQUIPA
+                  {citySub}
                 </span>
                 <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-[#FFDE17] shadow-xs shadow-amber-400" />
               </div>

@@ -35,12 +35,13 @@ export function isGibberish(text = "") {
   return false;
 }
 
-export function checkGuardrails(messages = []) {
+export function checkGuardrails(messages = [], storeInfo = {}) {
   const lastUserMessage = (messages[messages.length - 1]?.content || "").toLowerCase();
+  const storeName = storeInfo?.name || "Spartan Games";
 
   // 1. Gibberish check first
   if (isGibberish(lastUserMessage)) {
-    return "🛡️ No logré entender tu mensaje. ⚡ Por favor escríbelo de nuevo con más detalle o indícame qué componente, laptop o armado de PC buscas en Spartan Games.";
+    return `🛡️ No logré entender tu mensaje. ⚡ Por favor escríbelo de nuevo con más detalle o indícame qué componente, laptop o armado de PC buscas en ${storeName}.`;
   }
 
   // 2. Off-topic politics and historical atrocities
@@ -51,7 +52,7 @@ export function checkGuardrails(messages = []) {
   ];
 
   if (offTopicKeywords.some((kw) => lastUserMessage.includes(kw))) {
-    return "🛡️ En Spartan Games nuestra misión se concentra con disciplina en hardware gamer y armado de PCs. ⚔️ No tratamos temas políticos ni históricos ajenos a nuestra tienda. ¿En qué componente, laptop o proforma te puedo apoyar hoy? ⚡";
+    return `🛡️ En ${storeName} nuestra misión se concentra con disciplina en hardware gamer y armado de PCs. ⚔️ No tratamos temas políticos ni históricos ajenos a nuestra tienda. ¿En qué componente, laptop o proforma te puedo apoyar hoy? ⚡`;
   }
 
   // 3. Jailbreak attempts
@@ -62,7 +63,7 @@ export function checkGuardrails(messages = []) {
   ];
 
   if (jailbreakKeywords.some((kw) => lastUserMessage.includes(kw))) {
-    return "🛡️ Mis protocolos de Spartan Games están blindados y enfocados en rendimiento gamer. ⚔️ Dime qué componente, presupuesto o juego deseas evaluar. ⚡";
+    return `🛡️ Mis protocolos de ${storeName} están blindados y enfocados en rendimiento gamer. ⚔️ Dime qué componente, presupuesto o juego deseas evaluar. ⚡`;
   }
 
   return null;
@@ -198,7 +199,7 @@ export async function handler(event) {
     }
     const { messages, catalogContext, storeContext } = JSON.parse(rawBody || "{}");
 
-    const guardrailReply = checkGuardrails(messages);
+    const guardrailReply = checkGuardrails(messages, storeContext);
     if (guardrailReply) {
       return {
         statusCode: 200,

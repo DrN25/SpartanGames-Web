@@ -294,15 +294,15 @@ export default function CatalogPage({
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-[#FFDE17] text-slate-950 shadow-xs">
               <Sparkles className="w-3.5 h-3.5" />
-              Catálogo Spartan Games
+              Catálogo {storeInfo?.name || "Oficial"}
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-slate-950 dark:text-white">
-              {currentCategoryObj ? currentCategoryObj.name : "Hardware & Laptops en Arequipa"}
+              {currentCategoryObj ? currentCategoryObj.name : (storeInfo?.city ? `Hardware & Laptops en ${storeInfo.city}` : "Catálogo de Hardware & Laptops")}
             </h1>
             <p className={`text-sm mt-1 max-w-2xl ${isDarkMode ? "text-gray-400" : "text-slate-600"}`}>
               {currentCategoryObj
-                ? `Stock físico garantizado de ${currentCategoryObj.name.toLowerCase()} con respaldo local de 1 a 3 años en ${storeInfo?.address || "C.C. Compuplaza Int 211"}.`
-                : "Componentes nuevos, ensambles testeados y entrega rápida garantizada en Arequipa y todo el Sur del Perú."}
+                ? `Stock físico garantizado de ${currentCategoryObj.name.toLowerCase()} con respaldo local de 1 a 3 años en ${storeInfo?.address || storeInfo?.city || "tienda física"}.`
+                : (storeInfo?.city ? `Componentes nuevos, ensambles testeados y entrega rápida garantizada en ${storeInfo.city} y envíos a todo el país.` : "Componentes nuevos, ensambles testeados y entrega garantizada a todo el país.")}
             </p>
           </div>
 

@@ -373,17 +373,20 @@ export default function ChatIABubble({
     setIsOpen(false);
   };
 
+  const storeName = storeInfo?.name || "Spartan Games";
+  const storeLocation = storeInfo?.city ? `tienda oficial en ${storeInfo.city}` : "tienda física oficial";
+
   const initialMessage = {
     id: 1,
     sender: "spartan",
-    text: "⚔️ ¡Listo para la batalla! Soy SPARTAN. Te asesoro con stock físico, compatibilidad técnica, precios y armado de PC en nuestra tienda de Compuplaza Arequipa. 🛡️ ¿Qué máquina de combate o componente buscas hoy? ⚡",
+    text: `⚔️ ¡Listo para la batalla! Soy el asesor de hardware de ${storeName}. Te asesoro con stock físico, compatibilidad técnica, precios y armado de PC en nuestra ${storeLocation}. 🛡️ ¿Qué máquina de combate o componente buscas hoy? ⚡`,
     time: "Ahora",
     suggestions: [
       "🎮 Tarjetas de video para 1440p",
       "⚡ Procesadores y placas en stock",
       "🛠️ Armar una PC gamer paso a paso",
-      "📍 ¿Cómo llegar a Compuplaza Arequipa?",
-      "🌐 Redes sociales oficiales de Spartan Games"
+      "📍 ¿Cómo llegar a la tienda física?",
+      `🌐 Redes sociales oficiales de ${storeName}`
     ],
     productCards: [],
     actions: []
@@ -540,7 +543,7 @@ export default function ChatIABubble({
           actions: [
             {
               type: "whatsapp",
-              text: `Hola Spartan Games, estaba consultando por la web sobre: ${userText}`,
+              text: `Hola ${storeName}, estaba consultando por la web sobre: ${userText}`,
               label: "Consultar por WhatsApp"
             }
           ]

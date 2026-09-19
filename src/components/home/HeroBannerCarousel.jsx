@@ -155,7 +155,7 @@ export default function HeroBannerCarousel({
                 </span>
                 <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-gray-200 bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-gray-700/60 shadow-xs">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  Stock físico en Compuplaza Int 211
+                  Stock físico en {storeInfo?.address ? storeInfo.address.split(",")[0] : (storeInfo?.city || "tienda física")}
                 </span>
               </div>
 

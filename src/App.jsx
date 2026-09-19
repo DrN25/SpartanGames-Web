@@ -31,6 +31,8 @@ import {
   getCachedCategories,
   getCachedConfig,
   getCachedBanners,
+  getCachedReviews,
+  getCachedFaqs,
   countCategories,
   detectPriceChanges,
   slugify
@@ -44,8 +46,17 @@ export default function App() {
   const [categories, setCategories] = useState(() => countCategories(getCachedCategories(), getCachedCatalog()));
   const [storeInfo, setStoreInfo] = useState(() => getCachedConfig());
   const [banners, setBanners] = useState(() => getCachedBanners());
+  const [reviews, setReviews] = useState(() => getCachedReviews());
+  const [faqs, setFaqs] = useState(() => getCachedFaqs());
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState("");
+
+  useEffect(() => {
+    if (storeInfo?.name) {
+      const citySuffix = storeInfo.city ? ` en ${storeInfo.city}` : "";
+      document.title = `${storeInfo.name.toUpperCase()} | Tienda Oficial${citySuffix}`;
+    }
+  }, [storeInfo?.name, storeInfo?.city]);
 
   const [selectedProduct, setSelectedProduct] = useState(() => {
     const cached = getCachedCatalog();
@@ -83,6 +94,12 @@ export default function App() {
         if (data.banners && data.banners.length > 0) {
           setBanners(data.banners);
         }
+        if (data.reviews && data.reviews.length > 0) {
+          setReviews(data.reviews);
+        }
+        if (data.faqs && data.faqs.length > 0) {
+          setFaqs(data.faqs);
+        }
         setLastSyncTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
       }
     } catch (e) {
@@ -114,6 +131,12 @@ export default function App() {
     }
     if (freshData.banners && freshData.banners.length > 0) {
       setBanners(freshData.banners);
+    }
+    if (freshData.reviews && freshData.reviews.length > 0) {
+      setReviews(freshData.reviews);
+    }
+    if (freshData.faqs && freshData.faqs.length > 0) {
+      setFaqs(freshData.faqs);
     }
     setLastSyncTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
     setPendingUpdate(null);
@@ -327,6 +350,7 @@ export default function App() {
                 products={products}
                 categories={categories}
                 banners={banners}
+                reviews={reviews}
                 isDarkMode={isDarkMode}
                 storeInfo={storeInfo}
                 onNavigate={handleNavigate}
@@ -391,6 +415,7 @@ export default function App() {
         isDarkMode={isDarkMode}
         onSelectCategory={handleSelectCategory}
         onNavigate={handleNavigate}
+        storeInfo={storeInfo}
       />
 
       <CartDrawer
@@ -417,6 +442,7 @@ export default function App() {
         onClose={() => setIsFaqOpen(false)}
         isDarkMode={isDarkMode}
         storeInfo={storeInfo}
+        faqs={faqs}
       />
 
       <LocationModal
@@ -433,6 +459,7 @@ export default function App() {
         onApply={handleApplyPendingUpdate}
         onDismiss={() => setPendingUpdate(null)}
         isDarkMode={isDarkMode}
+        storeInfo={storeInfo}
       />
 
       {/* Floating AI Assistant Chat powered by OpenRouter GPT-5.6 Luna with live catalog */}

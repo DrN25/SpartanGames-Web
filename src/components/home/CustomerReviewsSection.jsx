@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect } from "react";
 import { Star, ShieldCheck, MapPin, CheckCircle, ChevronLeft, ChevronRight, X } from "../common/Icons";
 import { customerReviews } from "../../data/storeData";
 
-export default function CustomerReviewsSection({ isDarkMode, storeInfo }) {
+export default function CustomerReviewsSection({ isDarkMode, storeInfo, reviews: propReviews }) {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const scrollRef = useRef(null);
 
-  const reviews = customerReviews || [];
+  const reviews = (propReviews && propReviews.length > 0) ? propReviews : (customerReviews || []);
 
   const handleScroll = (direction) => {
     if (!scrollRef.current) return;
@@ -46,6 +46,8 @@ export default function CustomerReviewsSection({ isDarkMode, storeInfo }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const displayStoreLoc = storeInfo?.address ? storeInfo.address.split(",")[0] : (storeInfo?.name || "tienda física");
+
   return (
     <section className="relative">
       {/* Compact Header */}
@@ -65,7 +67,7 @@ export default function CustomerReviewsSection({ isDarkMode, storeInfo }) {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-gray-400">
-              Fotos y testimonios reales de recojo en <span className="font-semibold text-slate-800 dark:text-gray-200">Compuplaza Int 211</span> y envíos al Sur.
+              Fotos y testimonios reales de recojo en <span className="font-semibold text-slate-800 dark:text-gray-200">{displayStoreLoc}</span> y envíos garantizados.
             </p>
           </div>
         </div>

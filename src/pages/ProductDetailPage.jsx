@@ -258,7 +258,7 @@ export default function ProductDetailPage({
                         }`}
                       ></span>
                     </span>
-                    ¡Solo quedan {product.stock} unidades en Compuplaza Arequipa!
+                    ¡Solo quedan {product.stock} unidades en {storeInfo?.city || storeInfo?.name || "tienda física"}!
                   </span>
                   <span className="text-[10px] uppercase font-mono opacity-80">Stock Físico</span>
                 </div>
@@ -543,11 +543,11 @@ export default function ProductDetailPage({
                 }`}
               >
                 <h4 className="font-bold text-xs uppercase text-amber-800 dark:text-amber-400 mb-1">
-                  Nota del Equipo Técnico Spartan Games:
+                  Nota del Equipo Técnico {storeInfo?.name || "Especializado"}:
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-gray-400">
                   Si deseas ensamblar este componente en tu equipo actual o armar una PC desde cero,
-                  nuestro equipo en Compuplaza realiza el testeo de compatibilidad y actualización de
+                  nuestro equipo en {storeInfo?.city || storeInfo?.name || "tienda física"} realiza el testeo de compatibilidad y actualización de
                   BIOS sin costo adicional.
                 </p>
               </div>
@@ -738,7 +738,7 @@ export default function ProductDetailPage({
               Confirmación de Stock en Tienda
             </h3>
             <p className="text-xs text-slate-600 dark:text-gray-400 text-center leading-relaxed mb-6">
-              Debido a la alta rotación de hardware en Compuplaza Arequipa, te sugerimos confirmar
+              Debido a la alta rotación de hardware en {storeInfo?.city || storeInfo?.name || "tienda física"}, te sugerimos confirmar
               disponibilidad con nuestros asesores por WhatsApp o agregarlo al carrito para reservar
               tu unidad.
             </p>

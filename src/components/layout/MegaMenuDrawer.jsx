@@ -8,7 +8,8 @@ export default function MegaMenuDrawer({
   categories = [],
   isDarkMode,
   onSelectCategory,
-  onNavigate
+  onNavigate,
+  storeInfo = {}
 }) {
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const [expandedCatId, setExpandedCatId] = useState(() => categories[0]?.id || null);
@@ -67,7 +68,7 @@ export default function MegaMenuDrawer({
                 Categorias y Hardware
               </h2>
               <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-gray-400 line-clamp-1">
-                Explora el catálogo en Compuplaza Arequipa
+                Explora el catálogo oficial de {storeInfo?.name || "Hardware"}
               </p>
             </div>
           </div>

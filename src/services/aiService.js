@@ -117,10 +117,12 @@ function isGibberish(text = "") {
  */
 function checkClientSideGuardrails(text = "", storeInfo = {}) {
   const lower = text.toLowerCase();
+  const storeName = storeInfo?.name || "Spartan Games";
+  const storeCity = storeInfo?.city || "Arequipa";
 
   // 1. Gibberish check first
   if (isGibberish(text)) {
-    return "🛡️ No logré entender tu mensaje. ⚡ Por favor escríbelo de nuevo con más detalle o indícame qué componente, laptop o armado de PC buscas en Spartan Games.";
+    return `🛡️ No logré entender tu mensaje. ⚡ Por favor escríbelo de nuevo con más detalle o indícame qué componente, laptop o armado de PC buscas en ${storeName}.`;
   }
 
   // 1.1 Temporal Grounding: Instant, 100% veridic date & schedule response
@@ -135,7 +137,7 @@ function checkClientSideGuardrails(text = "", storeInfo = {}) {
 
   if (dateTriggers.some((t) => lower.includes(t))) {
     const timeCtx = getStoreTimeContext(storeInfo);
-    return `¡Todo firme y listo para la batalla! Hoy es **${timeCtx.fullDate}**, son las **${timeCtx.time}** en Arequipa y ${timeCtx.storeStatus}\n\nEl horario oficial de atención en tienda física es **${timeCtx.schedule}** en **${timeCtx.address}**.\n\n¿En qué componente, proforma o armado de PC gamer te puedo asesorar hoy?`;
+    return `¡Todo firme y listo para la batalla! Hoy es **${timeCtx.fullDate}**, son las **${timeCtx.time}** en ${storeCity} y ${timeCtx.storeStatus}\n\nEl horario oficial de atención en tienda física es **${timeCtx.schedule}** en **${timeCtx.address}**.\n\n¿En qué componente, proforma o armado de PC gamer te puedo asesorar hoy?`;
   }
 
 
@@ -147,7 +149,7 @@ function checkClientSideGuardrails(text = "", storeInfo = {}) {
   ];
 
   if (offTopicKeywords.some((kw) => lower.includes(kw))) {
-    return "🛡️ En Spartan Games nuestra misión se concentra con disciplina en hardware gamer y armado de PCs. ⚔️ No tratamos temas políticos ni históricos ajenos a nuestra tienda. ¿En qué componente, laptop o proforma te puedo apoyar hoy? ⚡";
+    return `🛡️ En ${storeName} nuestra misión se concentra con disciplina en hardware gamer y armado de PCs. ⚔️ No tratamos temas políticos ni históricos ajenos a nuestra tienda. ¿En qué componente, laptop o proforma te puedo apoyar hoy? ⚡`;
   }
 
   // 3. Jailbreak attempts
@@ -158,7 +160,7 @@ function checkClientSideGuardrails(text = "", storeInfo = {}) {
   ];
 
   if (jailbreakKeywords.some((kw) => lower.includes(kw))) {
-    return "🛡️ Mis protocolos de Spartan Games están blindados y enfocados en rendimiento gamer. ⚔️ Dime qué componente, presupuesto o juego deseas evaluar. ⚡";
+    return `🛡️ Mis protocolos de ${storeName} están blindados y enfocados en rendimiento gamer. ⚔️ Dime qué componente, presupuesto o juego deseas evaluar. ⚡`;
   }
 
   return null;
@@ -402,6 +404,8 @@ export async function sendChatMessage({
   }
 
   console.error("[SpartanAI] All chat endpoints failed. Last error:", lastError);
-  return "🛡️ En este momento no pude consultar el inventario en vivo. Escríbenos directamente a nuestro WhatsApp oficial (+51 912 930 004) para atenderte al instante en Spartan Games Compuplaza. ⚡";
+  const waContact = storeInfo?.whatsappMain ? `+${storeInfo.whatsappMain}` : "+51 912 930 004";
+  const storeLabel = storeInfo?.name || "Spartan Games";
+  return `🛡️ En este momento no pude consultar el inventario en vivo. Escríbenos directamente a nuestro WhatsApp oficial (${waContact}) para atenderte al instante en ${storeLabel}. ⚡`;
 }
 
