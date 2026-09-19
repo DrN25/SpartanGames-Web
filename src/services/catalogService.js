@@ -328,7 +328,23 @@ export function getCachedConfig() {
   if (typeof localStorage === "undefined") return defaultStoreInfo;
   try {
     const raw = localStorage.getItem(CACHE_CONFIG_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        const merged = { ...defaultStoreInfo };
+        Object.keys(defaultStoreInfo).forEach((key) => {
+          const val = parsed[key];
+          if (val !== undefined && val !== null && val !== "") {
+            if (Array.isArray(val)) {
+              if (val.length > 0) merged[key] = val;
+            } else {
+              merged[key] = val;
+            }
+          }
+        });
+        return merged;
+      }
+    }
   } catch (e) {
     console.warn("Could not read config cache", e);
   }
@@ -453,9 +469,23 @@ export async function fetchLiveCatalog(force = false) {
               localStorage.setItem(CACHE_KEY, JSON.stringify(safeProxyProducts));
               localStorage.setItem(CACHE_TIME_KEY, String(now));
 
-              if (proxyData.storeInfo) {
-                localStorage.setItem(CACHE_CONFIG_KEY, JSON.stringify(proxyData.storeInfo));
+              let liveStoreInfo = getCachedConfig();
+              if (proxyData.storeInfo && typeof proxyData.storeInfo === "object") {
+                const merged = { ...defaultStoreInfo };
+                Object.keys(defaultStoreInfo).forEach((key) => {
+                  const val = proxyData.storeInfo[key];
+                  if (val !== undefined && val !== null && val !== "") {
+                    if (Array.isArray(val)) {
+                      if (val.length > 0) merged[key] = val;
+                    } else {
+                      merged[key] = val;
+                    }
+                  }
+                });
+                liveStoreInfo = merged;
+                localStorage.setItem(CACHE_CONFIG_KEY, JSON.stringify(liveStoreInfo));
               }
+
               if (proxyData.categories && Array.isArray(proxyData.categories)) {
                 localStorage.setItem(CACHE_CAT_KEY, JSON.stringify(proxyData.categories));
               }
@@ -472,7 +502,7 @@ export async function fetchLiveCatalog(force = false) {
               return {
                 products: safeProxyProducts,
                 categories: countCategories(proxyData.categories || getCachedCategories(), safeProxyProducts),
-                storeInfo: proxyData.storeInfo || getCachedConfig(),
+                storeInfo: liveStoreInfo,
                 banners: proxyData.banners || getCachedBanners(),
                 reviews: proxyData.reviews || getCachedReviews(),
                 faqs: proxyData.faqs || getCachedFaqs()

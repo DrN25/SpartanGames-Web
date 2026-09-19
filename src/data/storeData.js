@@ -1,21 +1,26 @@
 export const storeInfo = {
   name: "Spartan Games",
   tagline: "Especialistas en Hardware Gamer y Cómputo de Alto Rendimiento",
-  city: "",
-  address: "",
-  phones: [],
-  whatsappMain: "",
-  schedule: "",
-  deliveryNote: "",
-  warrantyPolicy: "",
+  city: "Arequipa",
+  address: "Calle Octavio Muñoz Najar 223 Int 211, Arequipa, Perú",
+  phones: ["912930004", "973696367"],
+  whatsappMain: "51912930004",
+  schedule: "Lunes a Sábado: 11:00 am a 8:00 pm (Domingos cerrado)",
+  deliveryNote: "Envíos directos en Arequipa Metropolitana y despacho a provincias del Sur del Perú por Olva Courier y Shalom.",
+  warrantyPolicy: "Garantía física directa en tienda de 1 a 3 años según componente.",
   legalBookUrl: "/libro-reclamaciones",
   logoUrl: "/assets/images/spartan_games_logo_base_solo.png",
   isotipoUrl: "/assets/images/spartan_games_logo_base_solo.png",
-  mapsUrl: "",
-  wazeUrl: "",
-  facebookUrl: "",
-  instagramUrl: "",
-  tiktokUrl: ""
+  mapsUrl: "https://maps.google.com/?q=Compuplaza+Arequipa+Octavio+Munoz+Najar+223",
+  wazeUrl: "https://waze.com/ul?q=Compuplaza+Arequipa",
+  mapsEmbedUrl: "https://maps.google.com/maps?q=Compuplaza+Arequipa+Octavio+Munoz+Najar+223&hl=es&z=19&output=embed",
+  locationReference: "Al subir al segundo piso por las escaleras mecánicas, hacia el pasillo principal (Int 211).",
+  email: "ventas@spartangames.pe",
+  ruc: "10712345678",
+  businessName: "Spartan Games",
+  facebookUrl: "https://facebook.com/spartangamesaqp",
+  instagramUrl: "https://instagram.com/spartangamesaqp",
+  tiktokUrl: "https://tiktok.com/@spartangamesaqp"
 };
 
 export const categoriesTree = [
