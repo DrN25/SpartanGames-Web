@@ -106,52 +106,54 @@ export default function Footer({ onNavigate, onOpenLocation, storeInfo: propStor
               {storeInfo?.tagline || "Tienda especializada en hardware gamer y cómputo de alto rendimiento."}
             </p>
 
-            <div className="flex items-center gap-3 pt-2">
-              {storeInfo?.facebookUrl && (
-                <a
-                  href={storeInfo.facebookUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
-                  aria-label={`Facebook ${storeInfo.name || "Tienda"}`}
-                >
-                  <FacebookIcon className="w-4 h-4" />
-                </a>
-              )}
-              {storeInfo?.instagramUrl && (
-                <a
-                  href={storeInfo.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
-                  aria-label={`Instagram ${storeInfo.name || "Tienda"}`}
-                >
-                  <InstagramIcon className="w-4 h-4" />
-                </a>
-              )}
-              {storeInfo?.tiktokUrl && (
-                <a
-                  href={storeInfo.tiktokUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
-                  aria-label={`TikTok ${storeInfo.name || "Tienda"}`}
-                >
-                  <TikTokIcon className="w-4 h-4" />
-                </a>
-              )}
-              {storeInfo?.whatsappMain && (
-                <a
-                  href={`https://wa.me/${String(storeInfo.whatsappMain).replace(/[^0-9]/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-[#25D366] hover:border-[#25D366] transition-all"
-                  aria-label={`WhatsApp ${storeInfo.name || "Tienda"}`}
-                >
-                  <WhatsAppIcon className="w-4 h-4" />
-                </a>
-              )}
-            </div>
+            {Boolean(storeInfo?.facebookUrl || storeInfo?.instagramUrl || storeInfo?.tiktokUrl || storeInfo?.whatsappMain) && (
+              <div className="flex items-center gap-3 pt-2">
+                {storeInfo?.facebookUrl && (
+                  <a
+                    href={storeInfo.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
+                    aria-label={`Facebook ${storeInfo.name || "Tienda"}`}
+                  >
+                    <FacebookIcon className="w-4 h-4" />
+                  </a>
+                )}
+                {storeInfo?.instagramUrl && (
+                  <a
+                    href={storeInfo.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
+                    aria-label={`Instagram ${storeInfo.name || "Tienda"}`}
+                  >
+                    <InstagramIcon className="w-4 h-4" />
+                  </a>
+                )}
+                {storeInfo?.tiktokUrl && (
+                  <a
+                    href={storeInfo.tiktokUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#FFDE17] hover:border-[#FFDE17] transition-all"
+                    aria-label={`TikTok ${storeInfo.name || "Tienda"}`}
+                  >
+                    <TikTokIcon className="w-4 h-4" />
+                  </a>
+                )}
+                {storeInfo?.whatsappMain && (
+                  <a
+                    href={`https://wa.me/${String(storeInfo.whatsappMain).replace(/[^0-9]/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-[#25D366] hover:border-[#25D366] transition-all"
+                    aria-label={`WhatsApp ${storeInfo.name || "Tienda"}`}
+                  >
+                    <WhatsAppIcon className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Col 2: Tienda & Navegación */}
@@ -198,37 +200,45 @@ export default function Footer({ onNavigate, onOpenLocation, storeInfo: propStor
           {/* Col 3: Ubicación y Horarios */}
           <div>
             <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4 pb-1 border-b border-slate-800">
-              Tienda Física Arequipa
+              {storeInfo?.city ? `Tienda Física • ${storeInfo.city}` : (storeInfo?.address ? "Tienda Física" : "Atención y Contacto")}
             </h4>
             <ul className="space-y-3 text-xs text-slate-300">
-              <li>
-                <button
-                  onClick={onOpenLocation}
-                  className="flex items-start gap-2.5 text-left group hover:text-amber-400 transition-colors cursor-pointer w-full"
-                  title="Ver ubicación en Google Maps"
-                >
-                  <MapPin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
-                  <span className="underline decoration-dotted decoration-slate-600 group-hover:decoration-amber-400">
-                    {storeInfo.address}
-                  </span>
-                </button>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                <span className="font-mono">{(storeInfo.phones || []).join(" / ")}</span>
-              </li>
-              <li className="text-[11px] text-slate-400 pl-6.5">
-                {storeInfo.schedule}
-              </li>
-              <li className="pt-1 pl-6.5">
-                <button
-                  onClick={onOpenLocation}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-slate-900 border border-slate-700 hover:border-amber-400 text-slate-200 hover:text-amber-400 transition-all cursor-pointer"
-                >
-                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Ver Ubicación en Google Maps</span>
-                </button>
-              </li>
+              {storeInfo?.address && (
+                <li>
+                  <button
+                    onClick={onOpenLocation}
+                    className="flex items-start gap-2.5 text-left group hover:text-amber-400 transition-colors cursor-pointer w-full"
+                    title="Ver ubicación en Google Maps"
+                  >
+                    <MapPin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                    <span className="underline decoration-dotted decoration-slate-600 group-hover:decoration-amber-400">
+                      {storeInfo.address}
+                    </span>
+                  </button>
+                </li>
+              )}
+              {Array.isArray(storeInfo?.phones) && storeInfo.phones.filter(Boolean).length > 0 && (
+                <li className="flex items-center gap-2.5">
+                  <Phone className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <span className="font-mono">{storeInfo.phones.filter(Boolean).join(" / ")}</span>
+                </li>
+              )}
+              {storeInfo?.schedule && (
+                <li className="text-[11px] text-slate-400 pl-6.5">
+                  {storeInfo.schedule}
+                </li>
+              )}
+              {(storeInfo?.mapsUrl || storeInfo?.address) && (
+                <li className="pt-1 pl-6.5">
+                  <button
+                    onClick={onOpenLocation}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-slate-900 border border-slate-700 hover:border-amber-400 text-slate-200 hover:text-amber-400 transition-all cursor-pointer"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Ver Ubicación en Google Maps</span>
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 

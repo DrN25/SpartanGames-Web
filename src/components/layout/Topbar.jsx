@@ -13,7 +13,7 @@ export default function Topbar({
 }) {
   const phoneFormatted = storeInfo?.phones?.[0] || storeInfo?.whatsappMain || "";
   const whatsappNum = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
-  const displayAddress = storeInfo?.address || (storeInfo?.city ? `Tienda Física • ${storeInfo.city}` : "Tienda Física");
+  const displayAddress = storeInfo?.address || (storeInfo?.city ? `Tienda Física • ${storeInfo.city}` : (storeInfo?.name || "Tienda Oficial"));
 
   return (
     <div

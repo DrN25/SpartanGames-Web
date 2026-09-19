@@ -171,40 +171,42 @@ export default function LocationModal({
                     <MapPin className="w-4 h-4" />
                     <span>Dirección del Local</span>
                   </div>
-                  <button
-                    onClick={handleCopyAddress}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition-all cursor-pointer ${
-                      copied
-                        ? "bg-emerald-500 text-white"
-                        : isDarkMode
-                        ? "bg-black/60 text-slate-300 hover:text-white border border-gray-700"
-                        : "bg-white text-slate-700 hover:text-slate-950 border border-slate-300 shadow-xs"
-                    }`}
-                    title="Copiar dirección al portapapeles"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-3.5 h-3.5" />
-                        <span>¡Copiada!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copiar</span>
-                      </>
-                    )}
-                  </button>
+                  {fullAddress && (
+                    <button
+                      onClick={handleCopyAddress}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition-all cursor-pointer ${
+                        copied
+                          ? "bg-emerald-500 text-white"
+                          : isDarkMode
+                          ? "bg-black/60 text-slate-300 hover:text-white border border-gray-700"
+                          : "bg-white text-slate-700 hover:text-slate-950 border border-slate-300 shadow-xs"
+                      }`}
+                      title="Copiar dirección al portapapeles"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>¡Copiada!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copiar</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
 
                 <p className="text-sm font-bold leading-snug text-slate-900 dark:text-white">
-                  {fullAddress}
+                  {fullAddress || "Coordinar retiro presencial o envíos a domicilio por WhatsApp."}
                 </p>
 
                 <div className="mt-2.5 pt-2.5 border-t border-slate-200/60 dark:border-gray-800/80 text-xs text-slate-600 dark:text-slate-400">
                   <span className="font-semibold text-slate-800 dark:text-slate-200">
                     <Navigation className="w-3.5 h-3.5 text-amber-500 inline mr-1 -mt-0.5" /> Referencia:
                   </span>{" "}
-                  {storeInfo?.locationReference || "Al ingresar al local o galería comercial, consultar por nuestro módulo oficial."}
+                  {storeInfo?.locationReference || (fullAddress ? "Consultar referencia exacta de llegada con un asesor en tienda." : "Atención personalizada mediante nuestros canales oficiales.")}
                 </div>
               </div>
 
