@@ -9,7 +9,7 @@ import {
 
 export const GOOGLE_SHEET_ID =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_GOOGLE_SHEET_ID) ||
-  "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno";
+  "1_lfhNXffYfXKOXXTlk8wjel0veAn8zvnZ8kB2ktd-Xc";
 export const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit?usp=sharing`;
 
 export function getStoreMapsUrl(info = {}) {
@@ -38,7 +38,7 @@ const CACHE_BANNERS_KEY = "spartan_banners_cache_v5";
 const CACHE_REVIEWS_KEY = "spartan_reviews_cache_v5";
 const CACHE_FAQS_KEY = "spartan_faqs_cache_v5";
 const CACHE_TIME_KEY = "spartan_catalog_timestamp_v5";
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos de caché
+const CACHE_TTL_MS = 20 * 1000; // 20 segundos de caché pasiva en cliente
 
 // Mapeo bilingüe de cabeceras para pestaña Productos
 const HEADER_ALIASES = {
@@ -288,7 +288,14 @@ async function fetchTabRaw(tabName, timestamp) {
   const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(tabName)}&_t=${timestamp}`;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 6000);
-  const res = await fetch(url, { signal: controller.signal });
+  const res = await fetch(url, {
+    signal: controller.signal,
+    cache: "no-store",
+    headers: {
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache"
+    }
+  });
   clearTimeout(timeoutId);
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${tabName}`);
   return await res.text();
@@ -458,8 +465,15 @@ export async function fetchLiveCatalog(force = false) {
     // 1. Intentar primero a través del proxy serverless seguro (/api/catalog)
     try {
       const endpoints = ["/api/catalog", "/.netlify/functions/catalog"];
+      const forceQuery = force ? "&force=true&bypass=true" : "";
       for (const endpoint of endpoints) {
-        const proxyRes = await fetch(`${endpoint}?_t=${now}`);
+        const proxyRes = await fetch(`${endpoint}?_t=${now}${forceQuery}`, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache"
+          }
+        });
         if (proxyRes.ok) {
           const contentType = proxyRes.headers.get("content-type") || "";
           if (contentType.includes("application/json")) {

@@ -107,7 +107,8 @@ export async function executeGvizQuery(query, sheetId) {
     return { ok: false, error: validation.error };
   }
 
-  const sid = sheetId || (process.env.GOOGLE_SHEET_ID || "1us3QKhPE07Lv3Dt-S5GU6UpEIZudbhWmpU-lOZNiSno").trim();
+  const rawSid = sheetId || process.env.GOOGLE_SHEET_ID;
+  const sid = (rawSid && rawSid !== "undefined" ? rawSid : "1_lfhNXffYfXKOXXTlk8wjel0veAn8zvnZ8kB2ktd-Xc").trim();
   const url = `https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:json&sheet=Productos&tq=${encodeURIComponent(validation.query)}`;
 
   try {
@@ -420,7 +421,7 @@ EJEMPLO EXACTO DE CIERRE CON MAPS O WAZE:
         try {
           const args = JSON.parse(call.function.arguments || "{}");
           parsedQuery = args.query || "";
-        } catch (e) {
+        } catch {
           parsedQuery = "";
         }
 
@@ -436,7 +437,55 @@ EJEMPLO EXACTO DE CIERRE CON MAPS O WAZE:
           }
         ];
 
-        const followUpRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        try {
+          const followUpRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+              "HTTP-Referer": "https://spartangames.pe",
+              "X-Title": "Spartan Games AI"
+            },
+            body: JSON.stringify({
+              model: modelToUse,
+              messages: followUpMessages,
+              temperature: 0.35,
+              max_tokens: 900
+            })
+          });
+
+          if (followUpRes.ok) {
+            const followUpData = await followUpRes.json();
+            const finalReply = followUpData.choices?.[0]?.message?.content || followUpData.choices?.[0]?.message?.reasoning;
+            if (finalReply) {
+              return {
+                statusCode: 200,
+                headers: {
+                  "Content-Type": "application/json",
+                  "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify({
+                  reply: finalReply,
+                  usage: followUpData.usage,
+                  model: followUpData.model,
+                  gvizExecuted: true
+                })
+              };
+            }
+          } else {
+            console.warn("[SpartanAI] Tool follow-up returned status:", followUpRes.status);
+          }
+        } catch (toolFollowUpErr) {
+          console.warn("[SpartanAI] Tool follow-up error:", toolFollowUpErr);
+        }
+      }
+    }
+
+    // Fallback: Si el LLM devolvió tool_call pero falló la respuesta, o content vino vacío
+    let reply = assistantMsg?.content || assistantMsg?.reasoning;
+    if (!reply) {
+      try {
+        const fallbackRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${apiKey}`,
@@ -446,36 +495,24 @@ EJEMPLO EXACTO DE CIERRE CON MAPS O WAZE:
           },
           body: JSON.stringify({
             model: modelToUse,
-            messages: followUpMessages,
+            messages: formattedMessages,
             temperature: 0.35,
             max_tokens: 900
           })
         });
-
-        if (followUpRes.ok) {
-          const followUpData = await followUpRes.json();
-          const finalReply = followUpData.choices?.[0]?.message?.content;
-          if (finalReply) {
-            return {
-              statusCode: 200,
-              headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*"
-              },
-              body: JSON.stringify({
-                reply: finalReply,
-                usage: followUpData.usage,
-                model: followUpData.model,
-                gvizExecuted: true
-              })
-            };
-          }
+        if (fallbackRes.ok) {
+          const fallbackData = await fallbackRes.json();
+          reply = fallbackData.choices?.[0]?.message?.content || fallbackData.choices?.[0]?.message?.reasoning;
         }
+      } catch (fbErr) {
+        console.warn("[SpartanAI] Direct fallback error:", fbErr);
       }
     }
 
-    const whatsappNotice = storeContext?.whatsapp ? ` WhatsApp oficial (+${storeContext.whatsapp})` : " WhatsApp oficial";
-    const reply = assistantMsg?.content || `En este momento no pude consultar el inventario. Escríbenos directamente a nuestro${whatsappNotice}.`;
+    if (!reply) {
+      const whatsappNotice = storeContext?.whatsapp ? ` WhatsApp oficial (+${storeContext.whatsapp})` : " WhatsApp oficial";
+      reply = `En este momento no pude consultar el inventario. Escríbenos directamente a nuestro${whatsappNotice}.`;
+    }
 
     return {
       statusCode: 200,

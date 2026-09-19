@@ -439,4 +439,32 @@ test("getActiveThumbIndex correctly detects moving thumb and handles crossover s
   assert.equal(getActiveThumbIndex([500, 520], [480, 500], 1), 0);
 });
 
+test("parseProductsFromRows and parseStoreInfoFromRows parse 2D array data correctly", async () => {
+  const { parseProductsFromRows, parseStoreInfoFromRows } = await import("../netlify/functions/catalog.js");
+
+  const productRows = [
+    ["id", "nombre", "precio", "stock", "marca", "categoria"],
+    [101, "Tarjeta Gráfica RTX 4070 Ti", 3499, 5, "Asus", "gpu"],
+    [102, "Monitor Asus ROG 240Hz", 1299, 3, "Asus", "monitores"]
+  ];
+
+  const parsedProds = parseProductsFromRows(productRows);
+  assert.equal(parsedProds.length, 2);
+  assert.equal(parsedProds[0].id, 101);
+  assert.equal(parsedProds[0].name, "Tarjeta Gráfica RTX 4070 Ti");
+  assert.equal(parsedProds[0].price, 3499);
+  assert.equal(parsedProds[0].stock, 5);
+
+  const configRows = [
+    ["clave", "valor", "descripcion"],
+    ["nombre_tienda", "Spartan Games Ultra", "Nombre tienda"],
+    ["ciudad", "Arequipa", "Ciudad"]
+  ];
+
+  const parsedConfig = parseStoreInfoFromRows(configRows);
+  assert.equal(parsedConfig.name, "Spartan Games Ultra");
+  assert.equal(parsedConfig.city, "Arequipa");
+});
+
+
 

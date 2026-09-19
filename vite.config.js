@@ -22,8 +22,11 @@ export default defineConfig(({ mode }) => {
               req.on('data', chunk => body += chunk);
               req.on('end', async () => {
                 try {
-                  process.env.OPENROUTER_API_KEY = env.OPENROUTER_API_KEY || env.VITE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY || '';
-                  process.env.OPENROUTER_MODEL = env.OPENROUTER_MODEL || env.VITE_OPENROUTER_MODEL || 'openai/gpt-5.6-luna';
+                  const currentEnv = loadEnv(mode, process.cwd(), '');
+                  process.env.OPENROUTER_API_KEY = currentEnv.OPENROUTER_API_KEY || currentEnv.VITE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY || '';
+                  process.env.OPENROUTER_MODEL = currentEnv.OPENROUTER_MODEL || currentEnv.VITE_OPENROUTER_MODEL || 'openai/gpt-5.6-luna';
+                  const validSheetId = (currentEnv.GOOGLE_SHEET_ID || currentEnv.VITE_GOOGLE_SHEET_ID || process.env.GOOGLE_SHEET_ID || "1_lfhNXffYfXKOXXTlk8wjel0veAn8zvnZ8kB2ktd-Xc").trim();
+                  process.env.GOOGLE_SHEET_ID = validSheetId !== "undefined" ? validSheetId : "1_lfhNXffYfXKOXXTlk8wjel0veAn8zvnZ8kB2ktd-Xc";
                   const { handler } = await import(`${chatFunctionUrl}?update=${Date.now()}`);
                   const result = await handler({
                     httpMethod: 'POST',
@@ -50,7 +53,11 @@ export default defineConfig(({ mode }) => {
 
           const handleCatalog = async (req, res) => {
             try {
-              process.env.GOOGLE_SHEET_ID = env.GOOGLE_SHEET_ID || process.env.GOOGLE_SHEET_ID;
+              const currentEnv = loadEnv(mode, process.cwd(), '');
+              const validSheetId = (currentEnv.GOOGLE_SHEET_ID || currentEnv.VITE_GOOGLE_SHEET_ID || process.env.GOOGLE_SHEET_ID || "1_lfhNXffYfXKOXXTlk8wjel0veAn8zvnZ8kB2ktd-Xc").trim();
+              process.env.GOOGLE_SHEET_ID = validSheetId !== "undefined" ? validSheetId : "1_lfhNXffYfXKOXXTlk8wjel0veAn8zvnZ8kB2ktd-Xc";
+              const validAppsScriptUrl = (currentEnv.GOOGLE_APPS_SCRIPT_URL || currentEnv.VITE_GOOGLE_APPS_SCRIPT_URL || process.env.GOOGLE_APPS_SCRIPT_URL || "").trim();
+              process.env.GOOGLE_APPS_SCRIPT_URL = validAppsScriptUrl !== "undefined" ? validAppsScriptUrl : "";
               const { handler } = await import(`${catalogFunctionUrl}?update=${Date.now()}`);
               const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
               const queryParams = Object.fromEntries(url.searchParams.entries());
@@ -59,7 +66,11 @@ export default defineConfig(({ mode }) => {
                 queryStringParameters: queryParams
               });
               res.statusCode = result.statusCode || 200;
-              res.setHeader('Content-Type', 'application/json');
+              if (result.headers) {
+                Object.entries(result.headers).forEach(([k, v]) => res.setHeader(k, v));
+              } else {
+                res.setHeader('Content-Type', 'application/json');
+              }
               res.end(result.body);
             } catch (e) {
               console.error('Local catalog error:', e);
