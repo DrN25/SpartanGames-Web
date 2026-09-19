@@ -141,6 +141,10 @@ export default function ProductDetailPage({
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
 
+  const savings = product.oldPrice && product.oldPrice > product.price
+    ? Math.round(product.oldPrice - product.price)
+    : 0;
+
   const phoneMain = (storeInfo?.whatsappMain || storeInfo?.phones?.[0] || "").replace(/[^0-9]/g, "");
   const whatsappMsg = `Hola ${storeInfo?.name || "Tienda"}, deseo consultar stock del producto: *${product.name}* (SKU: ${product.sku}) por S/. ${Number(product.price || 0).toFixed(2)}`;
   const whatsappUrl = phoneMain ? `https://wa.me/${phoneMain}?text=${encodeURIComponent(whatsappMsg)}` : "";
