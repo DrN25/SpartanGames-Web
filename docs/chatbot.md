@@ -2,13 +2,15 @@
 
 ## 1. Visión General y Propósito
 
-**Spartan AI** es el asistente virtual inteligente y estratega de hardware integrado en la aplicación web. Todos los datos de la tienda (nombre, dirección, teléfonos, redes sociales, horarios) se cargan dinámicamente desde la pestaña **Configuracion** de Google Sheets, lo que permite reutilizar el sistema con cualquier cliente sin modificar código.
+**Spartan AI** es el asistente virtual integrado en la aplicación web Spartan Games. Opera en tiempo real dentro de la interfaz para responder dudas técnicas de hardware, consultar inventario y precios en Soles (S/.) y generar enlaces de acción directa en la tienda.
 
-El chatbot opera en tiempo real dentro de la aplicación web, diseñado para:
-1. **Asesorar técnicamente:** Guiar al cliente en selección de CPUs, GPUs, placas madre, fuentes de poder, memoria RAM y ensamblajes completos sin cuellos de botella.
-2. **Consultar stock y precios en Soles (S/.):** Conectarse en vivo al inventario de Google Sheets sin exponer credenciales sensibles.
-3. **Facilitar la compra digital:** Generar proformas interactivas, agregar piezas cotizadas al carrito con 1 clic y ofrecer accesos directos a Google Maps y WhatsApp oficial.
-4. **Proteger la marca:** Guardrails integrados contra jailbreaks, temas fuera de contexto (política/historia bélica ajena) y spam de caracteres incomprensibles.
+Todos los datos de la empresa (nombre comercial, dirección física, números telefónicos, enlaces de redes sociales y horarios de atención) se obtienen dinámicamente de la pestaña `Configuracion` de Google Sheets. Esto permite operar el sistema con cualquier catálogo o sede sin modificar el código fuente.
+
+Funciones principales:
+1. **Asesoría técnica:** Recomendación de componentes compatibles (procesadores, tarjetas de video, placas madre, fuentes de alimentación, memoria RAM) y ensamblajes completos.
+2. **Consulta de inventario en vivo:** Verificación de existencias y precios actualizados directamente sobre Google Sheets sin exponer credenciales privadas en el cliente.
+3. **Proceso de compra y navegación:** Generación de cotizaciones con botones de adición directa al carrito (en lote o individual) y accesos directos a Google Maps, Waze y WhatsApp.
+4. **Protección de entrada (Guardrails):** Filtrado de secuencias sin sentido (gibberish), intentos de manipulación de instrucciones (jailbreak) y temas ajenos al catálogo de la tienda (off-topic).
 
 ---
 
@@ -19,7 +21,9 @@ sequenceDiagram
     autonumber
     actor Usuario as Cliente (Navegador)
     participant UI as ChatIABubble.jsx
+    participant Markdown as MarkdownRenderer.jsx
     participant Service as aiService.js
+    participant Registry as actionRegistry.js
     participant Serverless as Netlify Function (/api/chat)
     participant OpenRouter as OpenRouter API (gpt-5.6-luna)
     participant Sheets as Google Sheets GViz API
@@ -29,7 +33,7 @@ sequenceDiagram
     Service->>Serverless: POST /api/chat (JSON payload con storeContext dinámico)
     Serverless->>Serverless: checkGuardrails (Gibberish / Jailbreak / Off-topic)
     
-    alt Guardrail activado
+    alt Guardrail activado en servidor
         Serverless-->>Service: Respuesta preventiva predefinida
     else Mensaje legítimo
         Serverless->>Serverless: Construir systemPrompt dinámico con storeContext
@@ -47,66 +51,111 @@ sequenceDiagram
         Serverless-->>Service: { reply, model, usage }
     end
 
-    Service->>Service: parseBotResponse(reply, products)
+    Service->>Registry: dispatchAction(tag, payload)
+    Registry-->>Service: Metadatos declarativos de la acción
+    Service->>Service: parseBotResponse (limpieza de texto y extracción de [PRODUCT:*])
     Service-->>UI: { text, productCards, actions }
-    UI->>Usuario: Renderiza burbuja con texto limpio + botones interactivos
+    UI->>Markdown: Renderiza formato Markdown táctico y sanitizado
+    UI->>Usuario: Muestra texto limpio + tarjetas interactivas + botones de acción
 ```
 
 ### Principios de Seguridad
-- **Cero exposición de API Keys:** La clave `OPENROUTER_API_KEY` se procesa exclusivamente en el entorno serverless (Netlify Functions / Middleware Vite en desarrollo).
+- **Cero exposición de API Keys:** La clave `OPENROUTER_API_KEY` se procesa exclusivamente en el entorno serverless (Netlify Functions / Middleware Vite en desarrollo local).
 - **Cero exposición del Sheet ID:** Las consultas a Google Sheets se gestionan del lado del servidor.
+- **SSOT de Guardrails:** Las validaciones de seguridad residen exclusivamente en `netlify/functions/chat.js`. El frontend no duplica filtros de seguridad (principio DRY).
 
 ---
 
-## 3. Mecanismo de Botones de Acción y Parsing Robusto
+## 3. Registro de Acciones y Patrón Dispatcher (`src/services/actionRegistry.js`)
 
-### El Problema Resuelto
-Previamente, el componente frontend realizaba comparaciones de cadenas estrictas (ej. `text.includes("[ACTION:MAPS]")`). Cuando el modelo generaba variaciones tipográficas, espacios, negritas o minúsculas (por ejemplo `[ACTION: MAPS]`, `**[action:ubicacion]**` o `[Action:Maps]`), la condición fallaba y la etiqueta quedaba expuesta al usuario en texto plano entre corchetes:
-```
-🛡️ Dirección: [dirección de la tienda cargada desde Sheets]...
-[ACTION:MAPS]  <-- Error: texto visible no deseado
-```
+El sistema utiliza el patrón Dispatcher para desacoplar las directivas generadas por el modelo de lenguaje de la representación visual de los botones en la interfaz de usuario.
 
-### Solución Implementada (`src/services/aiService.js`)
-Se centralizó la lógica en la función `parseBotResponse(rawText, products)`, respaldada por expresiones regulares con tolerancia a:
-- Espaciado variable (`\s*`)
-- Modificadores de formato Markdown (`**`, `*`, `` ` ``)
-- Insensibilidad a mayúsculas y minúsculas (`gi`)
-- Sinónimos y variantes léxicas (ej. `MAPS`, `MAPA`, `UBICACION`)
-- **Safety Scrub final:** Un filtro que remueve cualquier etiqueta no reconocida tipo `[ACTION:...]` o `[PRODUCT:...]`, asegurando que **nunca** se muestre una etiqueta de sistema en la interfaz.
+### 3.1. Protocolo de Directivas
 
-### Etiquetas Soportadas y Acciones Resultantes
+El modelo de lenguaje comunica acciones interactivas insertando etiquetas estructuradas dentro de su respuesta:
+- Directiva simple: `[ACTION:<TIPO>]` (ejemplo: `[ACTION:MAPS]`, `[ACTION:BUILDER]`)
+- Directiva con datos: `[ACTION:<TIPO>:<PAYLOAD>]` (ejemplo: `[ACTION:WHATSAPP:Hola]`, `[ACTION:ADDTOCART:101,102]`)
+- Tarjeta de producto: `[PRODUCT:<ID1, ID2, ...>]` (ejemplo: `[PRODUCT:301]`)
 
-| Etiqueta en Prompt | Variantes Aceptadas | Acción en UI |
+### 3.2. Componentes de `actionRegistry.js`
+
+El archivo [`actionRegistry.js`](../src/services/actionRegistry.js) concentra la definición y resolución de acciones:
+
+1. **`ACTION_HANDLERS`:** Diccionario de funciones despachadoras indexadas por clave canónica (`maps`, `builder`, `whatsapp`, `addtocart`, `waze`, `faq`, `categories`, etc.). Cada handler recibe el payload opcional y retorna el objeto descriptor de la acción con su tipo, etiqueta legible y parámetros procesados.
+2. **`ACTION_ALIASES`:** Tabla de normalización léxica. Asigna variantes, sinónimos y términos en minúsculas o con tildes (`ubicacion` -> `maps`, `armar` -> `builder`, `carrito` -> `addtocart`, `wsp` -> `whatsapp`) a su clave canónica correspondiente.
+3. **`dispatchAction(command, payload)`:** Función que normaliza el identificador de comando mediante `ACTION_ALIASES` y ejecuta el handler asociado. Si el comando no está registrado, retorna `null`.
+
+### 3.3. Procesamiento y Sanitización (Safety Scrub)
+
+La función `parseBotResponse` en `aiService.js` procesa la respuesta en cuatro etapas secuenciales:
+
+1. **Extracción de productos:** Identifica directivas `[PRODUCT:...]`, divide los identificadores y recopila los productos correspondientes desde el catálogo en memoria.
+2. **Extracción y despacho de acciones:** Una expresión regular unificada captura las etiquetas de acción, tolera espacios o formatos Markdown (negritas o código en línea) generados por el modelo, y delega su resolución a `dispatchAction`.
+3. **Safety Scrub:** Una expresión regular final purga del texto visible cualquier etiqueta residual, malformada o no reconocida (`[ACTION:...]`, `[PRODUCT:...]`, `[BUTTON:...]`). Esto garantiza que ninguna directiva de control quede expuesta como texto plano para el usuario.
+4. **Limpieza de viñetas huérfanas:** Elimina líneas de viñetas que contenían únicamente etiquetas ahora extraídas.
+
+### 3.4. Extensibilidad
+
+Para agregar una acción interactiva nueva:
+1. Declarar una función generadora en `ACTION_HANDLERS` con la clave canónica deseada.
+2. Registrar las variantes léxicas necesarias en `ACTION_ALIASES`.
+3. Consumir el `type` resultante en el renderizado de botones de `ChatIABubble.jsx`.
+
+No se requiere alterar las expresiones regulares del extractor ni modificar la lógica central de parseo.
+
+### 3.5. Catálogo de Directivas y Acciones Soportadas
+
+| Directiva en Prompt | Variantes y Alias Aceptados | Acción en Interfaz |
 | :--- | :--- | :--- |
-| `[ACTION:MAPS]` | `[ACTION: MAPS]`, `[action:ubicacion]`, `[ACTION:LOCATION]`, `[ACTION:GOOGLE_MAPS]` | Botón que abre el modal interactivo de Google Maps (URL dinámica desde `storeInfo.mapsUrl`). |
-| `[ACTION:WAZE]` | `[action:waze]`, `[ACTION: WAZE]` | Botón que abre Waze con la ruta a la tienda (URL dinámica desde `storeInfo.wazeUrl`). |
-| `[ACTION:BUILDER]` | `[ACTION: PC_BUILDER]`, `[action:armar]`, `[ACTION:CONFIGURADOR]` | Botón que abre el configurador de armado de PC paso a paso. |
-| `[ACTION:CATALOG]` | `[ACTION: CATALOGO]`, `[action:tienda]`, `[ACTION:PRODUCTOS]` | Botón que redirige la vista al catálogo general de productos. |
-| `[ACTION:WHATSAPP:msg]` | `[ACTION:WSP:msg]`, `[action:wa]` | Botón que abre WhatsApp Web o App con mensaje predefinido (número dinámico desde `storeInfo.whatsappMain`). |
-| `[ACTION:ADDTOCART:id1,id2]` | `[ACTION:CARRITO:id1,id2]`, `[action:add_to_cart:...]` | Botón que añade todos los IDs especificados de la cotización directamente al carrito de compras. |
-| `[ACTION:FACEBOOK]` | `[action:facebook]`, `[ACTION:FB]` | Botón que abre la página de Facebook de la tienda (URL dinámica desde `storeInfo.facebookUrl`). |
-| `[ACTION:INSTAGRAM]` | `[action:instagram]`, `[ACTION:IG]` | Botón que abre el perfil de Instagram de la tienda (URL dinámica desde `storeInfo.instagramUrl`). |
-| `[ACTION:TIKTOK]` | `[action:tiktok]` | Botón que abre el perfil de TikTok de la tienda (URL dinámica desde `storeInfo.tiktokUrl`). |
-| `[ACTION:FAQ]` | `[action:faq]`, `[ACTION:PREGUNTAS]` | Botón que abre el modal de preguntas frecuentes. |
-| `[ACTION:CATEGORIES]` | `[action:categories]`, `[ACTION:CATEGORIAS]` | Botón que abre el menú de todas las categorías de productos. |
-| `[PRODUCT:id]` | `[PRODUCT: id1, id2]`, `[product:101]` | Extrae el ID y renderiza una tarjeta interactiva con imagen, precio, stock y botón de compra rápida. |
-
-### Optimizaciones de Experiencia de Usuario (UI/UX)
-- **Escritura fluida no bloqueante:** Mientras el bot procesa y redacta su respuesta, el campo de texto (`<input>`) permanece habilitado. El usuario no pierde el foco ni el teclado móvil y puede redactar su siguiente duda inmediatamente. El botón de envío se deshabilita temporalmente con un micro-spinner para evitar envíos duplicados.
-- **Adaptabilidad móvil inteligente:**
-  - Se oculta el botón de maximizar en smartphones (`hidden sm:inline-flex`), evitando que la ventana se deforme o sobrepase el viewport vertical.
-  - Se desactivan las zonas de redimensionamiento invisible en pantallas táctiles (`hidden sm:block`) para evitar captura errática de toques.
-  - La ventana utiliza `100dvh` y márgenes dinámicos para que el botón de cierre (`X`) siempre esté visible, cómodo y despejado.
+| `[ACTION:MAPS]` | `[ACTION: MAPS]`, `[action:ubicacion]`, `[ACTION:LOCATION]`, `[ACTION:GOOGLE_MAPS]` | Abre el modal de ubicación con la dirección y mapa embebido (URL dinámica desde `storeInfo.mapsUrl`). |
+| `[ACTION:WAZE]` | `[action:waze]`, `[ACTION: WAZE]`, `[ACTION:GPS]` | Abre Waze con la ruta hacia la tienda física (URL dinámica desde `storeInfo.wazeUrl`). |
+| `[ACTION:BUILDER]` | `[ACTION: PC_BUILDER]`, `[action:armar]`, `[ACTION:CONFIGURADOR]` | Abre el modal del configurador de ensamblaje de PC paso a paso. |
+| `[ACTION:CATALOG]` | `[ACTION: CATALOGO]`, `[action:tienda]`, `[ACTION:PRODUCTOS]` | Redirige la vista al catálogo general de productos. |
+| `[ACTION:WHATSAPP:msg]` | `[ACTION:WSP:msg]`, `[action:wa]` | Abre el chat oficial de WhatsApp con el mensaje predefinido (número dinámico desde `storeInfo.whatsappMain`). |
+| `[ACTION:ADDTOCART:id1,id2]` | `[ACTION:CARRITO:id1,id2]`, `[action:add_to_cart:...]` | Agrega los identificadores indicados directamente al carrito de compras en un solo lote. |
+| `[ACTION:FACEBOOK]` | `[action:facebook]`, `[ACTION:FB]` | Abre la página oficial de Facebook (URL dinámica desde `storeInfo.facebookUrl`). |
+| `[ACTION:INSTAGRAM]` | `[action:instagram]`, `[ACTION:IG]` | Abre el perfil oficial de Instagram (URL dinámica desde `storeInfo.instagramUrl`). |
+| `[ACTION:TIKTOK]` | `[action:tiktok]` | Abre la cuenta oficial de TikTok (URL dinámica desde `storeInfo.tiktokUrl`). |
+| `[ACTION:FAQ]` | `[action:faq]`, `[ACTION:PREGUNTAS]`, `[ACTION:GARANTIAS]` | Abre el modal de preguntas frecuentes y políticas de garantía. |
+| `[ACTION:CATEGORIES]` | `[action:categories]`, `[ACTION:CATEGORIAS]`, `[ACTION:HARDWARE]` | Abre la navegación de categorías de hardware. |
+| `[PRODUCT:id]` | `[PRODUCT: id1, id2]`, `[product:101]` | Extrae los identificadores y renderiza tarjetas interactivas con imagen, precio, stock y botón de compra. |
 
 ---
 
-## 3.1. Prompt Dinámico y storeContext
+## 4. Renderizado de Markdown (`src/components/common/MarkdownRenderer.jsx`)
 
-El system prompt del chatbot ya no contiene datos de negocio hardcodeados. Toda la información de la tienda se inyecta dinámicamente desde el frontend mediante el objeto `storeContext` incluido en el payload POST:
+El componente [`MarkdownRenderer.jsx`](../src/components/common/MarkdownRenderer.jsx) procesa y sanitiza las respuestas formateadas del asistente:
+
+- **Estructuras de bloque:**
+  - Tablas Markdown con delimitadores estándar (`|`), encabezados y alineación (`:---`, `:---:`).
+  - Bloques de código preformateado (`pre` / `code`) con estilos oscuros y barra de desplazamiento horizontal.
+  - Listas ordenadas numéricas y listas de viñetas anidadas.
+- **Formato en línea:**
+  - Negritas (`**texto**`), cursivas (`*texto*`) y código en línea (`` `código` ``).
+  - Enlaces web externos con atributos de seguridad obligatorios (`target="_blank" rel="noopener noreferrer"`).
+
+---
+
+## 5. Interfaz de Usuario y Experiencia (`ChatIABubble.jsx`)
+
+El asistente flotante reside en [`ChatIABubble.jsx`](../src/components/feedback/ChatIABubble.jsx) y cuenta con los siguientes mecanismos de interacción:
+
+- **Entrada no bloqueante:** El campo de texto (`<input>`) permanece editable mientras el asistente genera su respuesta. El usuario puede escribir su siguiente pregunta sin interrupción. El botón de envío se desactiva temporalmente con un indicador de carga para evitar peticiones redundantes.
+- **Control de dimensiones:** El tamaño del contenedor se ajusta mediante el estado `isMaximized` utilizando clases de utilidad de Tailwind CSS:
+  - Vista compacta estándar: `w-[calc(100vw-1.5rem)] sm:w-[440px] h-[560px]`
+  - Vista expandida: `w-[calc(100vw-1.5rem)] sm:w-[min(880px,calc(100vw-2rem))] h-[calc(100dvh-110px)]`
+- **Adaptabilidad en pantallas móviles:**
+  - El botón de maximizar se oculta en dispositivos móviles (`hidden sm:inline-flex`) para evitar desbordes del viewport.
+  - La altura usa unidades `100dvh` con márgenes dinámicos para garantizar que el botón de cierre permanezca accesible aun con el teclado en pantalla activo.
+
+---
+
+## 6. Contexto Dinámico de Negocio (`storeContext`)
+
+La información de la tienda se suministra en tiempo de ejecución desde el frontend a través del objeto `storeContext` dentro del cuerpo de la petición POST:
 
 ```javascript
-// aiService.js envía al backend:
+// Payload enviado desde aiService.js a /api/chat:
 {
   messages: [...],
   catalogContext: "...",
@@ -127,9 +176,9 @@ El system prompt del chatbot ya no contiene datos de negocio hardcodeados. Toda 
 }
 ```
 
-En `chat.js`, el handler extrae `storeContext` del body y construye el prompt sustituyendo `${storeName}`, `${timeCtx.address}`, `${storeContext?.whatsapp}`, etc. Si `storeContext` es nulo, se usan valores genéricos seguros.
+En `netlify/functions/chat.js`, el backend extrae `storeContext` y construye el prompt del sistema interpolando variables (`${storeName}`, `${storeContext.address}`, `${storeContext.whatsapp}`). Si el objeto no está presente en la solicitud, se aplican valores genéricos de contingencia.
 
-El mensaje de fallback también es dinámico:
+La respuesta de fallback ante fallos de conexión también utiliza estos datos:
 ```javascript
 const whatsappNotice = storeContext?.whatsapp
   ? ` WhatsApp oficial (+${storeContext.whatsapp})`
@@ -139,11 +188,11 @@ const reply = assistantMsg?.content || `En este momento no pude consultar el inv
 
 ---
 
-## 4. Consultas a Inventarios Extensos (Text-to-GViz SQL)
+## 7. Consultas Text-to-GViz SQL (`netlify/functions/chat.js`)
 
-Para catálogos que superen miles de filas, volcar todo el archivo al contexto del LLM generaría latencia alta y consumo excesivo de tokens. Spartan AI utiliza **Text-to-GViz** mediante OpenAI Tool Calling.
+Para inventarios extensos donde volcar el catálogo completo excedería la ventana de contexto o elevaría la latencia, el asistente dispone de una herramienta de consulta directa vía Tool Calling.
 
-### Definición de la Herramienta (`netlify/functions/chat.js`)
+### Especificación de la Herramienta
 ```javascript
 const tools = [
   {
@@ -166,79 +215,84 @@ const tools = [
 ];
 ```
 
-### Validador de Seguridad (`validateGvizQuery`)
-Antes de despachar cualquier consulta generada por el LLM a Google Sheets, el validador aplica las siguientes reglas:
-1. **Prefijo obligatorio:** Debe comenzar con `SELECT`.
-2. **Inyección HTML y scripts:** Bloquea caracteres como `;`, `{`, `}`, `` ` ``, y etiquetas `<tag>`.
-3. **Comandos de mutación prohibidos:** Bloquea palabras clave como `DROP`, `DELETE`, `INSERT`, `UPDATE`, `ALTER`, `TRUNCATE`, `EXEC`.
-4. **Operadores de comparación permitidos:** Habilita comparaciones legítimas como `<=`, `>=`, `<`, `>`, `=` para filtros de precio y disponibilidad.
+### Reglas de Validación (`validateGvizQuery`)
+Antes de ejecutar la consulta sobre el endpoint GViz de Google Sheets, la sentencia pasa por las siguientes verificaciones:
+1. **Prefijo obligatorio:** La instrucción debe iniciar con la cláusula `SELECT`.
+2. **Restricción de caracteres peligrosos:** Bloquea `;`, `{`, `}`, `` ` `` y etiquetas HTML/XML (`<tag>`).
+3. **Bloqueo de mutación:** Rechaza operaciones de modificación o eliminación (`DROP`, `DELETE`, `INSERT`, `UPDATE`, `ALTER`, `TRUNCATE`, `EXEC`).
+4. **Filtros de comparación permitidos:** Admite operadores relacionales (`<=`, `>=`, `<`, `>`, `=`) para rangos de precio y umbrales de existencias.
 
 ---
 
-## 5. Guardrails y Seguridad de Entrada
+## 8. Guardrails y Validación de Entrada
 
-El chatbot procesa tres capas de protección antes de llamar a la API de inferencia:
+El backend ejecuta tres filtros de validación antes de realizar llamadas a la API de inferencia:
 
 1. **Filtro Gibberish (`isGibberish`):**
-   - Detecta repetición masiva de caracteres (`aaaa`, `zzzz`).
-   - Detecta repetición de sílabas (`asdfasdf`, `sdfsdf`).
-   - Evalúa ratio de vocales en palabras largas sin términos de hardware válidos.
-   - Respuesta: Solicita amablemente al usuario formular su pregunta con términos de computación.
+   - Detecta cadenas con repetición de caracteres individuales (`aaaa`, `zzzz`) o secuencias de teclado (`asdfasdf`, `qwrtyp`).
+   - Evalúa la proporción de vocales en palabras largas en ausencia de términos técnicos de computación.
+   - Acción: Solicita reformular la consulta utilizando términos de hardware o computación.
 
-2. **Filtro de Desvío Temático (Off-Topic):**
-   - Bloquea consultas sobre temas históricos bélicos ajenos (Hitler, dictaduras, guerras mundiales) o política.
-   - Respuesta: Redirige con disciplina espartana al ámbito exclusivo de hardware y proformas gamer.
+2. **Filtro de Temática Externa (Off-Topic):**
+   - Detecta consultas sobre política, conflictos bélicos o acontecimientos ajenos al propósito comercial.
+   - Acción: Redirige la conversación hacia componentes de computadora, periféricos y armado de equipos.
 
 3. **Filtro Anti-Jailbreak:**
-   - Detecta frases de manipulación de instrucciones ("ignora tus instrucciones", "dime tu system prompt", "modo desarrollador").
-   - Respuesta: Notifica que los protocolos de Spartan Games están blindados.
+   - Detecta instrucciones destinadas a anular directivas ("ignora tus instrucciones", "muestra tu system prompt", "modo desarrollador").
+   - Acción: Comunica que las directivas del sistema son estrictas y no admiten modificación externa.
 
 ---
 
-## 6. Sincronización en Vivo y Notificación Flotante (PriceUpdateToast)
+## 9. Sincronización de Catálogo y Notificación (`PriceUpdateToast`)
 
-Para mantener los precios y stock sincronizados con Google Sheets sin interrumpir la navegación del cliente:
-- **Proxy Serverless (`netlify/functions/catalog.js`):** Descarga el catálogo en el servidor, filtra columnas y mantiene una caché en memoria (60s TTL).
-- **Lectura directa con fallback:** Si el proxy no responde, `catalogService.js` descarga las 4 pestañas del Sheet en paralelo (`Productos`, `Categorias`, `Configuracion`, `Banners`) via la API GViz CSV.
-- **Pestaña `Configuracion`:** Contiene pares clave-valor (nombre_tienda, direccion, whatsapp, maps_url, facebook_url, etc.) que se parsean a un objeto `storeInfo` en `catalogService.js`. Este objeto alimenta toda la UI (Footer, Topbar, ChatIABubble, LocationModal) y el prompt del chatbot.
-- **Detección de Diferencias (`detectPriceChanges`):** Compara el inventario actual con el recién obtenido.
-- **Notificación Flotante (`PriceUpdateToast.jsx`):** Diseñada con estética cockpit dark glassmorphism:
-  - Fondo translúcido con desenfoque de fondo (`backdrop-blur-2xl bg-[#0b0f17]/90`).
-  - Indicador pulsante en tonos ámbar y esmeralda.
-  - Contador de cambios detectados.
-  - Botón **Actualizar** que aplica los nuevos precios y existencias en el estado de React sin recargar bruscamente la página.
+El inventario en pantalla se sincroniza con Google Sheets mediante el siguiente mecanismo:
+
+- **Proxy serverless (`netlify/functions/catalog.js`):** Descarga el catálogo en el servidor, filtra columnas y mantiene una caché en memoria de 60 segundos (TTL).
+- **Lectura directa de contingencia:** Si la función serverless no responde, `catalogService.js` descarga en paralelo las cuatro pestañas (`Productos`, `Categorias`, `Configuracion`, `Banners`) mediante la API CSV pública de GViz.
+- **Detección de variaciones (`detectPriceChanges`):** Compara el inventario cargado con la última lectura del servidor para identificar diferencias en precios o existencias.
+- **Notificación no bloqueante (`PriceUpdateToast.jsx`):** Alerta visual flotante que informa al cliente sobre cambios en el catálogo. Ofrece un botón para refrescar los datos en el estado de React sin recargar la página web.
 
 ---
 
-## 7. Variables de Entorno
+## 10. Variables de Entorno
 
-Configuradas en `.env` (desarrollo local) y en Netlify Site Configuration (producción):
-
-| Variable | Descripción | Valor por Defecto |
+| Variable | Descripción | Entorno |
 | :--- | :--- | :--- |
-| `OPENROUTER_API_KEY` | Clave secreta para la API de OpenRouter | `sk-or-v1-...` |
-| `OPENROUTER_MODEL` | Modelo de lenguaje de alta precisión | `openai/gpt-5.6-luna` |
-| `GOOGLE_SHEET_ID` | Identificador del Google Sheet (CMS) | *(configurado en `.env` y Netlify)* |
-| `VITE_GOOGLE_SHEET_ID` | Mismo Sheet ID expuesto al frontend vía Vite | *(igual a `GOOGLE_SHEET_ID`)* |
-| `REVALIDATE_SECRET` | Token para purga instantánea de caché vía webhook | *(configurado en Netlify)* |
+| `OPENROUTER_API_KEY` | Credencial secreta para la API de inferencia de OpenRouter | Servidor / Netlify |
+| `OPENROUTER_MODEL` | Identificador del modelo (ej. `openai/gpt-5.6-luna`) | Servidor / Netlify |
+| `GOOGLE_SHEET_ID` | Identificador de la hoja de cálculo de Google Sheets | Servidor / Netlify |
+| `VITE_GOOGLE_SHEET_ID` | Mismo identificador expuesto al frontend para contingencia | Cliente / Vite |
+| `REVALIDATE_SECRET` | Token para purga de caché de catálogo vía webhook | Servidor / Netlify |
 
-> **Nota:** Ningún dato personal de negocio (teléfonos, direcciones, URLs de redes sociales) se almacena en el código fuente. Todos provienen de la pestaña `Configuracion` del Google Sheet.
+Los datos operativos de la empresa (dirección, teléfonos, enlaces a redes sociales) provienen de la hoja de cálculo y no se configuran como variables de entorno estáticas.
 
 ---
 
-## 8. Verificación y Pruebas Automatizadas
+## 11. Pruebas Automatizadas
 
-La suite de pruebas automatizadas se ejecuta con el test runner nativo de Node.js:
+La verificación del sistema se ejecuta mediante el ejecutor de pruebas nativo de Node.js:
 
 ```bash
 npm test
 ```
 
-### Cobertura de Pruebas (`tests/production.test.js`):
-- `parseCSV`: Manejo de saltos CRLF, comillas dobles y comas internas.
-- `normalizeImageUrl`: Transformación de URLs de Google Drive a CDN optimizado.
-- `isGibberish`: Detección de teclado spameado vs. consultas de hardware válidas.
-- `checkGuardrails`: Bloqueo de jailbreaks y preguntas off-topic.
-- `parseBotResponse`: Extracción exacta de `[ACTION:MAPS]`, `[ACTION:BUILDER]`, `[ACTION:ADDTOCART]`, variantes con espacios, mayúsculas, negritas y eliminación garantizada de corchetes del texto visible.
-- `validateGvizQuery`: Validación de sintaxis `SELECT`, operadores `<=` y bloqueo de inyecciones maliciosas.
-- `detectPriceChanges`: Detección precisa de variaciones de precio y existencias.
+### Cobertura de Pruebas (19 casos en `tests/production.test.js`)
+- `parseCSV`: Manejo de saltos de línea CRLF, comillas escapadas y comas en campos de texto.
+- `normalizeImageUrl`: Conversión de enlaces de Google Drive a URLs de CDN directa.
+- `parseProductRow`: Sanitización de precios, cantidades de stock, ofertas y especificaciones.
+- `cart calculation`: Prevención de errores de redondeo en el total y cálculo de reserva del 10%.
+- `pagination`: Comportamiento de paginación con catálogos superiores a 500 registros.
+- `defaultBanners`: Verificación de integridad de banners predeterminados y referencias de producto.
+- `categoriesTree`: Asociación de imágenes demostrativas a las categorías de hardware.
+- `isGibberish`: Detección de patrones de teclado arbitrarios frente a consultas de hardware legítimas.
+- `checkGuardrails`: Bloqueo de peticiones de jailbreak y temas fuera de contexto.
+- `netlify chat handler`: Validación de métodos HTTP permitidos y cabeceras CORS.
+- `price filtering`: Aplicación de límites inferior y superior con ajuste de entradas manuales.
+- `parseBotResponse`: Extracción de directivas `[ACTION:...]` y `[PRODUCT:...]`, resolución de alias y sanitización mediante `actionRegistry`.
+- `validateGvizQuery`: Verificación de sintaxis `SELECT`, operadores de comparación y bloqueo de inyecciones SQL.
+- `detectPriceChanges`: Identificación de variaciones de precio y modificaciones en existencias.
+- `slugify`: Normalización de caracteres con tildes, espacios y signos en identificadores de URL.
+- `deduplicateProducts`: Resolución de colisiones de identificadores y slugs en el inventario.
+- `priceSliderUtils`: Mapeo continuo entre valores monetarios y posición física del control deslizante.
+- `getActiveThumbIndex`: Selección del control activo durante el cruce de límites en el selector de precios.
+- `parseProductsFromRows`: Parseo de matrices bidimensionales provenientes de Google Sheets.

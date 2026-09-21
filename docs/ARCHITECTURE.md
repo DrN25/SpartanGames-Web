@@ -44,15 +44,16 @@ Componentes organizados por dominio funcional. Las subcarpetas agrupan por respo
 - **`layout/`** — Estructura permanente visible en toda la app: `Topbar` (horarios, ubicación, sync manual), `Navbar` (buscador predictivo sincronizado con la URL, categorías, toggle de tema), `Footer` (pasarelas de pago, datos legales), `MegaMenuDrawer` (navegación lateral por familias de hardware).
 - **`modals/`** — Diálogos emergentes aislados: `CartDrawer` (carrito, cálculo de reserva 10%, proforma WhatsApp), `PCBuilderModal` (configurador paso a paso de PC), `LocationModal` (mapa de la tienda física en Compuplaza, ruta Waze), `FaqModal` (preguntas frecuentes con búsqueda en vivo).
 - **`home/`** — Secciones exclusivas de la portada: `HeroBannerCarousel`, `CategorySlider`, `CustomerReviewsSection`.
-- **`feedback/`** — Componentes reactivos de notificación: `ChatIABubble` (asistente IA flotante con tres modos de tamaño), `PriceUpdateToast` (alerta glassmorphic de precios actualizados).
-- **`common/`** — Átomos transversales: `Icons` (hub SVG centralizado de Lucide + vectores de pago peruanos), `Breadcrumbs` (migas de pan accesibles), `MarqueeTicker` (cinta informativa continua).
+- **`feedback/`** — Componentes reactivos de notificación: `ChatIABubble` (asistente IA flotante con modos estándar y maximizado vía Tailwind), `PriceUpdateToast` (alerta glassmorphic de precios actualizados).
+- **`common/`** — Átomos transversales: `Icons` (hub SVG centralizado de Lucide + vectores de pago peruanos), `MarkdownRenderer` (renderizador de Markdown del chatbot), `Breadcrumbs` (migas de pan accesibles), `MarqueeTicker` (cinta informativa continua).
 
 ### `src/services/`
 
 Capa de integración con servicios externos. Ningún componente de UI accede directamente a la red; siempre pasa por esta capa.
 
 - **`catalogService`** — Descarga y cachea los datos de Google Sheets desde 4 pestañas en paralelo (`Productos`, `Categorias`, `Configuracion`, `Banners`). Normaliza URLs de Google Drive a CDN directa (`lh3.googleusercontent.com`). Genera slugs limpios con `slugify`, desduplica IDs y slugs en memoria con `deduplicateProducts` para prevenir errores de edición humana en la hoja, detecta cambios de precio o stock con `detectPriceChanges`, y parsea la pestaña `Configuracion` a un objeto `storeInfo` que alimenta toda la UI y el prompt del chatbot. Exporta helpers dinámicos: `getStoreMapsUrl()`, `getStoreWazeUrl()`, `getStoreWhatsAppUrl()`.
-- **`aiService`** — Cliente del asistente IA. Envía mensajes al endpoint serverless y parsea la respuesta, extrayendo etiquetas de acción (`[ACTION:MAPS]`, `[ACTION:OPEN_CART]`, `[PRODUCT:sku]`) para convertirlas en botones y tarjetas interactivas.
+- **`aiService`** — Cliente del asistente IA. Envía mensajes al endpoint serverless y parsea la respuesta, delegando la extracción y resolución de acciones al `actionRegistry`. Maneja contingencia offline en fallos de red redirigiendo a WhatsApp.
+- **`actionRegistry`** — Registro de acciones del chatbot bajo el Patrón Dispatcher (`[ACTION:MAPS]`, `[ACTION:BUILDER]`, etc.). Mapea sinónimos, regex unificada y metadatos de botones. Abierto a extensión sin modificar el parseo.
 
 ### `src/utils/`
 
@@ -77,7 +78,7 @@ Backend serverless ejecutado en el edge de Netlify. Existen dos funciones:
 
 ### `tests/`
 
-- **`production.test.js`** — 16 pruebas unitarias con `node:test`. Cubren parseo CSV, normalización de URLs de imagen, cálculos de carrito y reserva, paginación, guardrails de IA, validación de queries GViz, detección de cambios de precio, normalización de slugs y desduplicación de inventario en memoria.
+- **`production.test.js`** — 19 pruebas unitarias con `node:test`. Cubren parseo CSV, normalización de URLs de imagen, cálculos de carrito y reserva, paginación, guardrails de IA, validación de queries GViz, detección de cambios de precio, normalización de slugs, desduplicación de inventario en memoria y compatibilidad con matrices de datos.
 
 ## Invariantes Arquitectónicos
 
@@ -98,6 +99,8 @@ Estas son propiedades del sistema que deben mantenerse verdaderas. Violarlas int
 7. **Cero emojis decorativos en la UI.** Toda la iconografía usa vectores SVG de Lucide React o vectores oficiales de pasarelas de pago (Yape, Plin, Culqi, Visa) centralizados en `Icons`.
 
 8. **Cero datos personales de negocio en el código fuente.** Teléfonos, direcciones, URLs de redes sociales, horarios y cualquier dato específico de un cliente deben provenir exclusivamente de la pestaña `Configuracion` del Google Sheet. El archivo `storeData.js` contiene solo una plantilla genérica con campos vacíos como fallback.
+
+9. **Gobernanza de Calidad y Ponytail (`GEMINI.md` / `AGENTS.md`):** Todo desarrollo debe respetar la Escalera de Ponytail (YAGNI, reutilización estricta con `grep`, capacidades nativas de JS/Tailwind antes de instalar dependencias o crear helpers innecesarios) y leer obligatoriamente `DESIGN.md` antes de crear o tocar componentes visuales.
 
 ## Cross-Cutting Concerns
 
@@ -147,14 +150,14 @@ El endpoint `chat.js` ejecuta tres capas de validación antes de invocar al mode
 ```
 
 ## Flujo de Datos: Chatbot IA
-
-```
-1. Usuario escribe en ChatIABubble → sendChatMessage()
-2. aiService → POST /api/chat con historial de mensajes + storeContext dinámico
-3. chat.js construye systemPrompt con datos de storeContext (nombre, dirección, WhatsApp, redes)
-4. chat.js ejecuta guardrails → si pasan, invoca OpenRouter
-5. Si el modelo pide datos del catálogo → ejecuta GViz SQL contra Google Sheets
-6. Respuesta final se envía al frontend
-7. parseBotResponse() extrae texto limpio + etiquetas [ACTION:*] y [PRODUCT:*]
-8. ChatIABubble renderiza burbujas con markdown + tarjetas de producto + botones
-```
+ 
+ ```
+ 1. Usuario escribe en ChatIABubble → sendChatMessage()
+ 2. aiService → POST /api/chat con historial de mensajes + storeContext dinámico
+ 3. chat.js construye systemPrompt con datos de storeContext (nombre, dirección, WhatsApp, redes)
+ 4. chat.js ejecuta guardrails → si pasan, invoca OpenRouter
+ 5. Si el modelo pide datos del catálogo → ejecuta GViz SQL contra Google Sheets
+ 6. Respuesta final se envía al frontend
+ 7. parseBotResponse() utiliza actionRegistry (Patrón Dispatcher) para resolver acciones y extraer texto limpio + [PRODUCT:*]
+ 8. ChatIABubble delega el texto enriquecido a MarkdownRenderer + renderiza tarjetas de producto y botones de acción
+ ```
