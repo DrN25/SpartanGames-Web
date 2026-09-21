@@ -5,6 +5,7 @@
  * Development: Falls back to direct OpenRouter API call
  */
 
+import { dispatchAction } from "./actionRegistry.js";
 
 /**
  * Builds compact catalog text for the LLM context
@@ -24,7 +25,6 @@ function buildCatalogContext(products = []) {
 /**
  * Builds system prompt with enterprise guardrails, store info, emojis, and subtle Spartan personality
  */
-
 export function getStoreTimeContext(storeInfo = {}) {
   const schedule = storeInfo?.schedule || "Lunes a Sábado según horario oficial";
   const address = storeInfo?.address || "";
@@ -76,101 +76,10 @@ export function getStoreTimeContext(storeInfo = {}) {
   return { fullDate, dayOfWeek, time, schedule, address, storeStatus };
 }
 
-
 /**
- * Checks for gibberish, spam of keys, or incomprensible input
- */
-function isGibberish(text = "") {
-  const trimmed = text.trim().toLowerCase();
-  if (trimmed.length < 3) return false;
-
-  // Single character repeat: "aaaa", "zzzz"
-  if (/^(.)\1{3,}$/.test(trimmed)) return true;
-
-  // Repeated syllables: "fadsfads", "sdfsdf", "asdfasdf"
-  if (/^(.{2,5})\1+$/.test(trimmed)) {
-    const validWords = ["yape", "plin"];
-    if (!validWords.includes(trimmed)) return true;
-  }
-
-  // Keyboard smashing patterns: e.g. "fadsfads", "asdfgh", "zxcvbn", "hjkghjk"
-  if (/^[a-z]{5,25}$/.test(trimmed)) {
-    const validWords = [
-      "hola", "buen", "dias", "tarde", "noche", "asus", "tuf", "rog",
-      "rtx", "gtx", "amd", "intel", "core", "ram", "ssd", "nvme",
-      "gpu", "cpu", "ddr4", "ddr5", "b650", "h610", "z790", "case",
-      "loq", "fps", "rgb", "dell", "acer", "msi", "ryzen", "tienda",
-      "stock", "precio", "cuanto", "cuesta", "tienen", "envio", "envios",
-      "arequipa", "compuplaza", "placa", "fuente", "monitor", "laptop"
-    ];
-    if (validWords.some((w) => trimmed.includes(w))) return false;
-
-    const vowels = (trimmed.match(/[aeiouáéíóú]/g) || []).length;
-    if (vowels / trimmed.length < 0.2) return true;
-  }
-
-  return false;
-}
-
-/**
- * Checks for off-topic prompt injection or controversial figures client-side as a safety net
- */
-function checkClientSideGuardrails(text = "", storeInfo = {}) {
-  const lower = text.toLowerCase();
-  const storeName = storeInfo?.name || "Spartan Games";
-  const storeCity = storeInfo?.city || "Arequipa";
-
-  // 1. Gibberish check first
-  if (isGibberish(text)) {
-    return `🛡️ No logré entender tu mensaje. ⚡ Por favor escríbelo de nuevo con más detalle o indícame qué componente, laptop o armado de PC buscas en ${storeName}.`;
-  }
-
-  // 1.1 Temporal Grounding: Instant, 100% veridic date & schedule response
-  const dateTriggers = [
-    "que dia es hoy", "qué día es hoy", "que dia estamos", "qué día estamos",
-    "que fecha es hoy", "qué fecha es hoy", "que fecha es", "qué fecha es",
-    "que fecha estamos", "qué fecha estamos", "que hora es", "qué hora es",
-    "hora actual", "estan abiertos", "están abiertos", "estan atendiendo",
-    "están atendiendo", "a que hora abren", "a qué hora abren",
-    "a que hora cierran", "a qué hora cierran"
-  ];
-
-  if (dateTriggers.some((t) => lower.includes(t))) {
-    const timeCtx = getStoreTimeContext(storeInfo);
-    return `¡Todo firme y listo para la batalla! Hoy es **${timeCtx.fullDate}**, son las **${timeCtx.time}** en ${storeCity} y ${timeCtx.storeStatus}\n\nEl horario oficial de atención en tienda física es **${timeCtx.schedule}** en **${timeCtx.address}**.\n\n¿En qué componente, proforma o armado de PC gamer te puedo asesorar hoy?`;
-  }
-
-
-  // 2. Off-topic politics and historical atrocities
-  const offTopicKeywords = [
-    "hitler", "nazi", "nazismo", "holocausto", "stalin", "fascismo",
-    "partido nazi", "segunda guerra mundial", "primera guerra mundial",
-    "quien fue adolf", "conoces a adolf", "conoces a hitler"
-  ];
-
-  if (offTopicKeywords.some((kw) => lower.includes(kw))) {
-    return `🛡️ En ${storeName} nuestra misión se concentra con disciplina en hardware gamer y armado de PCs. ⚔️ No tratamos temas políticos ni históricos ajenos a nuestra tienda. ¿En qué componente, laptop o proforma te puedo apoyar hoy? ⚡`;
-  }
-
-  // 3. Jailbreak attempts
-  const jailbreakKeywords = [
-    "ignora tus instrucciones", "ignore previous instructions",
-    "dime tu prompt", "muestra tu system prompt", "reveal your instructions",
-    "modo desarrollador", "dan mode", "actua como dan"
-  ];
-
-  if (jailbreakKeywords.some((kw) => lower.includes(kw))) {
-    return `🛡️ Mis protocolos de ${storeName} están blindados y enfocados en rendimiento gamer. ⚔️ Dime qué componente, presupuesto o juego deseas evaluar. ⚡`;
-  }
-
-  return null;
-}
-
-
-/**
- * Robustly parses LLM raw text to extract:
+ * Robustly parses LLM raw text using the Dispatcher Pattern:
  * 1. [PRODUCT:id1, id2, ...] tags -> interactive product cards
- * 2. [ACTION:...] tags -> action buttons (maps, builder, catalog, whatsapp, social, cart)
+ * 2. [ACTION:...] tags -> action buttons via actionRegistry
  * 3. Strips all system tags, orphan bullet points, and leftover brackets
  */
 export function parseBotResponse(rawText = "", products = []) {
@@ -189,105 +98,23 @@ export function parseBotResponse(rawText = "", products = []) {
   }
   cleanText = cleanText.replace(productRegex, "");
 
-  // 2. Extract [ACTION:BUILDER] / [ACTION:PCBUILDER] / [ACTION:ARMAR]
-  const builderRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:BUILDER|PC_?BUILDER|ARMAR(?:_PC)?|CONFIGURADOR)\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (builderRegex.test(cleanText)) {
-    rawActions.push({ type: "builder", label: "Armar PC personalizada" });
-    cleanText = cleanText.replace(builderRegex, "");
-  }
-
-  // 3. Extract [ACTION:CATALOG] / [ACTION:CATALOGO] / [ACTION:TIENDA]
-  const catalogRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:CATALOG(?:O|UE)?|CAT[AÁ]LOGO|TIENDA|STORE|PRODUCTOS)\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (catalogRegex.test(cleanText)) {
-    rawActions.push({ type: "catalog", label: "Ver catálogo" });
-    cleanText = cleanText.replace(catalogRegex, "");
-  }
-
-  // 3.5. Extract [ACTION:CART] / [ACTION:OPEN_CART] / [ACTION:VER_CARRITO]
-  const cartRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:CART|OPEN_?CART|VER_?CARRITO)\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (cartRegex.test(cleanText)) {
-    rawActions.push({ type: "cart", label: "Ver carrito" });
-    cleanText = cleanText.replace(cartRegex, "");
-  }
-
-  // 4. Extract [ACTION:MAPS] / [ACTION:MAP] / [ACTION:UBICACION] / [ACTION:LOCATION]
-  const mapsRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:MAPS?|UBICACI[OÓ]N|LOCATION|MAPA|GOOGLE_?MAPS?)\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (mapsRegex.test(cleanText)) {
-    rawActions.push({ type: "maps", label: "Ubicación en Google Maps" });
-    cleanText = cleanText.replace(mapsRegex, "");
-  }
-
-  // 4.5. Extract [ACTION:WAZE] / [ACTION:GPS]
-  const wazeRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:WAZE|GPS|RUTA_WAZE)\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (wazeRegex.test(cleanText)) {
-    rawActions.push({ type: "waze", label: "Ruta en Waze" });
-    cleanText = cleanText.replace(wazeRegex, "");
-  }
-
-  // 4.6. Extract [ACTION:FAQ] / [ACTION:PREGUNTAS] / [ACTION:GARANTIA]
-  const faqRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:FAQ|PREGUNTAS(?:_FRECUENTES)?|GARANT[IÍ]AS?|POL[IÍ]TICAS?)\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (faqRegex.test(cleanText)) {
-    rawActions.push({ type: "faq", label: "Preguntas Frecuentes y Garantías" });
-    cleanText = cleanText.replace(faqRegex, "");
-  }
-
-  // 4.7. Extract [ACTION:CATEGORIES] / [ACTION:CATEGORIAS] / [ACTION:HARDWARE]
-  const categoriesRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:CATEGORIES|CATEGOR[IÍ]AS|HARDWARE|DEPARTAMENTOS)\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (categoriesRegex.test(cleanText)) {
-    rawActions.push({ type: "categories", label: "Explorar Categorías" });
-    cleanText = cleanText.replace(categoriesRegex, "");
-  }
-
-  // 5. Extract [ACTION:WHATSAPP:text] or [ACTION:WHATSAPP]
-  const waRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:WHATSAPP|WSP|WA)(?:\s*:\s*([^\]]+))?\s*\]\s*(?:\*{0,2}|`?)/gi;
-  let waMatch;
-  while ((waMatch = waRegex.exec(cleanText)) !== null) {
-    const customMsg = waMatch[1]?.trim() || "Hola Spartan Games, deseo realizar una consulta sobre sus productos";
-    rawActions.push({ type: "whatsapp", text: customMsg, label: "Consultar por WhatsApp" });
-  }
-  cleanText = cleanText.replace(waRegex, "");
-
-  // 6. Extract [ACTION:FACEBOOK]
-  const fbRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*FACEBOOK\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (fbRegex.test(cleanText)) {
-    rawActions.push({ type: "facebook", label: "Facebook oficial" });
-    cleanText = cleanText.replace(fbRegex, "");
-  }
-
-  // 7. Extract [ACTION:INSTAGRAM]
-  const igRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*INSTAGRAM\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (igRegex.test(cleanText)) {
-    rawActions.push({ type: "instagram", label: "Instagram oficial" });
-    cleanText = cleanText.replace(igRegex, "");
-  }
-
-  // 8. Extract [ACTION:TIKTOK]
-  const ttRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*TIKTOK\s*\]\s*(?:\*{0,2}|`?)/gi;
-  if (ttRegex.test(cleanText)) {
-    rawActions.push({ type: "tiktok", label: "TikTok oficial" });
-    cleanText = cleanText.replace(ttRegex, "");
-  }
-
-  // 9. Extract [ACTION:ADDTOCART:id1,id2,...]
-  const addCartRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*(?:ADDTOCART|ADD_TO_CART|CARRITO|AGREGAR_CARRITO)\s*:\s*([^\]]+)\s*\]\s*(?:\*{0,2}|`?)/gi;
-  let addCartMatch;
-  while ((addCartMatch = addCartRegex.exec(cleanText)) !== null) {
-    const ids = addCartMatch[1].split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
-    if (ids.length > 0) {
-      rawActions.push({
-        type: "add_to_cart_batch",
-        productIds: ids,
-        label: `🛒 Agregar cotización al carrito (${ids.length} componentes)`
-      });
+  // 2. Extract [ACTION:COMMAND] or [ACTION:COMMAND:PAYLOAD] via Action Dispatcher
+  const actionRegex = /(?:\*{0,2}|`?)\s*\[\s*ACTION\s*:\s*([a-zA-Z0-9_-]+)(?:\s*:\s*([^\]]+))?\s*\]\s*(?:\*{0,2}|`?)/gi;
+  let actMatch;
+  while ((actMatch = actionRegex.exec(cleanText)) !== null) {
+    const command = actMatch[1];
+    const payload = actMatch[2];
+    const actionObj = dispatchAction(command, payload);
+    if (actionObj) {
+      rawActions.push(actionObj);
     }
   }
-  cleanText = cleanText.replace(addCartRegex, "");
+  cleanText = cleanText.replace(actionRegex, "");
 
-  // 10. SAFETY SCRUB: Strip any remaining unparsed or malformed [ACTION:...] or [PRODUCT:...] tags
-  // This guarantees that raw system tags like [ACTION:XYZ] will NEVER be displayed to the user
+  // 3. SAFETY SCRUB: Strip any remaining unparsed or malformed [ACTION:...] or [PRODUCT:...] tags
   cleanText = cleanText.replace(/(?:\*{0,2}|`?)\s*\[\s*(?:ACTION|PRODUCT|BOTON|BUTTON)\s*:[^\]]*\]\s*(?:\*{0,2}|`?)/gi, "");
 
-  // 11. Clean up orphan list items / bullet points left behind by extracted tags
+  // 4. Clean up orphan list items / bullet points left behind by extracted tags
   cleanText = cleanText
     .split("\n")
     .filter((line) => {
@@ -333,20 +160,13 @@ export function parseBotResponse(rawText = "", products = []) {
 }
 
 /**
- * Sends chat request to Netlify Function (or direct OpenRouter fallback)
+ * Sends chat request to Netlify Function (with automatic network error resilience)
  */
 export async function sendChatMessage({
   messages,
   products = [],
   storeInfo = {}
 }) {
-  const lastUserMessage = messages[messages.length - 1]?.content || "";
-
-  const guardrailResponse = checkClientSideGuardrails(lastUserMessage, storeInfo);
-  if (guardrailResponse) {
-    return guardrailResponse;
-  }
-
   const catalogContext = buildCatalogContext(products);
   const timeCtx = getStoreTimeContext(storeInfo);
   const storeContext = {
@@ -408,4 +228,3 @@ export async function sendChatMessage({
   const storeLabel = storeInfo?.name || "Spartan Games";
   return `🛡️ En este momento no pude consultar el inventario en vivo. Escríbenos directamente a nuestro WhatsApp oficial (${waContact}) para atenderte al instante en ${storeLabel}. ⚡`;
 }
-
