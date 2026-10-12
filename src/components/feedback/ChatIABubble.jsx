@@ -47,6 +47,60 @@ export default function ChatIABubble({
   const [addedBatchMap, setAddedBatchMap] = useState({});
   const messagesEndRef = useRef(null);
 
+  // Automatically minimize chatbot when any modal or drawer is opened
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      setIsOpen(false);
+    }
+  }, [isAnyModalOpen]);
+
+  const handleBatchAddToCart = (cards = [], messageId = null) => {
+    if (!cards || cards.length === 0) return;
+    if (onAddBatchToCart) {
+      onAddBatchToCart(cards);
+    } else if (onAddToCart) {
+      cards.forEach((p) => onAddToCart(p));
+    }
+    if (messageId) {
+      setAddedBatchMap((prev) => ({ ...prev, [messageId]: true }));
+      setTimeout(() => {
+        setAddedBatchMap((prev) => ({ ...prev, [messageId]: false }));
+      }, 3500);
+    }
+    setIsOpen(false);
+  };
+
+  const storeName = storeInfo?.name || "Spartan Games";
+  const storeLocation = storeInfo?.city ? `tienda oficial en ${storeInfo.city}` : "tienda física oficial";
+
+  const initialMessage = {
+    id: 1,
+    sender: "spartan",
+    text: `⚔️ ¡Listo para la batalla! Soy el asesor de hardware de ${storeName}. Te asesoro con stock físico, compatibilidad técnica, precios y armado de PC en nuestra ${storeLocation}. 🛡️ ¿Qué máquina de combate o componente buscas hoy? ⚡`,
+    time: "Ahora",
+    suggestions: [
+      "🎮 Tarjetas de video para 1440p",
+      "⚡ Procesadores y placas en stock",
+      "🛠️ Armar una PC gamer paso a paso",
+      "📍 ¿Cómo llegar a la tienda física?",
+      `🌐 Redes sociales oficiales de ${storeName}`
+    ],
+    productCards: [],
+    actions: []
+  };
+
+  const [messages, setMessages] = useState([initialMessage]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      scrollToBottom();
+    }
+  }, [messages, isOpen, isTyping]);
+
   const handleSendMessage = async (userText) => {
     if (!userText.trim() || isTyping) return;
 
@@ -60,44 +114,6 @@ export default function ChatIABubble({
     setMessages((prev) => [...prev, userMsgObj]);
     setInputMsg("");
     setIsTyping(true);
-
-    // Conversational Intent: Add quoted products or previous components to cart
-    const lowerText = userText.toLowerCase();
-    const isAddToCartIntent =
-      /(agregar|a[ñn]ad|pon|mete).*(carrito|cotizaci[oó]n|componentes|piezas|todo)|(puedes agregar).*(carrito)/i.test(
-        lowerText
-      );
-
-    if (isAddToCartIntent) {
-      const lastWithProducts = [...messages].reverse().find(
-        (m) => m.productCards && m.productCards.length > 0
-      );
-      if (lastWithProducts && lastWithProducts.productCards.length > 0) {
-        handleBatchAddToCart(lastWithProducts.productCards, lastWithProducts.id);
-        const totalQuote = lastWithProducts.productCards.reduce(
-          (sum, p) => sum + Number(p.price || 0),
-          0
-        );
-        const storeAddressSuffix = storeInfo?.address ? ` en ${storeInfo.address}` : " en nuestra tienda física";
-        const confirmMsg = {
-          id: Date.now() + 1,
-          sender: "spartan",
-          text: `⚔️ ¡Listo para la batalla! He añadido los **${lastWithProducts.productCards.length} componentes** de tu cotización directamente al carrito de compras (Total: **S/. ${totalQuote.toFixed(2)}**). 🛒\n\nEl carrito de compras se ha abierto a la derecha para que puedas verificar cada pieza, apartarlas con el 10% de seña o exportar la orden oficial hacia WhatsApp para coordinar tu armado o recojo${storeAddressSuffix}. 🛡️⚡`,
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          productCards: lastWithProducts.productCards,
-          actions: [
-            {
-              type: "whatsapp",
-              text: `Hola ${storeInfo?.name || "Tienda"}, tengo cotizados estos componentes en mi carrito: ${lastWithProducts.productCards.map((p) => p.name).join(", ")} por un total de S/. ${totalQuote.toFixed(2)}`,
-              label: "Coordinar Reserva por WhatsApp"
-            }
-          ]
-        };
-        setMessages((prev) => [...prev, confirmMsg]);
-        setIsTyping(false);
-        return;
-      }
-    }
 
     const chatHistory = messages
       .filter((m) => m.id !== 1)

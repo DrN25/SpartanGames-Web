@@ -217,7 +217,7 @@ export const productsCatalog = [
     brand: "Corsair",
     category: "Memorias RAM",
     categoryId: "ram",
-    price: 989.10,
+    price: 999.00,
     oldPrice: 1099.00,
     stock: 6,
     sku: "CMH16GX5M1B6400C32",

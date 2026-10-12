@@ -302,20 +302,28 @@ DATOS OFICIALES DE LA TIENDA:
 CATÁLOGO EN STOCK FÍSICO ACTUALIZADO:
 ${catalogContext || "Consulta nuestro catálogo en vivo."}
 
-FORMATO Y ETIQUETAS DE ACCIÓN:
-1. Usa formato Markdown limpio con encabezados (###), negritas para modelos y precios, y tablas cuando compares productos o detalles una cotización.
-2. AGREGAR AL CARRITO / COTIZACIONES:
-   - SÍ PUEDES y DEBES permitir al usuario agregar cotizaciones al carrito de compras digital de la web.
-   - Cuando el usuario te pida cotizar una PC, comparar componentes o agregar piezas al carrito:
-     * Coloca las etiquetas [PRODUCT:id] para cada componente cotizado (hasta un máximo de 10 tarjetas de productos).
-     * Coloca al final [ACTION:ADDTOCART:id1,id2,...] para habilitar el botón de agregar toda la cotización al carrito.
-     * Ejemplo: si cotizas Ryzen 7 (301) y RTX 4070 (401), responde con el desglose y añade al final:
-       [PRODUCT:301]
-       [PRODUCT:401]
-       [ACTION:ADDTOCART:301,401]
-   - NUNCA digas que no puedes modificar el carrito digital. Di con convicción espartana que dejas los componentes listos para cargarlos al carrito en 1 clic.
+FORMATO, FIDELIDAD DE PRECIOS Y ETIQUETAS DE ACCIÓN:
+1. FIDELIDAD ABSOLUTA DE PRECIOS Y STOCK (VERIFICACIÓN EN TIEMPO REAL CON GOOGLE SHEETS):
+   - El precio y stock oficial de cada componente provienen EXCLUSIVAMENTE de los datos reales del catálogo (del contexto inicial o de la herramienta 'consultar_catalogo_sheets').
+   - Los precios en Spartan Games son OFICIALES y FIJOS según el inventario del sistema; no se inventan descuentos ni se regatea por chat.
+   - NUNCA inventes precios ficticios de la nada (cero alucinaciones no sustentadas en la base de datos como inventar S/. 599).
+   - REVISIÓN EN TIEMPO REAL: Si el usuario pide expresamente volver a consultar o verificar ("a ver revisa", "consulta una vez más", "un amigo me contó que está más barato, a ver revisa", "verifica si cambió el precio en el sistema"):
+     * DEBES invocar la herramienta 'consultar_catalogo_sheets' para consultar en vivo Google Sheets y comprobar el precio y stock actualizados en este preciso instante.
+     * Si en Google Sheets el precio efectivamente se modificó o está más barato: confirma con total transparencia técnica el nuevo precio real verificado en el sistema:
+       "Verificando el inventario oficial en tiempo real en nuestro sistema: efectivamente, el precio actual de [PRODUCTO] es S/. [NUEVO PRECIO REAL] con stock de [STOCK] unidades."
+     * Si en Google Sheets el precio sigue siendo el mismo: mantén con firmeza el precio oficial de lista verificado:
+       "Verificando el inventario oficial en tiempo real en nuestro sistema: el precio oficial de lista se mantiene en S/. [PRECIO EXACTO] con boleta/factura y garantía directa. No contamos con precios menores registrados para este producto."
+     * En ambos casos, incluye siempre obligatoriamente [PRODUCT:id] y [ACTION:ADDTOCART:id].
+
+2. REGLA DE ORO OBLIGATORIA: ETIQUETAS [PRODUCT:id] Y [ACTION:ADDTOCART] (CERO PEREZA / NO-LAZY):
+   - SIEMPRE que menciones, recomiendes, compares, cotices o detalles un producto del catálogo (incluso si el usuario solo pregunta el precio, si hay stock, pide una recomendación, o dice "consulta otra vez"):
+     * DEBES incluir obligatoriamente la etiqueta [PRODUCT:id] para cada producto referenciado (hasta un máximo de 10 tarjetas).
+     * DEBES incluir obligatoriamente la etiqueta [ACTION:ADDTOCART:id1,id2,...] al final absoluto de tu mensaje en su propia línea independiente.
+   - REGLA CONTINUA ENTRE MENSAJES (ANTI-LAZY): Si la conversación continúa sobre el mismo producto (ej: el usuario pregunta "a ver consulta una vez más", "¿por qué?", "¿tienes fotos?", "otra vez"), NO SEAS PEREZOSO. Vuelve a colocar la etiqueta [PRODUCT:id] y el botón [ACTION:ADDTOCART:id]. NUNCA omitas el botón de acción ni la tarjeta en respuestas sucesivas.
+   - NUNCA digas falsamente "he añadido los componentes a tu carrito". Di: "Te dejo el componente listo aquí abajo para que lo agregues al carrito en 1 clic."
+
 3. REGLA CRÍTICA DE ETIQUETAS: NUNCA coloques las etiquetas [ACTION:...] dentro de viñetas, frases, ni después de dos puntos. Colócalas ÚNICAMENTE al final absoluto de tu mensaje en su propia línea independiente sin texto adicional:
-   - [PRODUCT:id] (ej: [PRODUCT:301]) para adjuntar fichas interactivas de productos recomendados o cotizados (hasta un límite de 10 tarjetas).
+   - [PRODUCT:id] (ej: [PRODUCT:1]) para adjuntar fichas interactivas de productos recomendados o cotizados (hasta un límite de 10 tarjetas).
    - [ACTION:ADDTOCART:id1,id2,...] para habilitar el botón de agregar toda la cotización al carrito en un solo clic.
    - [ACTION:BUILDER] si el usuario desea armar o configurar una PC paso a paso.
    - [ACTION:CATALOG] si el usuario desea ver todo el catálogo.
@@ -413,76 +421,93 @@ EJEMPLO EXACTO DE CIERRE CON MAPS O WAZE:
     const data = await response.json();
     let assistantMsg = data.choices?.[0]?.message;
 
-    // Si el LLM decide invocar la herramienta SQL sobre Google Sheets
+    // Si el LLM decide invocar herramientas SQL sobre Google Sheets
     if (assistantMsg?.tool_calls && assistantMsg.tool_calls.length > 0) {
-      const call = assistantMsg.tool_calls[0];
-      if (call.function?.name === "consultar_catalogo_sheets") {
-        let parsedQuery = "";
-        try {
-          const args = JSON.parse(call.function.arguments || "{}");
-          parsedQuery = args.query || "";
-        } catch {
-          parsedQuery = "";
-        }
+      const toolResponses = [];
+      let anyGvizExecuted = false;
 
-        const queryResult = await executeGvizQuery(parsedQuery);
+      for (const call of assistantMsg.tool_calls) {
+        if (call.function?.name === "consultar_catalogo_sheets") {
+          let parsedQuery = "";
+          try {
+            const args = JSON.parse(call.function.arguments || "{}");
+            parsedQuery = args.query || "";
+          } catch {
+            parsedQuery = "";
+          }
 
-        const followUpMessages = [
-          ...formattedMessages,
-          assistantMsg,
-          {
+          const queryResult = await executeGvizQuery(parsedQuery);
+          anyGvizExecuted = true;
+          toolResponses.push({
             role: "tool",
             tool_call_id: call.id,
             content: JSON.stringify(queryResult)
-          }
-        ];
-
-        try {
-          const followUpRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${apiKey}`,
-              "Content-Type": "application/json",
-              "HTTP-Referer": "https://spartangames.pe",
-              "X-Title": "Spartan Games AI"
-            },
-            body: JSON.stringify({
-              model: modelToUse,
-              messages: followUpMessages,
-              temperature: 0.35,
-              max_tokens: 900
-            })
           });
-
-          if (followUpRes.ok) {
-            const followUpData = await followUpRes.json();
-            const finalReply = followUpData.choices?.[0]?.message?.content || followUpData.choices?.[0]?.message?.reasoning;
-            if (finalReply) {
-              return {
-                statusCode: 200,
-                headers: {
-                  "Content-Type": "application/json",
-                  "Access-Control-Allow-Origin": "*"
-                },
-                body: JSON.stringify({
-                  reply: finalReply,
-                  usage: followUpData.usage,
-                  model: followUpData.model,
-                  gvizExecuted: true
-                })
-              };
-            }
-          } else {
-            console.warn("[SpartanAI] Tool follow-up returned status:", followUpRes.status);
-          }
-        } catch (toolFollowUpErr) {
-          console.warn("[SpartanAI] Tool follow-up error:", toolFollowUpErr);
+        } else {
+          toolResponses.push({
+            role: "tool",
+            tool_call_id: call.id,
+            content: JSON.stringify({ ok: false, error: "Herramienta no reconocida" })
+          });
         }
+      }
+
+      const followUpMessages = [
+        ...formattedMessages,
+        assistantMsg,
+        ...toolResponses
+      ];
+
+      try {
+        const followUpRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://spartangames.pe",
+            "X-Title": "Spartan Games AI"
+          },
+          body: JSON.stringify({
+            model: modelToUse,
+            messages: followUpMessages,
+            temperature: 0.35,
+            max_tokens: 900
+          })
+        });
+
+        if (followUpRes.ok) {
+          const followUpData = await followUpRes.json();
+          const finalReply = followUpData.choices?.[0]?.message?.content || followUpData.choices?.[0]?.message?.reasoning;
+          if (finalReply) {
+            return {
+              statusCode: 200,
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+              },
+              body: JSON.stringify({
+                reply: finalReply,
+                usage: followUpData.usage,
+                model: followUpData.model,
+                gvizExecuted: anyGvizExecuted
+              })
+            };
+          }
+        } else {
+          const errorDetails = await followUpRes.text();
+          console.warn("[SpartanAI] Tool follow-up returned status:", followUpRes.status, errorDetails);
+        }
+      } catch (toolFollowUpErr) {
+        console.warn("[SpartanAI] Tool follow-up error:", toolFollowUpErr);
       }
     }
 
-    // Fallback: Si el LLM devolvió tool_call pero falló la respuesta, o content vino vacío
-    let reply = assistantMsg?.content || assistantMsg?.reasoning;
+    // Fallback: Si el LLM no llamó herramientas o falló el follow-up
+    let reply = "";
+    if (!assistantMsg?.tool_calls || assistantMsg.tool_calls.length === 0) {
+      reply = assistantMsg?.content || assistantMsg?.reasoning;
+    }
+
     if (!reply) {
       try {
         const fallbackRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
